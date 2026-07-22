@@ -26,7 +26,12 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
       <div className="space-y-8 p-6 lg:p-10">
         <UserForm
           action={updateWithId}
-          defaultValues={user}
+          defaultValues={{
+            name: user.name ?? undefined,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+          }}
           submitLabel="Enregistrer"
           passwordLabel="Nouveau mot de passe"
           passwordRequired={false}

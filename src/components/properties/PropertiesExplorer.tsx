@@ -2,27 +2,38 @@
 
 import { useMemo, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
-import { properties, cities, propertyTypes, type Property } from "@/lib/mock-data";
 import { PropertyCard } from "@/components/home/PropertyCard";
+import type { PropertyWithRelations } from "@/lib/data/properties";
 
-export function PropertiesExplorer() {
+type CityOption = { id: string; name: string; slug: string };
+type PropertyTypeOption = { id: string; name: string; slug: string };
+
+export function PropertiesExplorer({
+  initialProperties,
+  cities,
+  propertyTypes,
+}: {
+  initialProperties: PropertyWithRelations[];
+  cities: CityOption[];
+  propertyTypes: PropertyTypeOption[];
+}) {
   const [city, setCity] = useState("Toutes les villes");
-  const [type, setType] = useState<"tous" | "vente" | "location">("tous");
+  const [type, setType] = useState<"tous" | "VENTE" | "LOCATION">("tous");
   const [propertyType, setPropertyType] = useState("Tous les types");
   const [sort, setSort] = useState<"recent" | "price-asc" | "price-desc">("recent");
   const [showFilters, setShowFilters] = useState(false);
 
   const results = useMemo(() => {
-    let list: Property[] = properties;
-    if (city !== "Toutes les villes") list = list.filter((p) => p.city === city);
-    if (type !== "tous") list = list.filter((p) => p.type === type);
-    if (propertyType !== "Tous les types") list = list.filter((p) => p.propertyType === propertyType);
+    let list = initialProperties;
+    if (city !== "Toutes les villes") list = list.filter((p) => p.city.name === city);
+    if (type !== "tous") list = list.filter((p) => p.listingType === type);
+    if (propertyType !== "Tous les types") list = list.filter((p) => p.propertyType.name === propertyType);
 
     if (sort === "price-asc") list = [...list].sort((a, b) => a.price - b.price);
     if (sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
 
     return list;
-  }, [city, type, propertyType, sort]);
+  }, [initialProperties, city, type, propertyType, sort]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -45,7 +56,7 @@ export function PropertiesExplorer() {
             <div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-domify-dark/50">Transaction</p>
               <div className="flex flex-col gap-2">
-                {(["tous", "vente", "location"] as const).map((t) => (
+                {(["tous", "VENTE", "LOCATION"] as const).map((t) => (
                   <button
                     key={t}
                     onClick={() => setType(t)}
@@ -53,7 +64,7 @@ export function PropertiesExplorer() {
                       type === t ? "bg-domify-primary text-white" : "bg-white text-domify-dark/70 hover:bg-white/70"
                     }`}
                   >
-                    {t === "tous" ? "Tous" : t === "vente" ? "Acheter" : "Louer"}
+                    {t === "tous" ? "Tous" : t === "VENTE" ? "Acheter" : "Louer"}
                   </button>
                 ))}
               </div>
@@ -68,7 +79,7 @@ export function PropertiesExplorer() {
               >
                 <option>Toutes les villes</option>
                 {cities.map((c) => (
-                  <option key={c}>{c}</option>
+                  <option key={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
@@ -82,7 +93,7 @@ export function PropertiesExplorer() {
               >
                 <option>Tous les types</option>
                 {propertyTypes.map((t) => (
-                  <option key={t}>{t}</option>
+                  <option key={t.id}>{t.name}</option>
                 ))}
               </select>
             </div>

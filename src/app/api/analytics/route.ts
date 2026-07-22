@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 const EventSchema = z.object({
@@ -13,6 +14,15 @@ export async function POST(request: Request) {
   const parsed = EventSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
-  await prisma.analyticsEvent.create({ data: parsed.data });
+  const { type, path, meta } = parsed.data;
+
+  await prisma.analyticsEvent.create({
+    data: {
+      type,
+      path,
+      meta: meta as Prisma.InputJsonValue | undefined,
+    },
+  });
+
   return NextResponse.json({ ok: true }, { status: 201 });
 }
