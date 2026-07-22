@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { sendEmail, emailLayout } from "@/lib/email";
 
 const RegisterSchema = z.object({
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -30,6 +31,15 @@ export async function POST(request: Request) {
   const user = await prisma.user.create({
     data: { name, email, password: hashed, phone, role: "USER" },
   });
+
+  sendEmail({
+    to: user.email,
+    subject: "Bienvenue sur Domify !",
+    html: emailLayout(
+      `Bienvenue, ${name} !`,
+      `<p>Votre compte Domify a bien été créé. Vous pouvez dès maintenant enregistrer vos favoris, suivre vos demandes de visite et vos leads en cours.</p>`
+    ),
+  }).catch((e) => console.error("[register] welcome email failed:", e));
 
   return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
 }

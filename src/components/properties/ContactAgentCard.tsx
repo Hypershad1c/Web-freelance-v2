@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, Mail, CalendarClock, X } from "lucide-react";
+import { Phone, Mail, CalendarClock, X, Building2 } from "lucide-react";
 import Image from "next/image";
-import type { Property } from "@/lib/mock-data";
+import type { PropertyWithRelations } from "@/lib/data/properties";
+import { whatsappLink, telLink } from "@/lib/utils";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
-export function ContactAgentCard({ property }: { property: Property }) {
+export function ContactAgentCard({ property }: { property: PropertyWithRelations }) {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
@@ -15,6 +17,12 @@ export function ContactAgentCard({ property }: { property: Property }) {
     phone: "",
     message: `Bonjour, je suis intéressé(e) par ${property.title} (${property.reference}).`,
   });
+
+  const contactName = property.agent?.name ?? property.agency?.name ?? "Domify";
+  const contactPhone = property.agent?.phone ?? property.agency?.phone ?? "+212 6 00 00 00 00";
+  const contactEmail = property.agent?.email ?? property.agency?.email ?? "contact@domify.ma";
+  const contactPhoto = property.agent?.photo;
+  const contactSubtitle = property.agent ? property.agency?.name ?? "Domify" : "Équipe Domify";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,8 +34,7 @@ export function ContactAgentCard({ property }: { property: Property }) {
         body: JSON.stringify({ ...form, propertyId: property.id, source: "property_detail" }),
       });
     } catch {
-      // Network/DB not available in this preview environment — the request is still
-      // validated and shaped correctly for when Postgres is connected.
+      // Best-effort — the request is still validated/shaped correctly server-side.
     }
     setSending(false);
     setSent(true);
@@ -36,23 +43,44 @@ export function ContactAgentCard({ property }: { property: Property }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-luxury">
       <div className="flex items-center gap-3">
-        <div className="relative h-12 w-12 overflow-hidden rounded-full">
-          <Image src={property.agent.photo} alt={property.agent.name} fill className="object-cover" />
+        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-domify-warm-white">
+          {contactPhoto ? (
+            <Image src={contactPhoto} alt={contactName} fill className="object-cover" />
+          ) : (
+            <Building2 size={18} className="text-domify-primary" />
+          )}
         </div>
         <div>
-          <p className="font-semibold text-domify-dark">{property.agent.name}</p>
-          <p className="text-xs text-domify-dark/60">{property.agent.agency}</p>
+          <p className="font-semibold text-domify-dark">{contactName}</p>
+          <p className="text-xs text-domify-dark/60">{contactSubtitle}</p>
         </div>
       </div>
 
       <div className="mt-4 space-y-2 text-sm text-domify-dark/70">
-        <p className="flex items-center gap-2"><Phone size={14} /> {property.agent.phone}</p>
-        <p className="flex items-center gap-2"><Mail size={14} /> {property.agent.email}</p>
+        <p className="flex items-center gap-2"><Phone size={14} /> {contactPhone}</p>
+        <p className="flex items-center gap-2"><Mail size={14} /> {contactEmail}</p>
+      </div>
+
+      <div className="mt-4 flex gap-2">
+        <a
+          href={whatsappLink(contactPhone, `Bonjour, je suis intéressé(e) par « ${property.title} » (${property.reference}) sur Domify.`)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#25D366]/10 py-2.5 text-sm font-semibold text-[#128C4A] transition-luxury hover:bg-[#25D366] hover:text-white"
+        >
+          <WhatsAppIcon size={15} /> WhatsApp
+        </a>
+        <a
+          href={telLink(contactPhone)}
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-domify-primary/10 py-2.5 text-sm font-semibold text-domify-primary transition-luxury hover:bg-domify-primary hover:text-white"
+        >
+          <Phone size={14} /> Appeler
+        </a>
       </div>
 
       <button
         onClick={() => setShowBooking(true)}
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-domify-primary py-2.5 text-sm font-semibold text-domify-primary transition-luxury hover:bg-domify-primary hover:text-white"
+        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-domify-primary py-2.5 text-sm font-semibold text-domify-primary transition-luxury hover:bg-domify-primary hover:text-white"
       >
         <CalendarClock size={16} /> Planifier une visite
       </button>
@@ -61,7 +89,7 @@ export function ContactAgentCard({ property }: { property: Property }) {
 
       {sent ? (
         <p className="rounded-xl bg-domify-warm-white p-4 text-sm text-domify-dark">
-          Merci ! Votre demande a bien été envoyée, {property.agent.name.split(" ")[0]} vous recontactera rapidement.
+          Merci ! Votre demande a bien été envoyée, {contactName.split(" ")[0]} vous recontactera rapidement.
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -103,12 +131,22 @@ export function ContactAgentCard({ property }: { property: Property }) {
         </form>
       )}
 
-      {showBooking && <BookingModal property={property} onClose={() => setShowBooking(false)} />}
+      {showBooking && (
+        <BookingModal property={property} agentName={contactName} onClose={() => setShowBooking(false)} />
+      )}
     </div>
   );
 }
 
-function BookingModal({ property, onClose }: { property: Property; onClose: () => void }) {
+function BookingModal({
+  property,
+  agentName,
+  onClose,
+}: {
+  property: PropertyWithRelations;
+  agentName: string;
+  onClose: () => void;
+}) {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", date: "", notes: "" });
@@ -120,10 +158,10 @@ function BookingModal({ property, onClose }: { property: Property; onClose: () =
       await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, propertyId: property.id }),
+        body: JSON.stringify({ ...form, propertyId: property.id, agentId: property.agentId ?? undefined }),
       });
     } catch {
-      // Same as above — request shape is correct, DB isn't connected in this preview.
+      // Best-effort — same as above.
     }
     setSending(false);
     setSent(true);
@@ -136,11 +174,11 @@ function BookingModal({ property, onClose }: { property: Property; onClose: () =
           <X size={18} />
         </button>
         <h3 className="font-display text-xl font-semibold text-domify-dark">Planifier une visite</h3>
-        <p className="mt-1 text-sm text-domify-dark/60">{property.title} — {property.city}</p>
+        <p className="mt-1 text-sm text-domify-dark/60">{property.title} — {property.city.name}</p>
 
         {sent ? (
           <p className="mt-6 rounded-xl bg-domify-warm-white p-4 text-sm text-domify-dark">
-            Votre demande de visite a été envoyée. Vous recevrez une confirmation par email.
+            Votre demande de visite a été envoyée à {agentName}. Vous recevrez une confirmation par email.
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="mt-6 space-y-3">

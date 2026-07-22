@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, Search, Building2, Heart, User, LogOut } from "lucide-react";
+import { Menu, X, Search, Heart, User, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
 import { useFavorites } from "@/lib/favorites-context";
 
 const NAV = [
   { label: "Acheter", href: "/proprietes?type=vente" },
   { label: "Louer", href: "/proprietes?type=location" },
-  { label: "Projets", href: "/projets" },
+  { label: "Carte", href: "/carte" },
   { label: "Agences", href: "/agences" },
   { label: "Blog", href: "/blog" },
+  { label: "À propos", href: "/a-propos" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -25,8 +27,8 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-domify-primary text-white">
-            <Building2 size={18} />
+          <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg">
+            <Image src="/Logo.jpeg" alt="Domify" fill className="object-cover" />
           </span>
           <span className="font-display text-xl font-semibold tracking-tight text-domify-dark">
             DOMIFY
@@ -68,8 +70,24 @@ export function Header() {
                 {session.user.name?.[0]?.toUpperCase() ?? <User size={16} />}
               </button>
               {accountOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white p-2 shadow-luxury">
+                <div className="absolute right-0 mt-2 w-52 rounded-xl bg-white p-2 shadow-luxury">
                   <p className="truncate px-3 py-2 text-xs text-domify-dark/50">{session.user.email}</p>
+                  <Link
+                    href="/compte"
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-domify-dark/80 hover:bg-domify-warm-white"
+                  >
+                    <UserCircle size={14} /> Mon compte
+                  </Link>
+                  {(session.user.role === "ADMIN" || session.user.role === "EDITOR" || session.user.role === "AGENT") && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-domify-dark/80 hover:bg-domify-warm-white"
+                    >
+                      <LayoutDashboard size={14} /> Back-office
+                    </Link>
+                  )}
                   <button
                     onClick={() => signOut()}
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-domify-dark/80 hover:bg-domify-warm-white"
@@ -110,9 +128,19 @@ export function Header() {
               Favoris ({favoriteIds.length})
             </Link>
             {session?.user ? (
-              <button onClick={() => signOut()} className="text-left text-sm font-medium text-domify-dark/80">
-                Se déconnecter
-              </button>
+              <>
+                <Link href="/compte" className="text-sm font-medium text-domify-dark/80" onClick={() => setOpen(false)}>
+                  Mon compte
+                </Link>
+                {(session.user.role === "ADMIN" || session.user.role === "EDITOR" || session.user.role === "AGENT") && (
+                  <Link href="/admin" className="text-sm font-medium text-domify-dark/80" onClick={() => setOpen(false)}>
+                    Back-office
+                  </Link>
+                )}
+                <button onClick={() => signOut()} className="text-left text-sm font-medium text-domify-dark/80">
+                  Se déconnecter
+                </button>
+              </>
             ) : (
               <Link href="/connexion" className="text-sm font-medium text-domify-dark/80" onClick={() => setOpen(false)}>
                 Connexion

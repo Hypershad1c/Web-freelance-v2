@@ -25,11 +25,11 @@ export type Property = {
 };
 
 const AGENT = {
-  name: "Abdelhamid Bourazzouq",
+  name: "Yasmine El Amrani",
   agency: "Domify Prestige",
   phone: "+212 6 12 34 56 78",
-  email: "abdelhamid@domify.ma",
-  photo: "https://res.cloudinary.com/di00pq8bf/image/upload/v1775667282/ecommerce_products/gfahcexnlq6whjqy9vdx.jpg",
+  email: "yasmine@domify.ma",
+  photo: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=300&auto=format&fit=crop",
 };
 
 const AMENITIES = [

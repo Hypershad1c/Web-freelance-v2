@@ -1,31 +1,50 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+// ---------- AUTH & USERS ----------
+
+enum Role {
+  ADMIN
+  EDITOR
+  AGENT
+  USER
+}
+
 model User {
-  id            String           @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String           @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
   password      String?
-  role          Role             @default(USER)
+  role          Role      @default(USER)
   phone         String?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  accounts      Account[]
-  agent         Agent?
-  appointments  Appointment[]
-  favorites     Favorite[]
-  leads         Lead[]
-  messages      Message[]
-  sessions      Session[]
-  permissions   UserPermission[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  favorites    Favorite[]
+  leads        Lead[]
+  appointments Appointment[]
+  agent        Agent?
+  messages     Message[]
+  permissions  UserPermission[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Account {
@@ -55,9 +74,10 @@ model Session {
 }
 
 model Permission {
-  id    String           @id @default(cuid())
-  key   String           @unique
+  id    String @id @default(cuid())
+  key   String @unique // e.g. "properties.create"
   label String
+
   users UserPermission[]
 }
 
@@ -65,11 +85,13 @@ model UserPermission {
   id           String     @id @default(cuid())
   userId       String
   permissionId String
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, permissionId])
 }
+
+// ---------- LOCATIONS ----------
 
 model City {
   id            String         @id @default(cuid())
@@ -92,37 +114,56 @@ model Neighborhood {
   properties  Property[]
 }
 
+// ---------- AGENCIES & AGENTS ----------
+
 model Agency {
-  id          String     @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  slug        String     @unique
+  slug        String   @unique
   logo        String?
   coverImage  String?
   description String?
   phone       String?
   email       String?
   address     String?
-  verified    Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  agents      Agent[]
-  properties  Property[]
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  agents     Agent[]
+  properties Property[]
 }
 
 model Agent {
-  id           String        @id @default(cuid())
-  userId       String?       @unique
-  name         String
-  slug         String        @unique
-  photo        String?
-  bio          String?
-  phone        String?
-  email        String?
-  agencyId     String?
-  createdAt    DateTime      @default(now())
-  agency       Agency?       @relation(fields: [agencyId], references: [id])
-  user         User?         @relation(fields: [userId], references: [id])
-  appointments Appointment[]
+  id        String   @id @default(cuid())
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id])
+  name      String
+  slug      String   @unique
+  photo     String?
+  bio       String?
+  phone     String?
+  email     String?
+  agencyId  String?
+  agency    Agency?  @relation(fields: [agencyId], references: [id])
+  createdAt DateTime @default(now())
+
   properties   Property[]
+  appointments Appointment[]
+}
+
+// ---------- PROPERTY CATALOG ----------
+
+enum ListingType {
+  VENTE
+  LOCATION
+}
+
+enum PropertyStatus {
+  DRAFT
+  PUBLISHED
+  UNDER_OFFER
+  SOLD
+  ARCHIVED
 }
 
 model PropertyType {
@@ -138,7 +179,7 @@ model Amenity {
   name       String
   slug       String     @unique
   icon       String?
-  properties Property[] @relation("AmenityToProperty")
+  properties Property[]
 }
 
 model Property {
@@ -160,50 +201,64 @@ model Property {
   address        String?
   featured       Boolean        @default(false)
   viewsCount     Int            @default(0)
+
   cityId         String
+  city           City           @relation(fields: [cityId], references: [id])
   neighborhoodId String?
+  neighborhood   Neighborhood?  @relation(fields: [neighborhoodId], references: [id])
   propertyTypeId String
+  propertyType   PropertyType   @relation(fields: [propertyTypeId], references: [id])
   agencyId       String?
+  agency         Agency?        @relation(fields: [agencyId], references: [id])
   agentId        String?
+  agent          Agent?         @relation(fields: [agentId], references: [id])
+
+  amenities Amenity[]
+  media     Media[]
+  leads     Lead[]
+  favorites Favorite[]
+  appointments Appointment[]
+
   seoTitle       String?
   seoDescription String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  appointments   Appointment[]
-  favorites      Favorite[]
-  leads          Lead[]
-  media          Media[]
-  agency         Agency?        @relation(fields: [agencyId], references: [id])
-  agent          Agent?         @relation(fields: [agentId], references: [id])
-  city           City           @relation(fields: [cityId], references: [id])
-  neighborhood   Neighborhood?  @relation(fields: [neighborhoodId], references: [id])
-  propertyType   PropertyType   @relation(fields: [propertyTypeId], references: [id])
-  amenities      Amenity[]      @relation("AmenityToProperty")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Media {
-  id           String    @id @default(cuid())
-  url          String
-  cloudinaryId String?
-  type         String    @default("image")
-  alt          String?
-  order        Int       @default(0)
-  propertyId   String?
-  blogPostId   String?
-  createdAt    DateTime  @default(now())
-  blogPost     BlogPost? @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
-  property     Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  id            String    @id @default(cuid())
+  url           String
+  cloudinaryId  String?
+  type          String    @default("image") // image | video | floorplan
+  alt           String?
+  order         Int       @default(0)
+  propertyId    String?
+  property      Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  blogPostId    String?
+  blogPost      BlogPost? @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
 }
 
 model Favorite {
   id         String   @id @default(cuid())
   userId     String
-  propertyId String
-  createdAt  DateTime @default(now())
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
 
   @@unique([userId, propertyId])
+}
+
+// ---------- LEADS / APPOINTMENTS / MESSAGES ----------
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
 }
 
 model Lead {
@@ -215,10 +270,17 @@ model Lead {
   status     LeadStatus @default(NEW)
   source     String?
   userId     String?
-  propertyId String?
-  createdAt  DateTime   @default(now())
-  property   Property?  @relation(fields: [propertyId], references: [id])
   user       User?      @relation(fields: [userId], references: [id])
+  propertyId String?
+  property   Property?  @relation(fields: [propertyId], references: [id])
+  createdAt  DateTime   @default(now())
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
 }
 
 model Appointment {
@@ -230,12 +292,12 @@ model Appointment {
   status     AppointmentStatus @default(PENDING)
   notes      String?
   userId     String?
-  propertyId String?
-  agentId    String?
-  createdAt  DateTime          @default(now())
-  agent      Agent?            @relation(fields: [agentId], references: [id])
-  property   Property?         @relation(fields: [propertyId], references: [id])
   user       User?             @relation(fields: [userId], references: [id])
+  propertyId String?
+  property   Property?         @relation(fields: [propertyId], references: [id])
+  agentId    String?
+  agent      Agent?            @relation(fields: [agentId], references: [id])
+  createdAt  DateTime          @default(now())
 }
 
 model Message {
@@ -246,9 +308,11 @@ model Message {
   body      String
   read      Boolean  @default(false)
   userId    String?
-  createdAt DateTime @default(now())
   user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }
+
+// ---------- BLOG / CMS ----------
 
 model BlogCategory {
   id    String     @id @default(cuid())
@@ -258,20 +322,22 @@ model BlogCategory {
 }
 
 model BlogPost {
-  id             String        @id @default(cuid())
-  title          String
-  slug           String        @unique
-  excerpt        String?
-  content        String
-  coverImage     String?
-  published      Boolean       @default(false)
-  categoryId     String?
+  id         String       @id @default(cuid())
+  title      String
+  slug       String       @unique
+  excerpt    String?
+  content    String
+  coverImage String?
+  published  Boolean      @default(false)
+  categoryId String?
+  category   BlogCategory? @relation(fields: [categoryId], references: [id])
+  media      Media[]
+
   seoTitle       String?
   seoDescription String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  category       BlogCategory? @relation(fields: [categoryId], references: [id])
-  media          Media[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Testimonial {
@@ -285,6 +351,8 @@ model Testimonial {
   createdAt DateTime @default(now())
 }
 
+// ---------- SETTINGS / SEO / ANALYTICS ----------
+
 model SiteSetting {
   id    String @id @default(cuid())
   key   String @unique
@@ -292,8 +360,8 @@ model SiteSetting {
 }
 
 model SeoEntry {
-  id          String  @id @default(cuid())
-  path        String  @unique
+  id          String @id @default(cuid())
+  path        String @unique
   title       String
   description String
   ogImage     String?
@@ -301,43 +369,8 @@ model SeoEntry {
 
 model AnalyticsEvent {
   id        String   @id @default(cuid())
-  type      String
+  type      String // page_view | lead | search | favorite
   path      String?
   meta      Json?
   createdAt DateTime @default(now())
-}
-
-enum Role {
-  ADMIN
-  EDITOR
-  AGENT
-  USER
-}
-
-enum ListingType {
-  VENTE
-  LOCATION
-}
-
-enum PropertyStatus {
-  DRAFT
-  PUBLISHED
-  UNDER_OFFER
-  SOLD
-  ARCHIVED
-}
-
-enum LeadStatus {
-  NEW
-  CONTACTED
-  QUALIFIED
-  CONVERTED
-  LOST
-}
-
-enum AppointmentStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
-  COMPLETED
 }
