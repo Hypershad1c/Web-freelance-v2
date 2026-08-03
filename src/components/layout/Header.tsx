@@ -1,0 +1,186 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useSession, signOut } from "next-auth/react";
+import { Menu, X, Search, Heart, User, LogOut, LayoutDashboard, UserCircle } from "lucide-react";
+import { useFavorites } from "@/lib/favorites-context";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import type { Locale } from "@/i18n/locales";
+import type { Dictionary } from "@/i18n/get-dictionary";
+
+export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+  const [open, setOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const { data: session } = useSession();
+  const { favoriteIds } = useFavorites();
+
+  const NAV = [
+    { label: dict.nav.buy, href: "/proprietes?type=vente" },
+    { label: dict.nav.rent, href: "/proprietes?type=location" },
+    { label: dict.nav.map, href: "/carte" },
+    { label: dict.nav.agencies, href: "/agences" },
+    { label: dict.nav.blog, href: "/blog" },
+    { label: dict.nav.about, href: "/a-propos" },
+    { label: dict.nav.contact, href: "/contact" },
+  ];
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg">
+            <Image src="/Logo.jpeg" alt="Domify" fill className="object-cover" />
+          </span>
+          <span className="font-display text-xl font-semibold tracking-tight text-domify-dark">
+            DOMIFY
+          </span>
+        </Link>
+
+        <nav className="hidden items-center gap-8 lg:flex">
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-sm font-medium text-domify-dark/80 transition-luxury hover:text-domify-primary"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="hidden items-center gap-4 lg:flex">
+          <LanguageSwitcher current={locale} />
+          <button aria-label={dict.header.search} className="text-domify-dark/70 hover:text-domify-primary transition-luxury">
+            <Search size={19} />
+          </button>
+          <Link href="/favoris" aria-label={dict.header.favorites} className="relative text-domify-dark/70 hover:text-domify-primary transition-luxury">
+            <Heart size={19} />
+            {favoriteIds.length > 0 && (
+              <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-domify-gold text-[10px] font-bold text-white">
+                {favoriteIds.length}
+              </span>
+            )}
+          </Link>
+
+          {session?.user ? (
+            <div className="relative">
+              <button
+                onClick={() => setAccountOpen(!accountOpen)}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-domify-warm-white text-domify-primary"
+                aria-label={dict.header.account}
+              >
+                {session.user.name?.[0]?.toUpperCase() ?? <User size={16} />}
+              </button>
+              {accountOpen && (
+                <div className="absolute right-0 mt-2 w-52 rounded-xl bg-white p-2 shadow-luxury">
+                  <p className="truncate px-3 py-2 text-xs text-domify-dark/50">{session.user.email}</p>
+                  <Link
+                    href="/compte"
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-domify-dark/80 hover:bg-domify-warm-white"
+                  >
+                    <UserCircle size={14} /> {dict.header.account}
+                  </Link>
+                  {(session.user.role === "ADMIN" || session.user.role === "EDITOR" || session.user.role === "AGENT") && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-domify-dark/80 hover:bg-domify-warm-white"
+                    >
+                      <LayoutDashboard size={14} /> {dict.header.dashboard}
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => signOut()}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-domify-dark/80 hover:bg-domify-warm-white"
+                  >
+                    <LogOut size={14} /> {dict.header.logout}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/connexion"
+              className="flex items-center gap-1.5 rounded-full border border-domify-primary/30 px-4 py-2 text-sm font-semibold text-domify-primary transition-luxury hover:bg-domify-primary hover:text-white"
+            >
+              <User size={16} /> {dict.header.login}
+            </Link>
+          )}
+
+          <Link
+            href="/vendre-louer"
+            className="rounded-full bg-domify-gold px-5 py-2.5 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark"
+          >
+            {dict.header.sellMyHome}
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-3 lg:hidden">
+          <LanguageSwitcher current={locale} />
+          <button onClick={() => setOpen(!open)} aria-label="Menu">
+            {open ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.8, 0.25, 1] }}
+            className="overflow-hidden border-t border-black/5 bg-white lg:hidden"
+          >
+            <div className="px-4 py-4">
+          <nav className="flex flex-col gap-4">
+            {NAV.map((item) => (
+              <Link key={item.href} href={item.href} className="text-sm font-medium text-domify-dark/80" onClick={() => setOpen(false)}>
+                {item.label}
+              </Link>
+            ))}
+            <Link href="/favoris" className="text-sm font-medium text-domify-dark/80" onClick={() => setOpen(false)}>
+              {dict.header.favorites} ({favoriteIds.length})
+            </Link>
+            {session?.user ? (
+              <>
+                <Link href="/compte" className="text-sm font-medium text-domify-dark/80" onClick={() => setOpen(false)}>
+                  {dict.header.account}
+                </Link>
+                {(session.user.role === "ADMIN" || session.user.role === "EDITOR" || session.user.role === "AGENT") && (
+                  <Link href="/admin" className="text-sm font-medium text-domify-dark/80" onClick={() => setOpen(false)}>
+                    {dict.header.dashboard}
+                  </Link>
+                )}
+                <button onClick={() => signOut()} className="text-left text-sm font-medium text-domify-dark/80">
+                  {dict.header.logout}
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/connexion"
+                className="flex items-center gap-1.5 rounded-full border border-domify-primary/30 px-4 py-2 text-center text-sm font-semibold text-domify-primary"
+                onClick={() => setOpen(false)}
+              >
+                <User size={16} /> {dict.header.login}
+              </Link>
+            )}
+            <Link
+              href="/vendre-louer"
+              className="mt-2 rounded-full bg-domify-gold px-5 py-2.5 text-center text-sm font-semibold text-white"
+              onClick={() => setOpen(false)}
+            >
+              {dict.header.sellMyHome}
+            </Link>
+          </nav>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
+  );
+}

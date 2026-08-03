@@ -1,0 +1,374 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- AUTH & USERS ----------
+
+enum Role {
+  ADMIN
+  EDITOR
+  AGENT
+  USER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(USER)
+  phone         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  favorites    Favorite[]
+  leads        Lead[]
+  appointments Appointment[]
+  agent        Agent?
+  messages     Message[]
+  permissions  UserPermission[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Permission {
+  id    String @id @default(cuid())
+  key   String @unique // e.g. "properties.create"
+  label String
+
+  users UserPermission[]
+}
+
+model UserPermission {
+  id           String     @id @default(cuid())
+  userId       String
+  permissionId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+}
+
+// ---------- LOCATIONS ----------
+
+model City {
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  image         String?
+  description   String?
+  order         Int            @default(0)
+  neighborhoods Neighborhood[]
+  properties    Property[]
+}
+
+model Neighborhood {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  cityId      String
+  city        City       @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  properties  Property[]
+}
+
+// ---------- AGENCIES & AGENTS ----------
+
+model Agency {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  logo        String?
+  coverImage  String?
+  description String?
+  phone       String?
+  email       String?
+  address     String?
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  agents     Agent[]
+  properties Property[]
+}
+
+model Agent {
+  id        String   @id @default(cuid())
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id])
+  name      String
+  slug      String   @unique
+  photo     String?
+  bio       String?
+  phone     String?
+  email     String?
+  agencyId  String?
+  agency    Agency?  @relation(fields: [agencyId], references: [id])
+  createdAt DateTime @default(now())
+
+  properties   Property[]
+  appointments Appointment[]
+}
+
+// ---------- PROPERTY CATALOG ----------
+
+enum ListingType {
+  VENTE
+  LOCATION
+}
+
+enum PropertyStatus {
+  DRAFT
+  PUBLISHED
+  UNDER_OFFER
+  SOLD
+  ARCHIVED
+}
+
+model PropertyType {
+  id         String     @id @default(cuid())
+  name       String
+  slug       String     @unique
+  icon       String?
+  properties Property[]
+}
+
+model Amenity {
+  id         String     @id @default(cuid())
+  name       String
+  slug       String     @unique
+  icon       String?
+  properties Property[]
+}
+
+model Property {
+  id             String         @id @default(cuid())
+  reference      String         @unique
+  title          String
+  slug           String         @unique
+  description    String
+  listingType    ListingType
+  status         PropertyStatus @default(DRAFT)
+  price          Int
+  surfaceArea    Float
+  bedrooms       Int            @default(0)
+  bathrooms      Int            @default(0)
+  floors         Int?
+  yearBuilt      Int?
+  latitude       Float?
+  longitude      Float?
+  address        String?
+  featured       Boolean        @default(false)
+  viewsCount     Int            @default(0)
+
+  cityId         String
+  city           City           @relation(fields: [cityId], references: [id])
+  neighborhoodId String?
+  neighborhood   Neighborhood?  @relation(fields: [neighborhoodId], references: [id])
+  propertyTypeId String
+  propertyType   PropertyType   @relation(fields: [propertyTypeId], references: [id])
+  agencyId       String?
+  agency         Agency?        @relation(fields: [agencyId], references: [id])
+  agentId        String?
+  agent          Agent?         @relation(fields: [agentId], references: [id])
+
+  amenities Amenity[]
+  media     Media[]
+  leads     Lead[]
+  favorites Favorite[]
+  appointments Appointment[]
+
+  seoTitle       String?
+  seoDescription String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Media {
+  id            String    @id @default(cuid())
+  url           String
+  cloudinaryId  String?
+  type          String    @default("image") // image | video | floorplan
+  alt           String?
+  order         Int       @default(0)
+  propertyId    String?
+  property      Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  blogPostId    String?
+  blogPost      BlogPost? @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+}
+
+// ---------- LEADS / APPOINTMENTS / MESSAGES ----------
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
+model Lead {
+  id         String     @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  message    String?
+  status     LeadStatus @default(NEW)
+  source     String?
+  userId     String?
+  user       User?      @relation(fields: [userId], references: [id])
+  propertyId String?
+  property   Property?  @relation(fields: [propertyId], references: [id])
+  createdAt  DateTime   @default(now())
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model Appointment {
+  id         String            @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  date       DateTime
+  status     AppointmentStatus @default(PENDING)
+  notes      String?
+  userId     String?
+  user       User?             @relation(fields: [userId], references: [id])
+  propertyId String?
+  property   Property?         @relation(fields: [propertyId], references: [id])
+  agentId    String?
+  agent      Agent?            @relation(fields: [agentId], references: [id])
+  createdAt  DateTime          @default(now())
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  body      String
+  read      Boolean  @default(false)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+// ---------- BLOG / CMS ----------
+
+model BlogCategory {
+  id    String     @id @default(cuid())
+  name  String
+  slug  String     @unique
+  posts BlogPost[]
+}
+
+model BlogPost {
+  id         String       @id @default(cuid())
+  title      String
+  slug       String       @unique
+  excerpt    String?
+  content    String
+  coverImage String?
+  published  Boolean      @default(false)
+  categoryId String?
+  category   BlogCategory? @relation(fields: [categoryId], references: [id])
+  media      Media[]
+
+  seoTitle       String?
+  seoDescription String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  city      String?
+  quote     String
+  rating    Int      @default(5)
+  photo     String?
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// ---------- SETTINGS / SEO / ANALYTICS ----------
+
+model SiteSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+model SeoEntry {
+  id          String @id @default(cuid())
+  path        String @unique
+  title       String
+  description String
+  ogImage     String?
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String // page_view | lead | search | favorite
+  path      String?
+  meta      Json?
+  createdAt DateTime @default(now())
+}
