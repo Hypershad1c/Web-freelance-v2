@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
@@ -6,8 +5,7 @@ import { PropertyForm } from "@/components/admin/PropertyForm";
 import { createProperty } from "@/lib/actions/properties";
 
 export default async function NewPropertyPage() {
-  const session = await auth();
-  if (session?.user?.role === "AGENT") redirect("/admin/properties");
+  await auth();
 
   const [cities, neighborhoods, propertyTypes, agencies, agents, amenities] = await Promise.all([
     prisma.city.findMany({ orderBy: { name: "asc" } }),

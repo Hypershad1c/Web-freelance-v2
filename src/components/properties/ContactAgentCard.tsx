@@ -7,12 +7,15 @@ import type { PropertyWithRelations } from "@/lib/data/properties";
 import { whatsappLink, telLink } from "@/lib/utils";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { HoneypotField } from "@/components/HoneypotField";
+import { Turnstile } from "@/components/Turnstile";
 
 export function ContactAgentCard({ property }: { property: PropertyWithRelations }) {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -30,17 +33,20 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
     e.preventDefault();
     if (honeypot) return; // bot — silently drop
     setSending(true);
+    setError(null);
     try {
-      await fetch("/api/leads", {
+      const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, propertyId: property.id, source: "property_detail", website: honeypot }),
+        body: JSON.stringify({ ...form, propertyId: property.id, source: "property_detail", website: honeypot, turnstileToken }),
       });
+      if (!response.ok) throw new Error();
+      setSent(true);
     } catch {
-      // Best-effort — the request is still validated/shaped correctly server-side.
+      setError("La demande n’a pas pu être envoyée. Merci de réessayer.");
+    } finally {
+      setSending(false);
     }
-    setSending(false);
-    setSent(true);
   }
 
   return (
@@ -125,9 +131,11 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
             onChange={(e) => setForm({ ...form, message: e.target.value })}
             className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm"
           />
+          <Turnstile action="lead" onTokenChange={setTurnstileToken} />
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <button
             type="submit"
-            disabled={sending}
+            disabled={sending || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken)}
             className="w-full rounded-xl bg-domify-gold py-2.5 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark disabled:opacity-60"
           >
             {sending ? "Envoi..." : "Contacter l'agent"}
@@ -154,23 +162,28 @@ function BookingModal({
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "", date: "", notes: "" });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (honeypot) return; // bot — silently drop
     setSending(true);
+    setError(null);
     try {
-      await fetch("/api/appointments", {
+      const response = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, propertyId: property.id, agentId: property.agentId ?? undefined, website: honeypot }),
+        body: JSON.stringify({ ...form, propertyId: property.id, agentId: property.agentId ?? undefined, website: honeypot, turnstileToken }),
       });
+      if (!response.ok) throw new Error();
+      setSent(true);
     } catch {
-      // Best-effort — same as above.
+      setError("La demande de visite n’a pas pu être envoyée. Merci de réessayer.");
+    } finally {
+      setSending(false);
     }
-    setSending(false);
-    setSent(true);
   }
 
   return (
@@ -194,7 +207,9 @@ function BookingModal({
             <input placeholder="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" />
             <input required type="datetime-local" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" />
             <textarea rows={2} placeholder="Notes (optionnel)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" />
-            <button type="submit" disabled={sending} className="w-full rounded-xl bg-domify-primary py-2.5 text-sm font-semibold text-white transition-luxury hover:bg-domify-primary-dark disabled:opacity-60">
+            <Turnstile action="appointment" onTokenChange={setTurnstileToken} />
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <button type="submit" disabled={sending || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken)} className="w-full rounded-xl bg-domify-primary py-2.5 text-sm font-semibold text-white transition-luxury hover:bg-domify-primary-dark disabled:opacity-60">
               {sending ? "Envoi..." : "Confirmer la demande"}
             </button>
           </form>

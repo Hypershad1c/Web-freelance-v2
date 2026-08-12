@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { getSiteSettings } from "@/lib/data/settings";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const LeadSchema = z.object({
   name: z.string().min(2),
@@ -14,6 +15,7 @@ const LeadSchema = z.object({
   propertyId: z.string().optional(),
   source: z.string().optional(),
   website: z.string().optional(), // honeypot — real users never see/fill this field
+  turnstileToken: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -36,8 +38,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true }, { status: 201 });
   }
 
-  const { website, ...data } = parsed.data;
-  void website; // already checked above — destructured only to exclude it from `data`
+  const verification = await verifyTurnstile({ token: parsed.data.turnstileToken, remoteIp: ip, expectedAction: "lead" });
+  if (!verification.ok) {
+    return NextResponse.json({ error: "La vérification de sécurité a échoué. Merci de réessayer." }, { status: 400 });
+  }
+
+  const { website, turnstileToken, ...data } = parsed.data;
+  void website;
+  void turnstileToken;
   const session = await auth();
 
   const lead = await prisma.lead.create({

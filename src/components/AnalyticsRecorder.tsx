@@ -1,22 +1,30 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { CONSENT_EVENT, readConsent } from "@/lib/consent";
 
 export function AnalyticsRecorder() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [analyticsAllowed, setAnalyticsAllowed] = useState(false);
 
   useEffect(() => {
-    // Best-effort, fire-and-forget — never blocks or breaks the page if it fails.
+    const refreshConsent = () => setAnalyticsAllowed(readConsent() === "accepted");
+    refreshConsent();
+    window.addEventListener(CONSENT_EVENT, refreshConsent);
+    return () => window.removeEventListener(CONSENT_EVENT, refreshConsent);
+  }, []);
+
+  useEffect(() => {
+    if (!analyticsAllowed) return;
     fetch("/api/analytics", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type: "page_view", path: pathname }),
       keepalive: true,
     }).catch(() => {});
-    // Re-fires on query param changes too (e.g. /proprietes?city=rabat counts as its own view).
-  }, [pathname, searchParams]);
+  }, [analyticsAllowed, pathname, searchParams]);
 
   return null;
 }

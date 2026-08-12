@@ -4,9 +4,8 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { notifyUsers, recordAudit } from "@/lib/workflow";
 
-// Admin & Editor manage everything. Agents may only update status on leads/
-// appointments tied to their own listings — never delete, never touch others'.
 async function requireStaff() {
   const session = await auth();
   const role = session?.user?.role;
@@ -30,8 +29,6 @@ async function getOwnAgentId(userId: string) {
   return agent?.id;
 }
 
-// ---------- Leads ----------
-
 const LeadStatuses = ["NEW", "CONTACTED", "QUALIFIED", "CONVERTED", "LOST"] as const;
 const LeadStatusSchema = z.enum(LeadStatuses);
 
@@ -40,24 +37,52 @@ export async function updateLeadStatus(id: string, status: string) {
   const parsed = LeadStatusSchema.safeParse(status);
   if (!parsed.success) throw new Error("Statut invalide");
 
+  const lead = await prisma.lead.findUnique({
+    where: { id },
+    include: { property: { include: { agent: { select: { userId: true } } } } },
+  });
+  if (!lead) throw new Error("Lead introuvable");
   if (session.user.role === "AGENT") {
     const agentId = await getOwnAgentId(session.user.id);
-    const lead = await prisma.lead.findUnique({ where: { id }, include: { property: true } });
-    if (!agentId || lead?.property?.agentId !== agentId) throw new Error("Non autorisé");
+    if (!agentId || lead.property?.agentId !== agentId) throw new Error("Non autorisé");
   }
 
-  await prisma.lead.update({ where: { id }, data: { status: parsed.data } });
+  const lastLead = await prisma.lead.findFirst({
+    where: { status: parsed.data, id: { not: id } },
+    orderBy: { position: "desc" },
+    select: { position: true },
+  });
+  await prisma.lead.update({
+    where: { id },
+    data: { status: parsed.data, position: (lastLead?.position ?? -1) + 1 },
+  });
+
+  const recipients = [lead.userId, lead.property?.agent?.userId].filter((id): id is string => Boolean(id && id !== session.user.id));
+  await notifyUsers({
+    userIds: recipients,
+    type: "LEAD_STATUS",
+    title: "Statut de lead mis à jour",
+    body: `Le lead de ${lead.name} est maintenant « ${leadStatusLabel(parsed.data)} ».`,
+    href: "/admin/leads",
+  });
+  await recordAudit({
+    actorId: session.user.id,
+    action: "LEAD_STATUS_UPDATED",
+    entityType: "Lead",
+    entityId: id,
+    summary: `Lead ${lead.name} : ${leadStatusLabel(lead.status)} → ${leadStatusLabel(parsed.data)}`,
+  });
   revalidatePath("/admin/leads");
   revalidatePath("/admin");
 }
 
 export async function deleteLead(id: string) {
-  await requireAdminOrEditor();
+  const session = await requireAdminOrEditor();
+  const lead = await prisma.lead.findUnique({ where: { id }, select: { name: true } });
   await prisma.lead.delete({ where: { id } });
+  await recordAudit({ actorId: session.user.id, action: "LEAD_DELETED", entityType: "Lead", entityId: id, summary: `Suppression du lead ${lead?.name ?? id}` });
   revalidatePath("/admin/leads");
 }
-
-// ---------- Appointments ----------
 
 const AppointmentStatuses = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"] as const;
 const AppointmentStatusSchema = z.enum(AppointmentStatuses);
@@ -67,33 +92,46 @@ export async function updateAppointmentStatus(id: string, status: string) {
   const parsed = AppointmentStatusSchema.safeParse(status);
   if (!parsed.success) throw new Error("Statut invalide");
 
+  const appointment = await prisma.appointment.findUnique({ where: { id }, include: { property: { select: { title: true } } } });
+  if (!appointment) throw new Error("Rendez-vous introuvable");
   if (session.user.role === "AGENT") {
     const agentId = await getOwnAgentId(session.user.id);
-    const appt = await prisma.appointment.findUnique({ where: { id } });
-    if (!agentId || appt?.agentId !== agentId) throw new Error("Non autorisé");
+    if (!agentId || appointment.agentId !== agentId) throw new Error("Non autorisé");
   }
 
   await prisma.appointment.update({ where: { id }, data: { status: parsed.data } });
+  await recordAudit({ actorId: session.user.id, action: "APPOINTMENT_STATUS_UPDATED", entityType: "Appointment", entityId: id, summary: `Rendez-vous ${appointment.property?.title ?? id} : ${parsed.data}` });
   revalidatePath("/admin/appointments");
   revalidatePath("/admin");
 }
 
 export async function deleteAppointment(id: string) {
-  await requireAdminOrEditor();
+  const session = await requireAdminOrEditor();
   await prisma.appointment.delete({ where: { id } });
+  await recordAudit({ actorId: session.user.id, action: "APPOINTMENT_DELETED", entityType: "Appointment", entityId: id, summary: "Suppression d’un rendez-vous" });
   revalidatePath("/admin/appointments");
 }
 
-// ---------- Messages (Admin/Editor only — not tied to any agent) ----------
-
 export async function toggleMessageRead(id: string, read: boolean) {
-  await requireAdminOrEditor();
+  const session = await requireAdminOrEditor();
   await prisma.message.update({ where: { id }, data: { read } });
+  await recordAudit({ actorId: session.user.id, action: read ? "MESSAGE_READ" : "MESSAGE_UNREAD", entityType: "Message", entityId: id, summary: read ? "Message marqué comme lu" : "Message marqué comme non lu" });
   revalidatePath("/admin/messages");
 }
 
 export async function deleteMessage(id: string) {
-  await requireAdminOrEditor();
+  const session = await requireAdminOrEditor();
   await prisma.message.delete({ where: { id } });
+  await recordAudit({ actorId: session.user.id, action: "MESSAGE_DELETED", entityType: "Message", entityId: id, summary: "Suppression d’un message" });
   revalidatePath("/admin/messages");
+}
+
+function leadStatusLabel(status: (typeof LeadStatuses)[number]) {
+  return {
+    NEW: "Nouveau",
+    CONTACTED: "Contacté",
+    QUALIFIED: "Qualifié",
+    CONVERTED: "Converti",
+    LOST: "Perdu",
+  }[status];
 }

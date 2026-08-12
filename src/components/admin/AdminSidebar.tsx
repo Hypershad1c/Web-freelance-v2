@@ -22,6 +22,8 @@ import {
   Tag,
   Sparkles,
   ShieldCheck,
+  ClipboardCheck,
+  ScrollText,
   ArrowLeft,
   Menu,
   X,
@@ -56,6 +58,7 @@ const STAFF_SECTIONS: NavSection[] = [
     items: [
       { label: "Agences", href: "/admin/agencies", icon: Building2 },
       { label: "Agents", href: "/admin/agents", icon: UserCog },
+      { label: "Performance des agents", href: "/admin/agent-performance", icon: BarChart3 },
       { label: "Utilisateurs", href: "/admin/users", icon: Users },
       { label: "Rôles & permissions", href: "/admin/roles", icon: ShieldCheck },
     ],
@@ -72,6 +75,7 @@ const STAFF_SECTIONS: NavSection[] = [
     items: [
       { label: "Rendez-vous", href: "/admin/appointments", icon: CalendarClock },
       { label: "Leads", href: "/admin/leads", icon: Inbox },
+      { label: "Validations", href: "/admin/approvals", icon: ClipboardCheck },
       { label: "Messages", href: "/admin/messages", icon: Mail },
     ],
   },
@@ -80,13 +84,14 @@ const STAFF_SECTIONS: NavSection[] = [
     items: [
       { label: "SEO", href: "/admin/seo", icon: Search },
       { label: "Analytique", href: "/admin/analytics", icon: BarChart3 },
+      { label: "Journal d’audit", href: "/admin/audit-log", icon: ScrollText },
       { label: "Paramètres", href: "/admin/settings", icon: Settings },
     ],
   },
 ];
 
 // Editors manage content but never accounts/roles — those two items are dropped.
-const EDITOR_HIDDEN_HREFS = new Set(["/admin/users", "/admin/roles"]);
+const EDITOR_HIDDEN_HREFS = new Set(["/admin/users", "/admin/roles", "/admin/approvals", "/admin/audit-log", "/admin/agent-performance"]);
 // Système (SEO/Analytics/Settings) stays Admin-only for now.
 const ADMIN_ONLY_SECTIONS = new Set(["Système"]);
 

@@ -1,8 +1,10 @@
-// Server Component — just renders a <script type="application/ld+json">. Kept as
-// its own tiny component so every page injects structured data the same way.
-export function JsonLd({ data }: { data: Record<string, unknown> }) {
+import { headers } from "next/headers";
+
+export async function JsonLd({ data }: { data: Record<string, unknown> }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <script
+      nonce={nonce}
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />

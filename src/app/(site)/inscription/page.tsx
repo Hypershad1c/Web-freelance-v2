@@ -5,12 +5,14 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { Turnstile } from "@/components/Turnstile";
 
 export default function InscriptionPage() {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,7 +22,7 @@ export default function InscriptionPage() {
     const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, turnstileToken }),
     });
 
     if (!res.ok) {
@@ -81,10 +83,11 @@ export default function InscriptionPage() {
           onChange={(e) => setForm({ ...form, password: e.target.value })}
           className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm"
         />
+        <Turnstile action="registration" onTokenChange={setTurnstileToken} />
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken)}
           className="w-full rounded-xl bg-domify-gold py-3 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark disabled:opacity-60"
         >
           {loading ? "Création..." : "Créer mon compte"}

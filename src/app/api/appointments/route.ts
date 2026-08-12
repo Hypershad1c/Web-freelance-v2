@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { getSiteSettings } from "@/lib/data/settings";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const AppointmentSchema = z.object({
   name: z.string().min(2),
@@ -15,6 +16,7 @@ const AppointmentSchema = z.object({
   propertyId: z.string().optional(),
   agentId: z.string().optional(),
   website: z.string().optional(), // honeypot
+  turnstileToken: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -35,9 +37,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true }, { status: 201 });
   }
 
+  const verification = await verifyTurnstile({ token: parsed.data.turnstileToken, remoteIp: ip, expectedAction: "appointment" });
+  if (!verification.ok) {
+    return NextResponse.json({ error: "La vérification de sécurité a échoué. Merci de réessayer." }, { status: 400 });
+  }
+
   const session = await auth();
-  const { date, website, ...rest } = parsed.data;
-  void website; // already checked above — destructured only to exclude it from `rest`
+  const { date, website, turnstileToken, ...rest } = parsed.data;
+  void website;
+  void turnstileToken;
 
   const appointment = await prisma.appointment.create({
     data: {

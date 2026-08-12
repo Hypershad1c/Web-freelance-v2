@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { Mail, Phone, MapPin, CheckCircle2 } from "lucide-react";
 import { HoneypotField } from "@/components/HoneypotField";
+import { Turnstile } from "@/components/Turnstile";
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [honeypot, setHoneypot] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", subject: "", body: "" });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -20,7 +22,7 @@ export default function ContactPage() {
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, website: honeypot }),
+        body: JSON.stringify({ ...form, website: honeypot, turnstileToken }),
       });
       if (!res.ok) throw new Error();
       setSent(true);
@@ -60,10 +62,11 @@ export default function ContactPage() {
               </div>
               <input placeholder="Sujet" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm" />
               <textarea required rows={5} placeholder="Votre message" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm" />
+              <Turnstile action="contact" onTokenChange={setTurnstileToken} />
               {error && <p className="text-sm text-red-600">{error}</p>}
               <button
                 type="submit"
-                disabled={sending}
+                disabled={sending || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken)}
                 className="rounded-xl bg-domify-gold px-6 py-3 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark disabled:opacity-60"
               >
                 {sending ? "Envoi..." : "Envoyer le message"}

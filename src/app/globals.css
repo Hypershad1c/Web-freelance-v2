@@ -144,3 +144,46 @@ textarea:focus-visible {
     letter-spacing: 0.16em;
   }
 }
+
+/* RTL support: preserve the same layout rhythm while moving directional affordances to the logical start/end. */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .rtl-mirror {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] .rtl-reverse {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .sell-rent-floating {
+  right: auto;
+  left: 1rem;
+}
+
+[dir="rtl"] .rtl-text-start {
+  text-align: right;
+}
+
+[dir="rtl"] .rtl-text-end {
+  text-align: left;
+}
+
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+}
+
+[dir="rtl"] input[type="checkbox"],
+[dir="rtl"] input[type="radio"] {
+  direction: ltr;
+}
+
+@media (min-width: 640px) {
+  [dir="rtl"] .sell-rent-floating {
+    left: 1.5rem;
+  }
+}

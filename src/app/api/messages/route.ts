@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { getSiteSettings } from "@/lib/data/settings";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const MessageSchema = z.object({
   name: z.string().min(2),
@@ -12,6 +13,7 @@ const MessageSchema = z.object({
   subject: z.string().optional(),
   body: z.string().min(5),
   website: z.string().optional(), // honeypot
+  turnstileToken: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -31,8 +33,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true }, { status: 201 });
   }
 
-  const { website, ...data } = parsed.data;
-  void website; // already checked above — destructured only to exclude it from `data`
+  const verification = await verifyTurnstile({ token: parsed.data.turnstileToken, remoteIp: ip, expectedAction: "contact" });
+  if (!verification.ok) {
+    return NextResponse.json({ error: "La vérification de sécurité a échoué. Merci de réessayer." }, { status: 400 });
+  }
+
+  const { website, turnstileToken, ...data } = parsed.data;
+  void website;
+  void turnstileToken;
   const session = await auth();
   const message = await prisma.message.create({
     data: { ...data, userId: session?.user?.id },

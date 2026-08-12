@@ -13,7 +13,7 @@ export function SellRentFloatingButton() {
   return (
     <Link
       href="/vendre-louer"
-      className="fixed bottom-24 right-4 z-50 flex items-center gap-2 rounded-full bg-domify-gold px-4 py-3 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark hover:shadow-luxury-hover sm:right-6"
+      className="sell-rent-floating fixed bottom-24 right-4 z-50 flex items-center gap-2 rounded-full bg-domify-gold px-4 py-3 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark hover:shadow-luxury-hover sm:right-6"
     >
       <Home size={16} />
       <span className="hidden sm:inline">Vendre / Louer mon bien</span>

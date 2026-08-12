@@ -7,6 +7,8 @@ import { Providers } from "@/components/Providers";
 import { CompareBar } from "@/components/properties/CompareBar";
 import { SellRentFloatingButton } from "@/components/SellRentFloatingButton";
 import { AnalyticsRecorder } from "@/components/AnalyticsRecorder";
+import { RuntimeLocaleTranslator } from "@/components/RuntimeLocaleTranslator";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { isRtl } from "@/i18n/locales";
@@ -36,9 +38,11 @@ export default async function RootLayout({
           <Suspense fallback={null}>
             <AnalyticsRecorder />
           </Suspense>
+          <RuntimeLocaleTranslator locale={locale} />
           <Header locale={locale} dict={dict} />
           <main>{children}</main>
           <Footer locale={locale} dict={dict} />
+          <CookieConsentBanner />
           <CompareBar />
           <SellRentFloatingButton />
         </Providers>

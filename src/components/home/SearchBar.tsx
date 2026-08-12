@@ -32,7 +32,7 @@ export function SearchBar() {
       <button className="group flex h-[52px] items-center justify-center gap-2 rounded-[0.9rem] bg-domify-primary px-4 text-sm font-semibold text-white shadow-[0_14px_24px_-14px_rgba(16,47,66,0.9)] transition-luxury hover:-translate-y-0.5 hover:bg-domify-primary-dark">
         <Search size={16} strokeWidth={2.4} />
         <span>Rechercher</span>
-        <ArrowRight size={15} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+        <ArrowRight size={15} className="rtl-mirror transition-transform duration-300 group-hover:translate-x-0.5" />
       </button>
     </div>
   );

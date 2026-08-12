@@ -35,6 +35,10 @@ model User {
   agent        Agent?
   messages     Message[]
   permissions  UserPermission[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  submittedProperties Property[] @relation("PropertySubmittedBy")
+  approvedProperties  Property[] @relation("PropertyApprovedBy")
 }
 
 model PasswordResetToken {
@@ -164,6 +168,13 @@ enum PropertyStatus {
   ARCHIVED
 }
 
+enum ApprovalStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model PropertyType {
   id         String     @id @default(cuid())
   name       String
@@ -188,6 +199,14 @@ model Property {
   description    String
   listingType    ListingType
   status         PropertyStatus @default(DRAFT)
+  approvalStatus ApprovalStatus @default(DRAFT)
+  submittedAt    DateTime?
+  submittedById  String?
+  submittedBy    User?          @relation("PropertySubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  approvedAt     DateTime?
+  approvedById   String?
+  approvedBy     User?          @relation("PropertyApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  rejectionReason String?
   price          Int
   surfaceArea    Float
   bedrooms       Int            @default(0)
@@ -266,6 +285,7 @@ model Lead {
   phone      String?
   message    String?
   status     LeadStatus @default(NEW)
+  position   Int        @default(0)
   source     String?
   userId     String?
   user       User?      @relation(fields: [userId], references: [id])
@@ -308,6 +328,44 @@ model Message {
   userId    String?
   user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+}
+
+enum NotificationType {
+  APPROVAL_REQUEST
+  APPROVAL_DECISION
+  LEAD_STATUS
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String?
+  href      String?
+  meta      Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, readAt, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String
+  summary    String?
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
 }
 
 // ---------- BLOG / CMS ----------
