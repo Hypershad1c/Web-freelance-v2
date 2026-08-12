@@ -1,18 +1,20 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600;1,700&display=swap");
 @import "tailwindcss";
 
 :root {
-  /* Domify brand palette */
-  --color-primary: #336699;
-  --color-primary-dark: #244a70;
-  --color-secondary: #6699cc;
-  --color-gold: #cd9c20;
-  --color-soft-gold: #f5cb5c;
-  --color-warm-white: #f2ecdd;
-  --color-dark: #1f2937;
+  /* Domify's editorial-luxury palette */
+  --color-primary: #1d536d;
+  --color-primary-dark: #102f42;
+  --color-secondary: #78a7b8;
+  --color-gold: #bd914a;
+  --color-soft-gold: #e8cb91;
+  --color-warm-white: #f6f2eb;
+  --color-sand: #e7dfd2;
+  --color-dark: #152d3b;
+  --color-muted: #60717a;
   --color-white: #ffffff;
 
-  --background: var(--color-white);
+  --background: #fcfbf8;
   --foreground: var(--color-dark);
 }
 
@@ -23,32 +25,122 @@
   --color-domify-gold: var(--color-gold);
   --color-domify-soft-gold: var(--color-soft-gold);
   --color-domify-warm-white: var(--color-warm-white);
+  --color-domify-sand: var(--color-sand);
   --color-domify-dark: var(--color-dark);
+  --color-domify-muted: var(--color-muted);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-display: "Playfair Display", serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  border-color: color-mix(in srgb, var(--color-dark) 10%, transparent);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
+  min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, .font-display {
+::selection {
+  background: var(--color-soft-gold);
+  color: var(--color-primary-dark);
+}
+
+h1,
+h2,
+h3,
+.font-display {
   font-family: var(--font-display);
+  letter-spacing: -0.025em;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  outline-offset: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-gold);
 }
 
 .transition-luxury {
-  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease,
+    box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease;
 }
 
 .shadow-luxury {
-  box-shadow: 0 8px 30px -8px rgba(31, 41, 55, 0.18);
+  box-shadow: 0 16px 38px -20px rgba(16, 47, 66, 0.3);
 }
 
 .shadow-luxury-hover:hover {
-  box-shadow: 0 20px 40px -12px rgba(31, 41, 55, 0.28);
+  box-shadow: 0 28px 55px -24px rgba(16, 47, 66, 0.38);
+}
+
+.luxury-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.luxury-surface {
+  border: 1px solid rgba(21, 45, 59, 0.08);
+  background: rgba(255, 255, 255, 0.93);
+  box-shadow: 0 18px 48px -30px rgba(16, 47, 66, 0.34);
+}
+
+.domify-select {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid rgba(21, 45, 59, 0.11);
+  border-radius: 0.9rem;
+  padding: 0 1rem;
+  color: var(--color-dark);
+  background: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.domify-select::placeholder {
+  color: color-mix(in srgb, var(--color-muted) 82%, transparent);
+}
+
+.domify-select:hover {
+  border-color: rgba(29, 83, 109, 0.28);
+}
+
+.domify-select:focus {
+  border-color: var(--color-secondary);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(120, 167, 184, 0.15);
+}
+
+@media (max-width: 640px) {
+  .luxury-eyebrow {
+    letter-spacing: 0.16em;
+  }
 }

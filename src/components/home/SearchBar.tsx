@@ -1,10 +1,10 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 
 export function SearchBar() {
   return (
-    <div className="grid grid-cols-1 gap-3 rounded-2xl bg-white p-4 shadow-luxury sm:grid-cols-2 lg:grid-cols-5 lg:items-end lg:gap-4 lg:p-5">
+    <div className="luxury-surface grid grid-cols-1 gap-3 rounded-[1.45rem] p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-[1.05fr_1.05fr_0.92fr_0.92fr_0.9fr] lg:items-end lg:gap-3 lg:p-4">
       <Field label="Localisation">
         <select className="domify-select">
           <option>Toutes les villes</option>
@@ -29,23 +29,11 @@ export function SearchBar() {
       <Field label="Référence">
         <input className="domify-select" placeholder="Référence" />
       </Field>
-      <button className="flex h-[46px] items-center justify-center gap-2 rounded-xl bg-domify-primary text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-primary-dark">
-        <Search size={16} /> Rechercher
+      <button className="group flex h-[52px] items-center justify-center gap-2 rounded-[0.9rem] bg-domify-primary px-4 text-sm font-semibold text-white shadow-[0_14px_24px_-14px_rgba(16,47,66,0.9)] transition-luxury hover:-translate-y-0.5 hover:bg-domify-primary-dark">
+        <Search size={16} strokeWidth={2.4} />
+        <span>Rechercher</span>
+        <ArrowRight size={15} className="transition-transform duration-300 group-hover:translate-x-0.5" />
       </button>
-
-      <style>{`
-        .domify-select {
-          width: 100%;
-          height: 46px;
-          border-radius: 0.75rem;
-          border: 1px solid rgba(31,41,55,0.12);
-          padding: 0 0.9rem;
-          font-size: 0.875rem;
-          color: #1F2937;
-          background: #fff;
-        }
-        .domify-select:focus { outline: 2px solid #6699CC; }
-      `}</style>
     </div>
   );
 }
@@ -53,7 +41,7 @@ export function SearchBar() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block text-left">
-      <span className="mb-1.5 block text-xs font-medium text-domify-dark/60">{label}</span>
+      <span className="mb-2 block text-[0.66rem] font-bold uppercase tracking-[0.13em] text-domify-dark/55">{label}</span>
       {children}
     </label>
   );

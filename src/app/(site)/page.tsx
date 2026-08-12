@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ShieldCheck, Users, Sparkles, TrendingUp, Quote } from "lucide-react";
+import { ArrowUpRight, Quote, ShieldCheck, Sparkles, TrendingUp, Users } from "lucide-react";
 import { SearchBar } from "@/components/home/SearchBar";
 import { PropertyCard } from "@/components/home/PropertyCard";
 import { getFeaturedProperties } from "@/lib/data/properties";
@@ -78,131 +78,173 @@ export default async function HomePage() {
   return (
     <>
       <JsonLd data={organizationJsonLd} />
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="relative h-[520px] w-full sm:h-[600px]">
+
+      <section className="relative isolate overflow-hidden bg-domify-primary-dark">
+        <div className="relative min-h-[590px] sm:min-h-[660px] lg:min-h-[720px]">
           <MotionDiv
             className="absolute inset-0"
-            initial={{ scale: 1.08, opacity: 0.7 }}
+            initial={{ scale: 1.07, opacity: 0.72 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1.1, ease: [0.25, 0.8, 0.25, 1] }}
+            transition={{ duration: 1.15, ease: [0.25, 0.8, 0.25, 1] }}
           >
             <Image
-              src="https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=1920&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1613977257363-707ba9348227?q=85&w=2160&auto=format&fit=crop"
               alt="Villa moderne au Maroc"
               fill
               priority
-              className="object-cover"
+              className="object-cover object-center"
             />
           </MotionDiv>
-          <div className="absolute inset-0 bg-gradient-to-r from-domify-dark/80 via-domify-dark/50 to-transparent" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(16,47,66,0.96)_0%,rgba(16,47,66,0.8)_42%,rgba(16,47,66,0.26)_76%,rgba(16,47,66,0.12)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(16,47,66,0.05)_38%,rgba(16,47,66,0.72)_100%)]" />
+          <div className="pointer-events-none absolute -right-24 top-12 h-80 w-80 rounded-full border border-white/15 sm:right-[5%]" />
+          <div className="pointer-events-none absolute right-[8%] top-28 h-52 w-52 rounded-full border border-domify-soft-gold/25" />
 
-          {/* Anchored to the bottom with reserved padding so the overlapping
-              search bar below never collides with the headline/subtitle */}
-          <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-4 pb-24 sm:px-6 sm:pb-28 lg:px-8">
+          <div className="relative mx-auto flex min-h-[590px] max-w-7xl flex-col justify-end px-4 pb-36 pt-20 sm:min-h-[660px] sm:px-6 sm:pb-40 lg:min-h-[720px] lg:px-8 lg:pb-44">
             <MotionDiv
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.15, ease: [0.25, 0.8, 0.25, 1] }}
+              transition={{ duration: 0.65, delay: 0.12, ease: [0.25, 0.8, 0.25, 1] }}
+              className="max-w-3xl"
             >
-              <h1 className="max-w-xl font-display text-4xl font-bold leading-tight text-white sm:text-5xl">
-                {dict.home.heroTitle1} <span className="text-domify-soft-gold">{dict.home.heroTitleHighlight}</span> {dict.home.heroTitle2}
+              <p className="luxury-eyebrow mb-5 flex items-center gap-3 text-domify-soft-gold">
+                <span className="h-px w-9 bg-domify-soft-gold" />
+                Find Your Perfect Place
+              </p>
+              <h1 className="max-w-3xl font-display text-[2.65rem] font-semibold leading-[1.06] text-white sm:text-6xl lg:text-7xl">
+                {dict.home.heroTitle1} <span className="italic text-domify-soft-gold">{dict.home.heroTitleHighlight}</span> {dict.home.heroTitle2}
               </h1>
-              <p className="mt-4 max-w-md text-white/80">{dict.home.heroSubtitle}</p>
+              <p className="mt-6 max-w-xl text-base leading-7 text-white/76 sm:text-lg">{dict.home.heroSubtitle}</p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/proprietes"
+                  className="group inline-flex items-center gap-2 rounded-full bg-domify-gold px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_30px_-18px_rgba(189,145,74,0.95)] transition-luxury hover:-translate-y-0.5 hover:bg-domify-soft-gold hover:text-domify-primary-dark"
+                >
+                  {dict.home.seeAll}
+                  <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </Link>
+                <Link
+                  href="/estimation"
+                  className="inline-flex items-center rounded-full border border-white/35 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition-luxury hover:-translate-y-0.5 hover:border-white/65 hover:bg-white/12"
+                >
+                  {dict.home.valuationCta}
+                </Link>
+              </div>
             </MotionDiv>
           </div>
         </div>
 
-        {/* Responsive overlap: smaller pull-up on mobile, larger on desktop */}
         <MotionDiv
-          className="relative z-10 mx-auto -mt-10 max-w-6xl px-4 sm:-mt-14 sm:px-6 lg:px-8"
-          initial={{ opacity: 0, y: 20 }}
+          className="relative z-10 mx-auto -mt-20 max-w-7xl px-4 pb-5 sm:-mt-24 sm:px-6 lg:px-8"
+          initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35, ease: [0.25, 0.8, 0.25, 1] }}
+          transition={{ duration: 0.55, delay: 0.35, ease: [0.25, 0.8, 0.25, 1] }}
         >
           <SearchBar />
         </MotionDiv>
       </section>
 
-      {/* TRUST BADGES */}
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <StaggerReveal className="grid grid-cols-2 gap-8 lg:grid-cols-4">
-          {TRUST.map((t) => (
-            <MotionDiv key={t.title} variants={staggerItem} className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-domify-warm-white text-domify-gold">
-                <t.icon size={20} />
-              </span>
-              <div>
-                <p className="font-semibold text-domify-dark">{t.title}</p>
-                <p className="text-sm text-domify-dark/60">{t.desc}</p>
-              </div>
-            </MotionDiv>
-          ))}
-        </StaggerReveal>
+      <section className="border-y border-domify-dark/7 bg-domify-warm-white/72">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+          <StaggerReveal className="grid grid-cols-1 divide-y divide-domify-dark/10 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4" stagger={0.07}>
+            {TRUST.map((trust) => (
+              <MotionDiv key={trust.title} variants={staggerItem} className="group flex items-start gap-4 px-0 py-5 sm:px-5 sm:py-1 first:pl-0 last:pr-0">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-domify-gold shadow-[0_12px_24px_-18px_rgba(16,47,66,0.65)] transition-luxury group-hover:-translate-y-1 group-hover:bg-domify-primary group-hover:text-domify-soft-gold">
+                  <trust.icon size={19} strokeWidth={1.8} />
+                </span>
+                <div>
+                  <p className="font-semibold text-domify-dark">{trust.title}</p>
+                  <p className="mt-1 text-sm leading-5 text-domify-dark/58">{trust.desc}</p>
+                </div>
+              </MotionDiv>
+            ))}
+          </StaggerReveal>
+        </div>
       </section>
 
-      {/* FEATURED PROPERTIES */}
-      <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
-        <FadeIn className="mb-8 flex items-end justify-between">
-          <h2 className="font-display text-2xl font-bold text-domify-dark sm:text-3xl">{dict.home.featuredTitle}</h2>
-          <Link href="/proprietes" className="text-sm font-semibold text-domify-primary hover:text-domify-gold transition-luxury">
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+        <FadeIn className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="luxury-eyebrow text-domify-gold">Sélection Domify</p>
+            <h2 className="mt-3 font-display text-4xl font-semibold text-domify-dark sm:text-5xl">{dict.home.featuredTitle}</h2>
+          </div>
+          <Link href="/proprietes" className="group inline-flex items-center gap-2 text-sm font-semibold text-domify-primary transition-luxury hover:text-domify-gold">
             {dict.home.seeAll}
+            <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </FadeIn>
+
         {featuredProperties.length === 0 ? (
-          <p className="rounded-2xl bg-domify-warm-white p-10 text-center text-domify-dark/60">{dict.home.noFeatured}</p>
+          <FadeIn className="relative overflow-hidden rounded-[1.65rem] border border-domify-dark/8 bg-domify-warm-white p-8 sm:p-12">
+            <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full border border-domify-gold/25" />
+            <Sparkles className="relative text-domify-gold" size={28} strokeWidth={1.6} />
+            <p className="relative mt-5 max-w-lg font-display text-2xl font-semibold text-domify-dark">{dict.home.noFeatured}</p>
+            <Link href="/proprietes" className="relative mt-6 inline-flex items-center gap-2 text-sm font-semibold text-domify-primary transition-luxury hover:text-domify-gold">
+              {dict.home.seeAll} <ArrowUpRight size={15} />
+            </Link>
+          </FadeIn>
         ) : (
-          <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4" stagger={0.1}>
-            {featuredProperties.map((p) => (
-              <MotionDiv key={p.id} variants={staggerItem}>
-                <PropertyCard property={p} />
+          <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4" stagger={0.08}>
+            {featuredProperties.map((property) => (
+              <MotionDiv key={property.id} variants={staggerItem}>
+                <PropertyCard property={property} />
               </MotionDiv>
             ))}
           </StaggerReveal>
         )}
       </section>
 
-      {/* VALUATION CTA */}
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <FadeIn className="relative overflow-hidden rounded-3xl bg-domify-primary-dark px-8 py-14 text-white sm:px-14">
-          <div className="max-w-lg">
-            <h3 className="font-display text-2xl font-bold sm:text-3xl">{dict.home.valuationTitle}</h3>
-            <p className="mt-3 text-white/70">{dict.home.valuationSubtitle}</p>
+      <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8 lg:pb-28">
+        <FadeIn className="relative overflow-hidden rounded-[1.85rem] bg-domify-primary-dark px-7 py-12 text-white sm:px-12 sm:py-16 lg:px-16 lg:py-20">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full border border-white/14" />
+          <div className="pointer-events-none absolute bottom-[-11rem] right-[21%] h-72 w-72 rounded-full bg-domify-primary/55 blur-3xl" />
+          <div className="relative grid items-end gap-10 lg:grid-cols-[1fr_auto]">
+            <div className="max-w-2xl">
+              <p className="luxury-eyebrow text-domify-soft-gold">Votre projet, notre expertise</p>
+              <h3 className="mt-4 font-display text-4xl font-semibold leading-tight sm:text-5xl">{dict.home.valuationTitle}</h3>
+              <p className="mt-5 max-w-xl text-base leading-7 text-white/72 sm:text-lg">{dict.home.valuationSubtitle}</p>
+            </div>
             <Link
               href="/estimation"
-              className="mt-6 inline-block rounded-full bg-domify-gold px-6 py-3 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark"
+              className="group inline-flex w-fit items-center gap-2 rounded-full bg-domify-gold px-5 py-3 text-sm font-semibold text-white transition-luxury hover:-translate-y-0.5 hover:bg-domify-soft-gold hover:text-domify-primary-dark"
             >
               {dict.home.valuationCta}
+              <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           </div>
         </FadeIn>
       </section>
 
-      {/* WHY CHOOSE US */}
-      <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
-        <FadeIn>
-          <h2 className="mb-8 font-display text-2xl font-bold text-domify-dark sm:text-3xl">{dict.home.whyUsTitle}</h2>
-        </FadeIn>
-        <StaggerReveal className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {WHY_US.map((f) => (
-            <MotionDiv key={f.title} variants={staggerItem}>
-              <p className="font-display text-lg font-semibold text-domify-dark">{f.title}</p>
-              <p className="mt-1 text-sm text-domify-dark/60">{f.desc}</p>
-            </MotionDiv>
-          ))}
-        </StaggerReveal>
+      <section className="border-y border-domify-dark/7 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+          <FadeIn className="max-w-2xl">
+            <p className="luxury-eyebrow text-domify-gold">L&apos;expérience Domify</p>
+            <h2 className="mt-3 font-display text-4xl font-semibold text-domify-dark sm:text-5xl">{dict.home.whyUsTitle}</h2>
+          </FadeIn>
+          <StaggerReveal className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-[1.5rem] border border-domify-dark/8 bg-domify-dark/8 sm:grid-cols-2 lg:grid-cols-4" stagger={0.08}>
+            {WHY_US.map((feature, index) => (
+              <MotionDiv key={feature.title} variants={staggerItem} className="group min-h-56 bg-[#fcfbf8] p-7 transition-luxury hover:bg-domify-warm-white sm:p-8">
+                <span className="font-display text-4xl italic text-domify-gold/60">0{index + 1}</span>
+                <p className="mt-8 font-display text-xl font-semibold text-domify-dark">{feature.title}</p>
+                <p className="mt-3 text-sm leading-6 text-domify-dark/60">{feature.desc}</p>
+              </MotionDiv>
+            ))}
+          </StaggerReveal>
+        </div>
       </section>
 
-      {/* TESTIMONIALS */}
       {testimonials.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
-          <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {testimonials.map((t) => (
-              <MotionDiv key={t.id} variants={staggerItem} className="rounded-3xl bg-domify-warm-white p-8">
-                <Quote className="text-domify-gold" size={24} />
-                <p className="mt-4 font-display text-lg text-domify-dark">{t.quote}</p>
-                <p className="mt-4 text-sm font-semibold text-domify-primary">
-                  — {t.name}{t.city ? `, ${t.city}` : ""}
+        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+          <FadeIn className="mb-10">
+            <p className="luxury-eyebrow text-domify-gold">Ils nous font confiance</p>
+          </FadeIn>
+          <StaggerReveal className="grid grid-cols-1 gap-5 lg:grid-cols-3" stagger={0.08}>
+            {testimonials.map((testimonial) => (
+              <MotionDiv key={testimonial.id} variants={staggerItem} className="rounded-[1.5rem] border border-domify-dark/8 bg-white p-7 shadow-[0_18px_42px_-34px_rgba(16,47,66,0.5)] sm:p-8">
+                <Quote className="text-domify-gold" size={27} strokeWidth={1.6} />
+                <p className="mt-6 font-display text-xl leading-8 text-domify-dark">{testimonial.quote}</p>
+                <p className="mt-6 text-sm font-semibold tracking-wide text-domify-primary">
+                  {testimonial.name}{testimonial.city ? ` · ${testimonial.city}` : ""}
                 </p>
               </MotionDiv>
             ))}

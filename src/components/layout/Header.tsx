@@ -28,30 +28,30 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg">
+    <header className="sticky top-0 z-50 w-full border-b border-domify-dark/10 bg-[#fcfbf8]/85 backdrop-blur-xl">
+      <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="group flex items-center gap-2.5">
+          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-domify-gold/35 transition-luxury group-hover:ring-domify-gold">
             <Image src="/Logo.jpeg" alt="Domify" fill className="object-cover" />
           </span>
-          <span className="font-display text-xl font-semibold tracking-tight text-domify-dark">
+          <span className="font-display text-lg font-semibold tracking-[0.16em] text-domify-dark">
             DOMIFY
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-8 lg:flex">
+        <nav className="hidden items-center gap-7 lg:flex">
           {NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-domify-dark/80 transition-luxury hover:text-domify-primary"
+              className="relative py-2 text-sm font-medium text-domify-dark/75 transition-luxury after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-domify-gold after:transition-[width] after:duration-300 hover:text-domify-primary hover:after:w-full"
             >
               {item.label}
             </Link>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-4 lg:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           <LanguageSwitcher current={locale} />
           <button aria-label={dict.header.search} className="text-domify-dark/70 hover:text-domify-primary transition-luxury">
             <Search size={19} />
@@ -105,7 +105,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           ) : (
             <Link
               href="/connexion"
-              className="flex items-center gap-1.5 rounded-full border border-domify-primary/30 px-4 py-2 text-sm font-semibold text-domify-primary transition-luxury hover:bg-domify-primary hover:text-white"
+              className="flex items-center gap-1.5 rounded-full border border-domify-primary/20 bg-white/65 px-4 py-2 text-sm font-semibold text-domify-primary transition-luxury hover:-translate-y-0.5 hover:border-domify-primary hover:bg-domify-primary hover:text-white"
             >
               <User size={16} /> {dict.header.login}
             </Link>
@@ -113,15 +113,15 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
           <Link
             href="/vendre-louer"
-            className="rounded-full bg-domify-gold px-5 py-2.5 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark"
+            className="rounded-full bg-domify-gold px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_-14px_rgba(189,145,74,0.95)] transition-luxury hover:-translate-y-0.5 hover:bg-domify-soft-gold hover:text-domify-primary-dark"
           >
             {dict.header.sellMyHome}
           </Link>
         </div>
 
-        <div className="flex items-center gap-3 lg:hidden">
+        <div className="flex items-center gap-2.5 lg:hidden">
           <LanguageSwitcher current={locale} />
-          <button onClick={() => setOpen(!open)} aria-label="Menu">
+          <button onClick={() => setOpen(!open)} aria-label="Menu" className="flex h-10 w-10 items-center justify-center rounded-full border border-domify-dark/10 bg-white/70 text-domify-dark">
             {open ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -134,7 +134,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.25, 0.8, 0.25, 1] }}
-            className="overflow-hidden border-t border-black/5 bg-white lg:hidden"
+            className="overflow-hidden border-t border-domify-dark/10 bg-[#fcfbf8]/98 shadow-xl lg:hidden"
           >
             <div className="px-4 py-4">
           <nav className="flex flex-col gap-4">

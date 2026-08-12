@@ -23,104 +23,107 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
 
   return (
     <motion.div
-      whileHover={{ y: -6 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.25, ease: [0.25, 0.8, 0.25, 1] }}
+      whileHover={{ y: -7 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ duration: 0.28, ease: [0.25, 0.8, 0.25, 1] }}
+      className="h-full"
     >
       <Link
         href={`/proprietes/${property.id}`}
-        className="group block overflow-hidden rounded-2xl bg-white shadow-luxury transition-luxury shadow-luxury-hover"
+        className="group flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-domify-dark/8 bg-white shadow-[0_18px_38px_-28px_rgba(16,47,66,0.45)] transition-luxury hover:border-domify-gold/35 hover:shadow-[0_28px_48px_-28px_rgba(16,47,66,0.45)]"
       >
-      <div className="relative h-56 w-full overflow-hidden">
-        <Image
-          src={image}
-          alt={property.title}
-          fill
-          className="object-cover transition-luxury group-hover:scale-105"
-        />
-        <span className="absolute left-3 top-3 rounded-full bg-domify-gold px-3 py-1 text-xs font-semibold text-white shadow">
-          {property.listingType === "LOCATION" ? "À louer" : property.propertyType.name}
-        </span>
-        <div className="absolute right-3 top-3 flex gap-2">
-          <button
-            aria-label={comparing ? "Retirer de la comparaison" : "Ajouter à la comparaison"}
-            title={!comparing && maxReached ? "Maximum 4 biens à comparer" : undefined}
-            disabled={!comparing && maxReached}
-            onClick={(e) => {
-              e.preventDefault();
-              toggleCompare(property.id);
-            }}
-            className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-full transition-luxury disabled:opacity-40",
-              comparing ? "bg-domify-primary text-white" : "bg-white/90 text-domify-dark hover:bg-domify-primary hover:text-white"
-            )}
-          >
-            <Scale size={14} />
-          </button>
-          <button
-            aria-label="Ajouter aux favoris"
-            onClick={(e) => {
-              e.preventDefault();
-              toggleFavorite(property.id);
-            }}
-            className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-full transition-luxury",
-              favorited ? "bg-domify-gold text-white" : "bg-white/90 text-domify-dark hover:bg-domify-gold hover:text-white"
-            )}
-          >
-            <Heart size={15} fill={favorited ? "currentColor" : "none"} />
-          </button>
-        </div>
-      </div>
-      <div className="p-5">
-        <p className="text-xs font-medium uppercase tracking-wide text-domify-primary/70">{property.city.name}</p>
-        <h3 className="mt-1 font-display text-lg font-semibold text-domify-dark">{property.title}</h3>
-        <div className="mt-1 flex items-center justify-between">
-          <p className="text-lg font-bold text-domify-gold">
-            {formatMAD(property.price)}
-            {property.listingType === "LOCATION" && <span className="text-sm font-normal text-domify-dark/50"> /mois</span>}
-          </p>
-          <span className="flex items-center gap-1 text-xs text-domify-dark/40">
-            <Eye size={13} /> {property.viewsCount}
+        <div className="relative h-60 w-full overflow-hidden">
+          <Image
+            src={image}
+            alt={property.title}
+            fill
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-domify-primary-dark/45 via-transparent to-transparent opacity-85" />
+          <span className="absolute left-4 top-4 rounded-full bg-domify-gold px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.09em] text-white shadow-sm">
+            {property.listingType === "LOCATION" ? "À louer" : property.propertyType.name}
           </span>
-        </div>
-        <div className="mt-4 flex items-center gap-4 border-t border-black/5 pt-4 text-sm text-domify-dark/60">
-          <span className="flex items-center gap-1.5"><Bed size={15} /> {property.bedrooms}</span>
-          <span className="flex items-center gap-1.5"><Bath size={15} /> {property.bathrooms}</span>
-          <span className="flex items-center gap-1.5"><Square size={15} /> {property.surfaceArea} m²</span>
-        </div>
-
-        {contactPhone && (
-          <div className="mt-4 flex gap-2 border-t border-black/5 pt-4">
+          <div className="absolute right-4 top-4 flex gap-2">
             <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                window.open(
-                  whatsappLink(contactPhone, `Bonjour, je suis intéressé(e) par « ${property.title} » (${property.reference}) sur Domify.`),
-                  "_blank"
-                );
+              aria-label={comparing ? "Retirer de la comparaison" : "Ajouter à la comparaison"}
+              title={!comparing && maxReached ? "Maximum 4 biens à comparer" : undefined}
+              disabled={!comparing && maxReached}
+              onClick={(event) => {
+                event.preventDefault();
+                toggleCompare(property.id);
               }}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#25D366]/10 py-2 text-xs font-semibold text-[#128C4A] transition-luxury hover:bg-[#25D366] hover:text-white"
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-full border border-white/30 backdrop-blur-sm transition-luxury disabled:opacity-40",
+                comparing ? "border-domify-primary bg-domify-primary text-white" : "bg-white/90 text-domify-dark hover:-translate-y-0.5 hover:bg-domify-primary hover:text-white"
+              )}
             >
-              <WhatsAppIcon size={14} /> WhatsApp
+              <Scale size={14} />
             </button>
             <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                window.location.href = telLink(contactPhone);
+              aria-label="Ajouter aux favoris"
+              onClick={(event) => {
+                event.preventDefault();
+                toggleFavorite(property.id);
               }}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-domify-primary/10 py-2 text-xs font-semibold text-domify-primary transition-luxury hover:bg-domify-primary hover:text-white"
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-full border border-white/30 backdrop-blur-sm transition-luxury",
+                favorited ? "border-domify-gold bg-domify-gold text-white" : "bg-white/90 text-domify-dark hover:-translate-y-0.5 hover:bg-domify-gold hover:text-white"
+              )}
             >
-              <Phone size={13} /> Appeler
+              <Heart size={15} fill={favorited ? "currentColor" : "none"} />
             </button>
           </div>
-        )}
-      </div>
-    </Link>
+        </div>
+
+        <div className="flex flex-1 flex-col p-5 sm:p-6">
+          <p className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-domify-primary/70">{property.city.name}</p>
+          <h3 className="mt-2 line-clamp-2 font-display text-xl font-semibold leading-6 text-domify-dark transition-colors duration-300 group-hover:text-domify-primary">{property.title}</h3>
+          <div className="mt-4 flex items-end justify-between gap-3">
+            <p className="font-display text-[1.35rem] font-bold leading-none text-domify-gold">
+              {formatMAD(property.price)}
+              {property.listingType === "LOCATION" && <span className="ml-1 font-sans text-xs font-medium text-domify-dark/45">/mois</span>}
+            </p>
+            <span className="flex items-center gap-1 text-xs text-domify-dark/42">
+              <Eye size={13} /> {property.viewsCount}
+            </span>
+          </div>
+          <div className="mt-5 flex items-center gap-3 border-t border-domify-dark/8 pt-4 text-sm text-domify-dark/62">
+            <span className="flex items-center gap-1.5"><Bed size={15} className="text-domify-primary/72" /> {property.bedrooms}</span>
+            <span className="flex items-center gap-1.5"><Bath size={15} className="text-domify-primary/72" /> {property.bathrooms}</span>
+            <span className="flex items-center gap-1.5"><Square size={15} className="text-domify-primary/72" /> {property.surfaceArea} m²</span>
+          </div>
+
+          {contactPhone && (
+            <div className="mt-5 flex gap-2 border-t border-domify-dark/8 pt-4">
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  window.open(
+                    whatsappLink(contactPhone, `Bonjour, je suis intéressé(e) par « ${property.title} » (${property.reference}) sur Domify.`),
+                    "_blank"
+                  );
+                }}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#25D366]/10 py-2.5 text-xs font-semibold text-[#128C4A] transition-luxury hover:bg-[#25D366] hover:text-white"
+              >
+                <WhatsAppIcon size={14} /> WhatsApp
+              </button>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  window.location.href = telLink(contactPhone);
+                }}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-domify-primary/9 py-2.5 text-xs font-semibold text-domify-primary transition-luxury hover:bg-domify-primary hover:text-white"
+              >
+                <Phone size={13} /> Appeler
+              </button>
+            </div>
+          )}
+        </div>
+      </Link>
     </motion.div>
   );
 }
