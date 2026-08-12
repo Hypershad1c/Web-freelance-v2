@@ -1,24 +1,29 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
-export function FadeIn({
-  children,
-  delay = 0,
-  y = 16,
-  className,
-}: {
+const revealEase = [0.23, 1, 0.32, 1] as const;
+
+type RevealProps = {
   children: React.ReactNode;
   delay?: number;
   y?: number;
   className?: string;
-}) {
+};
+
+/**
+ * A restrained viewport reveal for editorial content. Motion is removed entirely
+ * when the visitor has requested reduced motion.
+ */
+export function FadeIn({ children, delay = 0, y = 18, className }: RevealProps) {
+  const reduceMotion = useReducedMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.5, delay, ease: [0.25, 0.8, 0.25, 1] }}
+      initial={reduceMotion ? false : { opacity: 0, y }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-72px" }}
+      transition={{ duration: 0.46, delay, ease: revealEase }}
       className={className}
     >
       {children}
@@ -26,24 +31,29 @@ export function FadeIn({
   );
 }
 
-// Wraps a list of children, staggering each direct child's entrance slightly.
+/**
+ * Wrap a collection to introduce its direct children with a short, controlled
+ * cascade rather than a visually noisy simultaneous reveal.
+ */
 export function StaggerReveal({
   children,
   className,
-  stagger = 0.08,
+  stagger = 0.06,
 }: {
   children: React.ReactNode;
   className?: string;
   stagger?: number;
 }) {
+  const reduceMotion = useReducedMotion();
+
   return (
     <motion.div
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-60px" }}
+      initial={reduceMotion ? false : "hidden"}
+      whileInView={reduceMotion ? undefined : "show"}
+      viewport={{ once: true, margin: "-72px" }}
       variants={{
         hidden: {},
-        show: { transition: { staggerChildren: stagger } },
+        show: { transition: { staggerChildren: stagger, delayChildren: 0.02 } },
       }}
       className={className}
     >
@@ -53,6 +63,6 @@ export function StaggerReveal({
 }
 
 export const staggerItem = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.8, 0.25, 1] as const } },
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.42, ease: revealEase } },
 };

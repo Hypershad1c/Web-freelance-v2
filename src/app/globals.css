@@ -16,6 +16,13 @@
 
   --background: #fcfbf8;
   --foreground: var(--color-dark);
+
+  /* Interaction system: short, deliberate, and shared across public and admin UI. */
+  --ease-snappy: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-emphasized: cubic-bezier(0.77, 0, 0.175, 1);
+  --motion-fast: 160ms;
+  --motion-base: 240ms;
+  --motion-slow: 420ms;
 }
 
 @theme inline {
@@ -40,11 +47,14 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
 }
 
 body {
   min-height: 100vh;
-  background: var(--background);
+  background:
+    radial-gradient(circle at 82% -12%, rgba(232, 203, 145, 0.12), transparent 24rem),
+    var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -86,8 +96,52 @@ textarea:focus-visible {
 }
 
 .transition-luxury {
-  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease,
-    box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease;
+  transition:
+    color var(--motion-base) var(--ease-snappy),
+    background-color var(--motion-base) var(--ease-snappy),
+    border-color var(--motion-base) var(--ease-snappy),
+    box-shadow var(--motion-base) var(--ease-snappy),
+    transform var(--motion-base) var(--ease-snappy),
+    opacity var(--motion-base) var(--ease-snappy);
+}
+
+.pressable {
+  transition: transform var(--motion-fast) var(--ease-snappy), box-shadow var(--motion-base) var(--ease-snappy),
+    background-color var(--motion-base) var(--ease-snappy), color var(--motion-base) var(--ease-snappy),
+    border-color var(--motion-base) var(--ease-snappy);
+}
+
+.pressable:active {
+  transform: scale(0.97);
+}
+
+.nav-link {
+  position: relative;
+  color: color-mix(in srgb, var(--color-dark) 76%, transparent);
+  transition: color var(--motion-base) var(--ease-snappy);
+}
+
+.nav-link::after {
+  position: absolute;
+  right: 0;
+  bottom: -0.15rem;
+  left: 0;
+  height: 1px;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: var(--color-gold);
+  content: "";
+  transition: transform var(--motion-base) var(--ease-snappy);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--color-primary);
+}
+
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  transform: scaleX(1);
 }
 
 .shadow-luxury {
@@ -110,6 +164,34 @@ textarea:focus-visible {
   border: 1px solid rgba(21, 45, 59, 0.08);
   background: rgba(255, 255, 255, 0.93);
   box-shadow: 0 18px 48px -30px rgba(16, 47, 66, 0.34);
+}
+
+.luxury-surface-strong {
+  border-color: rgba(232, 203, 145, 0.38);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 24px 58px -30px rgba(16, 47, 66, 0.48), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+.admin-panel {
+  border: 1px solid rgba(21, 45, 59, 0.07);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 46px -32px rgba(16, 47, 66, 0.32);
+}
+
+.admin-panel-interactive {
+  border: 1px solid rgba(21, 45, 59, 0.07);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 46px -32px rgba(16, 47, 66, 0.32);
+  transition:
+    transform var(--motion-base) var(--ease-snappy),
+    border-color var(--motion-base) var(--ease-snappy),
+    box-shadow var(--motion-base) var(--ease-snappy);
+}
+
+.admin-panel-interactive:hover {
+  transform: translateY(-3px);
+  border-color: rgba(189, 145, 74, 0.28);
+  box-shadow: 0 25px 48px -32px rgba(16, 47, 66, 0.42);
 }
 
 .domify-select {
@@ -142,6 +224,21 @@ textarea:focus-visible {
 @media (max-width: 640px) {
   .luxury-eyebrow {
     letter-spacing: 0.16em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
   }
 }
 

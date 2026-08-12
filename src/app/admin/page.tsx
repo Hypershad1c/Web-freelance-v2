@@ -38,32 +38,39 @@ async function StaffDashboard({ role }: { role: "ADMIN" | "EDITOR" }) {
   return (
     <>
       <AdminTopbar title={role === "ADMIN" ? "Tableau de bord" : "Tableau de bord — Éditeur"} />
-      <div className="p-6 lg:p-10">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="p-4 sm:p-6 lg:p-10">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
           {stats.map((s) => (
-            <div key={s.label} className="rounded-2xl bg-white p-6 shadow-luxury">
-              <s.icon className="text-domify-gold" size={22} />
-              <p className="mt-4 font-display text-3xl font-bold text-domify-dark">{s.value}</p>
-              <p className="text-sm text-domify-dark/60">{s.label}</p>
+            <div key={s.label} className="admin-panel-interactive relative overflow-hidden rounded-[1.35rem] p-5 sm:p-6">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-domify-warm-white text-domify-gold ring-1 ring-domify-gold/10">
+                <s.icon size={19} strokeWidth={1.9} />
+              </span>
+              <p className="mt-5 font-display text-3xl font-bold leading-none text-domify-dark">{s.value}</p>
+              <p className="mt-2 text-sm font-medium text-domify-dark/58">{s.label}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 rounded-2xl bg-white p-6 shadow-luxury">
-          <h2 className="font-display text-lg font-semibold text-domify-dark">Derniers leads</h2>
+        <div className="admin-panel mt-7 rounded-[1.5rem] p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-4 border-b border-domify-dark/7 pb-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-domify-gold">Activité récente</p>
+              <h2 className="mt-1 font-display text-lg font-semibold text-domify-dark">Derniers leads</h2>
+            </div>
+          </div>
           {recentLeads.length === 0 ? (
-            <p className="mt-4 text-sm text-domify-dark/50">Aucun lead pour le moment.</p>
+            <p className="mt-5 rounded-xl bg-domify-warm-white/70 px-4 py-4 text-sm text-domify-dark/55">Aucun lead pour le moment.</p>
           ) : (
             <div className="mt-4 divide-y divide-black/5">
               {recentLeads.map((lead) => (
-                <div key={lead.id} className="flex items-center justify-between py-3">
+                <div key={lead.id} className="flex items-center justify-between gap-4 py-4 first:pt-5">
                   <div>
                     <p className="text-sm font-medium text-domify-dark">{lead.name}</p>
                     <p className="text-xs text-domify-dark/50">
                       {lead.email} {lead.property ? `— ${lead.property.title}` : ""}
                     </p>
                   </div>
-                  <span className="rounded-full bg-domify-warm-white px-3 py-1 text-xs font-medium text-domify-dark/70">
+                  <span className="shrink-0 rounded-full border border-domify-dark/8 bg-domify-warm-white px-3 py-1 text-[11px] font-semibold text-domify-dark/70">
                     {lead.status}
                   </span>
                 </div>
@@ -127,20 +134,23 @@ async function AgentDashboard({ userId }: { userId: string }) {
   return (
     <>
       <AdminTopbar title={`Bonjour, ${agent.name.split(" ")[0]}`} />
-      <div className="p-6 lg:p-10">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="p-4 sm:p-6 lg:p-10">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="rounded-2xl bg-white p-6 shadow-luxury">
-              <s.icon className="text-domify-gold" size={22} />
-              <p className="mt-4 font-display text-3xl font-bold text-domify-dark">{s.value}</p>
-              <p className="text-sm text-domify-dark/60">{s.label}</p>
+            <div key={s.label} className="admin-panel-interactive relative overflow-hidden rounded-[1.35rem] p-5 sm:p-6">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-domify-warm-white text-domify-gold ring-1 ring-domify-gold/10">
+                <s.icon size={19} strokeWidth={1.9} />
+              </span>
+              <p className="mt-5 font-display text-3xl font-bold leading-none text-domify-dark">{s.value}</p>
+              <p className="mt-2 text-sm font-medium text-domify-dark/58">{s.label}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl bg-white p-6 shadow-luxury">
-            <h2 className="font-display text-lg font-semibold text-domify-dark">Mes prochains rendez-vous</h2>
+        <div className="mt-7 grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="admin-panel rounded-[1.5rem] p-5 sm:p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-domify-gold">À venir</p>
+            <h2 className="mt-1 font-display text-lg font-semibold text-domify-dark">Mes prochains rendez-vous</h2>
             {upcomingAppointments.length === 0 ? (
               <p className="mt-4 text-sm text-domify-dark/50">Aucun rendez-vous en attente.</p>
             ) : (
@@ -161,10 +171,11 @@ async function AgentDashboard({ userId }: { userId: string }) {
             </Link>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-luxury">
-            <h2 className="font-display text-lg font-semibold text-domify-dark">Mes derniers leads</h2>
+          <div className="admin-panel rounded-[1.5rem] p-5 sm:p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-domify-gold">À traiter</p>
+            <h2 className="mt-1 font-display text-lg font-semibold text-domify-dark">Mes derniers leads</h2>
             {recentLeads.length === 0 ? (
-              <p className="mt-4 text-sm text-domify-dark/50">Aucun lead pour le moment.</p>
+              <p className="mt-5 rounded-xl bg-domify-warm-white/70 px-4 py-4 text-sm text-domify-dark/55">Aucun lead pour le moment.</p>
             ) : (
               <div className="mt-4 divide-y divide-black/5">
                 {recentLeads.map((lead) => (

@@ -37,7 +37,7 @@ export async function Footer({ dict }: { locale: Locale; dict: Dictionary }) {
 
       <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.25fr_0.75fr_1fr_1fr] lg:gap-12 lg:px-8 lg:py-20">
         <div className="max-w-sm">
-          <Link href="/" className="group flex items-center gap-3">
+          <Link href="/" className="group pressable flex items-center gap-3 rounded-full">
             <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-domify-soft-gold/60 transition-luxury group-hover:ring-2">
               <Image src="/Logo.jpeg" alt="Domify" fill className="object-cover" />
             </span>
@@ -57,7 +57,7 @@ export async function Footer({ dict }: { locale: Locale; dict: Dictionary }) {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/5 transition-luxury hover:-translate-y-0.5 hover:border-domify-soft-gold hover:bg-domify-gold hover:text-white"
+                  className="pressable flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/5 hover:-translate-y-0.5 hover:border-domify-soft-gold hover:bg-domify-gold hover:text-white"
                 >
                   <Icon size={16} />
                 </a>
@@ -93,7 +93,7 @@ function FooterColumn({ title, links }: { title: string; links: Array<{ label: s
       <ul className="mt-5 space-y-3 text-sm">
         {links.map((link) => (
           <li key={link.label}>
-            <Link href={link.href} className="group inline-flex items-center text-white/68 transition-luxury hover:text-white">
+            <Link href={link.href} className="group pressable inline-flex items-center rounded-md text-white/68 hover:text-white">
               <span className="mr-0 inline-block h-px w-0 bg-domify-soft-gold transition-[width,margin] duration-300 group-hover:mr-2 group-hover:w-3" />
               {link.label}
             </Link>

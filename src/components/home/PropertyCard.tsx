@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Heart, Bed, Bath, Square, Phone, Scale, Eye } from "lucide-react";
 import { formatMAD, cn, whatsappLink, telLink } from "@/lib/utils";
 import { useFavorites } from "@/lib/favorites-context";
@@ -20,24 +20,25 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
   const comparing = isComparing(property.id);
   const image = property.media[0]?.url ?? FALLBACK_IMAGE;
   const contactPhone = property.agent?.phone ?? property.agency?.phone;
+  const reduceMotion = useReducedMotion();
 
   return (
     <motion.div
-      whileHover={{ y: -7 }}
-      whileTap={{ scale: 0.985 }}
-      transition={{ duration: 0.28, ease: [0.25, 0.8, 0.25, 1] }}
+      whileHover={reduceMotion ? undefined : { y: -6 }}
+      whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+      transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}
       className="h-full"
     >
       <Link
         href={`/proprietes/${property.id}`}
-        className="group flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-domify-dark/8 bg-white shadow-[0_18px_38px_-28px_rgba(16,47,66,0.45)] transition-luxury hover:border-domify-gold/35 hover:shadow-[0_28px_48px_-28px_rgba(16,47,66,0.45)]"
+        className="group flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-domify-dark/8 bg-white shadow-[0_18px_38px_-28px_rgba(16,47,66,0.45)] transition-luxury hover:border-domify-gold/35 hover:shadow-[0_28px_48px_-28px_rgba(16,47,66,0.45)] focus-visible:ring-2 focus-visible:ring-domify-gold"
       >
-        <div className="relative h-60 w-full overflow-hidden">
+        <div className="relative h-60 w-full overflow-hidden bg-domify-primary-dark">
           <Image
             src={image}
             alt={property.title}
             fill
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="object-cover transition-transform duration-700 [transition-timing-function:var(--ease-snappy)] group-hover:scale-[1.045]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-domify-primary-dark/45 via-transparent to-transparent opacity-85" />
           <span className="absolute left-4 top-4 rounded-full bg-domify-gold px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.09em] text-white shadow-sm">
@@ -53,7 +54,7 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
                 toggleCompare(property.id);
               }}
               className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-full border border-white/30 backdrop-blur-sm transition-luxury disabled:opacity-40",
+                "pressable flex h-9 w-9 items-center justify-center rounded-full border border-white/30 backdrop-blur-sm disabled:opacity-40",
                 comparing ? "border-domify-primary bg-domify-primary text-white" : "bg-white/90 text-domify-dark hover:-translate-y-0.5 hover:bg-domify-primary hover:text-white"
               )}
             >
@@ -66,7 +67,7 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
                 toggleFavorite(property.id);
               }}
               className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-full border border-white/30 backdrop-blur-sm transition-luxury",
+                "pressable flex h-9 w-9 items-center justify-center rounded-full border border-white/30 backdrop-blur-sm",
                 favorited ? "border-domify-gold bg-domify-gold text-white" : "bg-white/90 text-domify-dark hover:-translate-y-0.5 hover:bg-domify-gold hover:text-white"
               )}
             >
@@ -105,7 +106,7 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
                     "_blank"
                   );
                 }}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#25D366]/10 py-2.5 text-xs font-semibold text-[#128C4A] transition-luxury hover:bg-[#25D366] hover:text-white"
+                className="pressable flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#25D366]/10 py-2.5 text-xs font-semibold text-[#128C4A] hover:bg-[#25D366] hover:text-white"
               >
                 <WhatsAppIcon size={14} /> WhatsApp
               </button>
@@ -116,7 +117,7 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
                   event.stopPropagation();
                   window.location.href = telLink(contactPhone);
                 }}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-domify-primary/9 py-2.5 text-xs font-semibold text-domify-primary transition-luxury hover:bg-domify-primary hover:text-white"
+                className="pressable flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-domify-primary/9 py-2.5 text-xs font-semibold text-domify-primary hover:bg-domify-primary hover:text-white"
               >
                 <Phone size={13} /> Appeler
               </button>

@@ -1,7 +1,32 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
 
-// A plain re-export would work too, but naming it explicitly keeps call sites
-// readable (`<MotionDiv>` vs a bare `<motion.div>` inside a Server Component file).
-export const MotionDiv = motion.div;
+/**
+ * A safe client boundary for motion used from Server Components. It keeps the
+ * declarative Framer Motion API while removing nonessential animation when a
+ * visitor requests reduced motion.
+ */
+export function MotionDiv({
+  initial,
+  animate,
+  exit,
+  whileInView,
+  whileHover,
+  whileTap,
+  ...props
+}: HTMLMotionProps<"div">) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      {...props}
+      initial={reduceMotion ? false : initial}
+      animate={reduceMotion ? undefined : animate}
+      exit={reduceMotion ? undefined : exit}
+      whileInView={reduceMotion ? undefined : whileInView}
+      whileHover={reduceMotion ? undefined : whileHover}
+      whileTap={reduceMotion ? undefined : whileTap}
+    />
+  );
+}
