@@ -19,9 +19,10 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const { favoriteIds } = useFavorites();
 
   const NAV = [
-    { label: dict.nav.buy, href: "/proprietes?type=vente" },
-    { label: dict.nav.rent, href: "/proprietes?type=location" },
+    { label: dict.nav.buy, href: "/proprietes?listingType=VENTE" },
+    { label: dict.nav.rent, href: "/proprietes?listingType=LOCATION" },
     { label: dict.nav.map, href: "/carte" },
+    { label: dict.nav.neighborhoods, href: "/quartiers" },
     { label: dict.nav.agencies, href: "/agences" },
     { label: dict.nav.blog, href: "/blog" },
     { label: dict.nav.about, href: "/a-propos" },
@@ -40,7 +41,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex">
+        <nav className="hidden items-center gap-6 xl:flex">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -52,7 +53,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-3 xl:flex">
           <LanguageSwitcher current={locale} />
           <button aria-label={dict.header.search} className="pressable rounded-full p-1 text-domify-dark/70 hover:text-domify-primary">
             <Search size={19} />
@@ -128,7 +129,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2.5 lg:hidden">
+        <div className="flex items-center gap-2.5 xl:hidden">
           <LanguageSwitcher current={locale} />
           <button onClick={() => setOpen(!open)} aria-label="Menu" aria-expanded={open} className="pressable flex h-10 w-10 items-center justify-center rounded-full border border-domify-dark/10 bg-white/80 text-domify-dark shadow-[0_10px_18px_-16px_rgba(16,47,66,0.7)]">
             {open ? <X size={24} /> : <Menu size={24} />}
@@ -143,7 +144,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             animate={{ opacity: 1, y: 0 }}
             exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
             transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-            className="border-t border-domify-dark/10 bg-[#fcfbf8]/98 shadow-[0_18px_30px_-24px_rgba(16,47,66,0.5)] backdrop-blur-xl lg:hidden"
+            className="border-t border-domify-dark/10 bg-[#fcfbf8]/98 shadow-[0_18px_30px_-24px_rgba(16,47,66,0.5)] backdrop-blur-xl xl:hidden"
           >
             <div className="px-4 py-4">
           <nav className="flex flex-col gap-1">

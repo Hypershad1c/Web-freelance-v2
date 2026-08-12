@@ -24,8 +24,8 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
   });
 
   const contactName = property.agent?.name ?? property.agency?.name ?? "Domify";
-  const contactPhone = property.agent?.phone ?? property.agency?.phone ?? "+212 6 00 00 00 00";
-  const contactEmail = property.agent?.email ?? property.agency?.email ?? "contact@domify.ma";
+  const contactPhone = property.agent?.phone ?? property.agency?.phone;
+  const contactEmail = property.agent?.email ?? property.agency?.email;
   const contactPhoto = property.agent?.photo;
   const contactSubtitle = property.agent ? property.agency?.name ?? "Domify" : "Équipe Domify";
 
@@ -65,27 +65,31 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
         </div>
       </div>
 
-      <div className="mt-4 space-y-2 text-sm text-domify-dark/70">
-        <p className="flex items-center gap-2"><Phone size={14} /> {contactPhone}</p>
-        <p className="flex items-center gap-2"><Mail size={14} /> {contactEmail}</p>
-      </div>
+      {(contactPhone || contactEmail) && (
+        <div className="mt-4 space-y-2 text-sm text-domify-dark/70">
+          {contactPhone && <p className="flex items-center gap-2"><Phone size={14} /> {contactPhone}</p>}
+          {contactEmail && <p className="flex items-center gap-2"><Mail size={14} /> {contactEmail}</p>}
+        </div>
+      )}
 
-      <div className="mt-4 flex gap-2">
-        <a
-          href={whatsappLink(contactPhone, `Bonjour, je suis intéressé(e) par « ${property.title} » (${property.reference}) sur Domify.`)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#25D366]/10 py-2.5 text-sm font-semibold text-[#128C4A] transition-luxury hover:bg-[#25D366] hover:text-white"
-        >
-          <WhatsAppIcon size={15} /> WhatsApp
-        </a>
-        <a
-          href={telLink(contactPhone)}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-domify-primary/10 py-2.5 text-sm font-semibold text-domify-primary transition-luxury hover:bg-domify-primary hover:text-white"
-        >
-          <Phone size={14} /> Appeler
-        </a>
-      </div>
+      {contactPhone && (
+        <div className="mt-4 flex gap-2">
+          <a
+            href={whatsappLink(contactPhone, `Bonjour, je suis intéressé(e) par « ${property.title} » (${property.reference}) sur Domify.`)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pressable flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#25D366]/10 py-2.5 text-sm font-semibold text-[#128C4A] hover:bg-[#25D366] hover:text-white"
+          >
+            <WhatsAppIcon size={15} /> WhatsApp
+          </a>
+          <a
+            href={telLink(contactPhone)}
+            className="pressable flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-domify-primary/10 py-2.5 text-sm font-semibold text-domify-primary hover:bg-domify-primary hover:text-white"
+          >
+            <Phone size={14} /> Appeler
+          </a>
+        </div>
+      )}
 
       <button
         onClick={() => setShowBooking(true)}

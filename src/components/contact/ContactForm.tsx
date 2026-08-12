@@ -1,0 +1,110 @@
+"use client";
+
+import { useState } from "react";
+import { Mail, Phone, MapPin, CheckCircle2 } from "lucide-react";
+import { HoneypotField } from "@/components/HoneypotField";
+import { Turnstile } from "@/components/Turnstile";
+
+type ContactSettings = {
+  phone: string;
+  email: string;
+  address: string;
+};
+
+export function ContactForm({ settings }: { settings: ContactSettings }) {
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [honeypot, setHoneypot] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [form, setForm] = useState({ name: "", email: "", subject: "", body: "" });
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (honeypot) return;
+
+    setSending(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, website: honeypot, turnstileToken }),
+      });
+      if (!response.ok) throw new Error("Message request failed");
+      setSent(true);
+    } catch {
+      setError("Une erreur est survenue. Merci de réessayer.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
+      <div className="text-center">
+        <p className="luxury-eyebrow text-domify-gold">Une équipe à votre écoute</p>
+        <h1 className="mt-3 font-display text-4xl font-bold text-domify-dark sm:text-5xl">Contactez-nous</h1>
+        <p className="mt-3 text-domify-dark/60">Une question, un projet ? Notre équipe vous répond rapidement.</p>
+      </div>
+
+      <div className="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-[0.9fr_1.2fr]">
+        <div className="space-y-5 rounded-[1.5rem] bg-domify-warm-white/70 p-6 sm:p-8">
+          {settings.phone || settings.email || settings.address ? (
+            <>
+              {settings.phone && <ContactInfo icon={Phone} label="Téléphone" value={settings.phone} href={`tel:${settings.phone.replace(/\s/g, "")}`} />}
+              {settings.email && <ContactInfo icon={Mail} label="Email" value={settings.email} href={`mailto:${settings.email}`} />}
+              {settings.address && <ContactInfo icon={MapPin} label="Adresse" value={settings.address} />}
+            </>
+          ) : (
+            <div className="py-5">
+              <p className="font-display text-2xl font-semibold text-domify-dark">Parlons de votre projet</p>
+              <p className="mt-3 text-sm leading-6 text-domify-dark/60">Utilisez le formulaire pour nous indiquer vos critères. Notre équipe vous répondra rapidement.</p>
+            </div>
+          )}
+        </div>
+
+        <div className="admin-panel rounded-[1.5rem] p-6 sm:p-8">
+          {sent ? (
+            <div className="flex flex-col items-center py-10 text-center">
+              <CheckCircle2 className="text-domify-gold" size={38} />
+              <p className="mt-4 font-display text-xl font-semibold text-domify-dark">Message envoyé !</p>
+              <p className="mt-1 text-sm text-domify-dark/60">Nous vous répondrons dans les plus brefs délais.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <HoneypotField value={honeypot} onChange={setHoneypot} />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <input required placeholder="Nom complet" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="domify-select" />
+                <input required type="email" placeholder="Email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="domify-select" />
+              </div>
+              <input placeholder="Sujet" value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} className="domify-select" />
+              <textarea required rows={5} placeholder="Votre message" value={form.body} onChange={(event) => setForm({ ...form, body: event.target.value })} className="min-h-32 w-full rounded-[0.9rem] border border-domify-dark/11 bg-white px-4 py-3 text-sm text-domify-dark transition-luxury placeholder:text-domify-muted/70 focus:border-domify-secondary focus:outline-none focus:ring-4 focus:ring-domify-secondary/15" />
+              <Turnstile action="contact" onTokenChange={setTurnstileToken} />
+              {error && <p className="text-sm text-red-600">{error}</p>}
+              <button type="submit" disabled={sending || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken)} className="pressable inline-flex rounded-xl bg-domify-gold px-6 py-3 text-sm font-semibold text-white shadow-luxury hover:bg-domify-soft-gold hover:text-domify-dark disabled:opacity-60">
+                {sending ? "Envoi..." : "Envoyer le message"}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ContactInfo({ icon: Icon, label, value, href }: { icon: typeof Mail; label: string; value: string; href?: string }) {
+  const content = (
+    <>
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-domify-gold shadow-[0_10px_20px_-18px_rgba(16,47,66,0.55)]">
+        <Icon size={18} />
+      </span>
+      <span>
+        <span className="block text-sm font-semibold text-domify-dark">{label}</span>
+        <span className="mt-1 block text-sm leading-6 text-domify-dark/60">{value}</span>
+      </span>
+    </>
+  );
+
+  return href ? <a href={href} className="pressable flex items-start gap-3 rounded-xl p-2 hover:bg-white/75">{content}</a> : <div className="flex items-start gap-3 p-2">{content}</div>;
+}

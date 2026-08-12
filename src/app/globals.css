@@ -3,14 +3,14 @@
 
 :root {
   /* Domify's editorial-luxury palette */
-  --color-primary: #1d536d;
-  --color-primary-dark: #102f42;
-  --color-secondary: #78a7b8;
-  --color-gold: #bd914a;
-  --color-soft-gold: #e8cb91;
-  --color-warm-white: #f6f2eb;
+  --color-primary: #336699;
+  --color-primary-dark: #254f79;
+  --color-secondary: #6699cc;
+  --color-gold: #cd9c20;
+  --color-soft-gold: #f5cb5c;
+  --color-warm-white: #f2ecdd;
   --color-sand: #e7dfd2;
-  --color-dark: #152d3b;
+  --color-dark: #1f2937;
   --color-muted: #60717a;
   --color-white: #ffffff;
 

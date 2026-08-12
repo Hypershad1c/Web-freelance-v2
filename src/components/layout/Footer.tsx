@@ -20,6 +20,8 @@ export async function Footer({ dict }: { locale: Locale; dict: Dictionary }) {
     { label: dict.footer.sellOrRent, href: "/vendre-louer" },
     { label: dict.footer.estimate, href: "/estimation" },
     { label: dict.footer.mapSearch, href: "/carte" },
+    { label: dict.footer.neighborhoods, href: "/quartiers" },
+    { label: dict.footer.agents, href: "/agents" },
     { label: dict.footer.compare, href: "/comparer" },
     { label: dict.footer.mortgageCalculator, href: "/calculateur-credit" },
     { label: dict.footer.investmentCalculator, href: "/calculateur-investissement" },
@@ -70,11 +72,15 @@ export async function Footer({ dict }: { locale: Locale; dict: Dictionary }) {
 
         <div>
           <h4 className="luxury-eyebrow text-domify-soft-gold">{dict.footer.contact}</h4>
-          <ul className="mt-5 space-y-4 text-sm leading-6 text-white/68">
-            <li className="flex items-start gap-3"><Phone className="mt-1 shrink-0 text-domify-soft-gold" size={15} /> <span>{settings.contact_phone}</span></li>
-            <li className="flex items-start gap-3"><Mail className="mt-1 shrink-0 text-domify-soft-gold" size={15} /> <span>{settings.contact_email}</span></li>
-            <li className="flex items-start gap-3"><MapPin className="mt-1 shrink-0 text-domify-soft-gold" size={15} /> <span>{settings.contact_address}</span></li>
-          </ul>
+          {settings.contact_phone || settings.contact_email || settings.contact_address ? (
+            <ul className="mt-5 space-y-4 text-sm leading-6 text-white/68">
+              {settings.contact_phone && <li className="flex items-start gap-3"><Phone className="mt-1 shrink-0 text-domify-soft-gold" size={15} /> <span>{settings.contact_phone}</span></li>}
+              {settings.contact_email && <li className="flex items-start gap-3"><Mail className="mt-1 shrink-0 text-domify-soft-gold" size={15} /> <span>{settings.contact_email}</span></li>}
+              {settings.contact_address && <li className="flex items-start gap-3"><MapPin className="mt-1 shrink-0 text-domify-soft-gold" size={15} /> <span>{settings.contact_address}</span></li>}
+            </ul>
+          ) : (
+            <p className="mt-5 max-w-xs text-sm leading-6 text-white/62">Utilisez le formulaire Domify pour nous parler de votre projet immobilier.</p>
+          )}
         </div>
       </div>
 

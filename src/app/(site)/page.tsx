@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { ArrowUpRight, Quote, ShieldCheck, Sparkles, TrendingUp, Users } from "lucide-react";
 import { SearchBar } from "@/components/home/SearchBar";
 import { PropertyCard } from "@/components/home/PropertyCard";
-import { getFeaturedProperties } from "@/lib/data/properties";
+import { getFeaturedProperties, getCitiesWithCounts, getPropertyTypes } from "@/lib/data/properties";
 import { getSeoOverride } from "@/lib/data/seo";
 import { getSiteSettings } from "@/lib/data/settings";
 import { JsonLd } from "@/components/JsonLd";
@@ -14,6 +14,8 @@ import { Prisma } from "@prisma/client";
 import { prisma, isPrismaReady } from "@/lib/prisma";
 import { FadeIn, StaggerReveal, staggerItem } from "@/components/motion/FadeIn";
 import { MotionDiv } from "@/components/motion/MotionPrimitives";
+
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoOverride("/");
@@ -29,8 +31,12 @@ export default async function HomePage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
 
-  const featuredProperties = await getFeaturedProperties(4);
-  const settings = await getSiteSettings();
+  const [featuredProperties, settings, cities, propertyTypes] = await Promise.all([
+    getFeaturedProperties(4),
+    getSiteSettings(),
+    getCitiesWithCounts(),
+    getPropertyTypes(),
+  ]);
   let testimonials: Array<{ id: string; name: string; quote: string; city?: string | null }> = [];
 
   if (await isPrismaReady()) {
@@ -140,7 +146,10 @@ export default async function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.35, ease: [0.25, 0.8, 0.25, 1] }}
         >
-          <SearchBar />
+          <SearchBar
+            cities={cities.map((city) => ({ slug: city.slug, name: city.name }))}
+            propertyTypes={propertyTypes.map((propertyType) => ({ slug: propertyType.slug, name: propertyType.name }))}
+          />
         </MotionDiv>
       </section>
 

@@ -10,15 +10,34 @@ const propertyCardInclude = {
   media: { orderBy: { order: "asc" as const } },
 };
 
+const publishedPropertyCount = { properties: { where: { status: "PUBLISHED" as const } } };
+
 export async function getCities() {
   return prisma.city.findMany({
-    include: { _count: { select: { properties: { where: { status: "PUBLISHED" } } } } },
+    include: { _count: { select: publishedPropertyCount } },
     orderBy: { name: "asc" },
   });
 }
 
 export async function getCityBySlug(slug: string) {
   return prisma.city.findUnique({ where: { slug } });
+}
+
+export async function getNeighborhoods() {
+  return prisma.neighborhood.findMany({
+    include: {
+      city: true,
+      _count: { select: publishedPropertyCount },
+    },
+    orderBy: [{ city: { name: "asc" } }, { name: "asc" }],
+  });
+}
+
+export async function getNeighborhoodBySlug(slug: string) {
+  return prisma.neighborhood.findUnique({
+    where: { slug },
+    include: { city: true },
+  });
 }
 
 export async function getAgencies() {
@@ -35,6 +54,16 @@ export async function getAgencyBySlug(slug: string) {
       agents: true,
       properties: { where: { status: "PUBLISHED" }, include: propertyCardInclude, orderBy: { createdAt: "desc" } },
     },
+  });
+}
+
+export async function getAgents() {
+  return prisma.agent.findMany({
+    include: {
+      agency: true,
+      _count: { select: publishedPropertyCount },
+    },
+    orderBy: { name: "asc" },
   });
 }
 

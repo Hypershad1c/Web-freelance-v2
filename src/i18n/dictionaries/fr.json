@@ -4,6 +4,8 @@
     "rent": "Louer",
     "map": "Carte",
     "agencies": "Agences",
+    "neighborhoods": "Quartiers",
+    "agents": "Conseillers",
     "blog": "Blog",
     "about": "À propos",
     "contact": "Contact"
@@ -26,6 +28,8 @@
     "sellOrRent": "Vendre ou louer mon bien",
     "estimate": "Estimer mon bien",
     "mapSearch": "Recherche sur la carte",
+    "neighborhoods": "Explorer les quartiers",
+    "agents": "Nos conseillers",
     "compare": "Comparer des biens",
     "mortgageCalculator": "Calculateur de crédit",
     "investmentCalculator": "Calculateur d'investissement",

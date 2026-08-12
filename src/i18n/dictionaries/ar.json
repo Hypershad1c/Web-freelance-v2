@@ -4,6 +4,8 @@
     "rent": "كراء",
     "map": "الخريطة",
     "agencies": "الوكالات",
+    "neighborhoods": "الأحياء",
+    "agents": "المستشارون",
     "blog": "المدونة",
     "about": "من نحن",
     "contact": "اتصل بنا"
@@ -26,6 +28,8 @@
     "sellOrRent": "بيع أو كراء عقاري",
     "estimate": "قيّم عقاري",
     "mapSearch": "البحث على الخريطة",
+    "neighborhoods": "اكتشف الأحياء",
+    "agents": "مستشارونا",
     "compare": "مقارنة العقارات",
     "mortgageCalculator": "حاسبة القرض العقاري",
     "investmentCalculator": "حاسبة الاستثمار",

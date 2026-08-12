@@ -1,40 +1,66 @@
 "use client";
 
 import { ArrowRight, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 
-export function SearchBar() {
+type SearchValues = {
+  city: string;
+  propertyType: string;
+  priceMax: string;
+  reference: string;
+};
+
+type SearchOption = { slug: string; name: string };
+
+export function SearchBar({ cities, propertyTypes }: { cities: SearchOption[]; propertyTypes: SearchOption[] }) {
+  const router = useRouter();
+  const { register, handleSubmit } = useForm<SearchValues>({
+    defaultValues: { city: "", propertyType: "", priceMax: "", reference: "" },
+  });
+
+  function submitSearch(values: SearchValues) {
+    const query = new URLSearchParams();
+    if (values.city) query.set("city", values.city);
+    if (values.propertyType) query.set("propertyType", values.propertyType);
+    if (values.priceMax && Number(values.priceMax) > 0) query.set("priceMax", values.priceMax);
+    if (values.reference.trim()) query.set("reference", values.reference.trim());
+
+    const suffix = query.toString();
+    router.push(suffix ? `/proprietes?${suffix}` : "/proprietes");
+  }
+
   return (
-    <div className="luxury-surface luxury-surface-strong grid grid-cols-1 gap-3 rounded-[1.65rem] p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-[1.05fr_1.05fr_0.92fr_0.92fr_0.9fr] lg:items-end lg:gap-3 lg:p-4">
+    <form onSubmit={handleSubmit(submitSearch)} className="luxury-surface luxury-surface-strong grid grid-cols-1 gap-3 rounded-[1.65rem] p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-[1.05fr_1.05fr_0.92fr_0.92fr_0.9fr] lg:items-end lg:gap-3 lg:p-4">
       <Field label="Localisation">
-        <select className="domify-select">
-          <option>Toutes les villes</option>
-          <option>Casablanca</option>
-          <option>Rabat</option>
-          <option>Marrakech</option>
-          <option>Tanger</option>
+        <select {...register("city")} className="domify-select" aria-label="Ville">
+          <option value="">Toutes les villes</option>
+          {cities.map((city) => (
+            <option key={city.slug} value={city.slug}>{city.name}</option>
+          ))}
         </select>
       </Field>
       <Field label="Type de bien">
-        <select className="domify-select">
-          <option>Tous les types</option>
-          <option>Appartement</option>
-          <option>Villa</option>
-          <option>Duplex</option>
-          <option>Terrain</option>
+        <select {...register("propertyType")} className="domify-select" aria-label="Type de bien">
+          <option value="">Tous les types</option>
+          {propertyTypes.map((propertyType) => (
+            <option key={propertyType.slug} value={propertyType.slug}>{propertyType.name}</option>
+          ))}
         </select>
       </Field>
-      <Field label="Prix max">
-        <input className="domify-select" placeholder="Prix max" />
+      <Field label="Prix maximum">
+        <input {...register("priceMax")} type="number" min="0" inputMode="numeric" className="domify-select" placeholder="Ex. 2 500 000" aria-label="Prix maximum" />
       </Field>
       <Field label="Référence">
-        <input className="domify-select" placeholder="Référence" />
+        <input {...register("reference")} className="domify-select" placeholder="Ex. DOM-101" aria-label="Référence du bien" />
       </Field>
-      <button type="button" className="group pressable flex h-[52px] items-center justify-center gap-2 rounded-[0.95rem] bg-domify-primary px-4 text-sm font-semibold text-white shadow-[0_14px_24px_-14px_rgba(16,47,66,0.9)] hover:-translate-y-0.5 hover:bg-domify-primary-dark hover:shadow-[0_19px_30px_-16px_rgba(16,47,66,0.9)]">
+      <Button type="submit" size="lg" className="group h-[52px] w-full rounded-[0.95rem] hover:-translate-y-0.5 hover:shadow-[0_19px_30px_-16px_rgba(16,47,66,0.9)]">
         <Search size={16} strokeWidth={2.4} />
         <span>Rechercher</span>
         <ArrowRight size={15} className="rtl-mirror transition-transform duration-300 group-hover:translate-x-0.5" />
-      </button>
-    </div>
+      </Button>
+    </form>
   );
 }
 

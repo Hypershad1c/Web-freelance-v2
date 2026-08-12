@@ -10,7 +10,7 @@ export function PropertyFiltersForm({
 }: {
   cities: CityOption[];
   propertyTypes: TypeOption[];
-  current: { city?: string; listingType?: string; propertyType?: string; sort?: string };
+  current: { city?: string; listingType?: string; propertyType?: string; priceMax?: string; reference?: string; sort?: string };
 }) {
   return (
     <form method="get" className="sticky top-24 space-y-6 rounded-[1.35rem] border border-domify-dark/8 bg-[#fcfbf8] p-5 shadow-[0_18px_38px_-30px_rgba(16,47,66,0.35)] sm:p-6">
@@ -67,6 +67,14 @@ export function PropertyFiltersForm({
             <option key={propertyType.slug} value={propertyType.slug}>{propertyType.name}</option>
           ))}
         </select>
+      </FilterField>
+
+      <FilterField label="Prix maximum (MAD)">
+        <input name="priceMax" type="number" min="0" inputMode="numeric" defaultValue={current.priceMax ?? ""} className="domify-select" placeholder="Ex. 2 500 000" />
+      </FilterField>
+
+      <FilterField label="Référence">
+        <input name="reference" defaultValue={current.reference ?? ""} className="domify-select" placeholder="Ex. DOM-101" />
       </FilterField>
 
       <FilterField label="Trier par">

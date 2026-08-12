@@ -7,6 +7,8 @@ import { PropertyCard } from "@/components/home/PropertyCard";
 import { StaggerReveal, staggerItem } from "@/components/motion/FadeIn";
 import { MotionDiv } from "@/components/motion/MotionPrimitives";
 
+export const revalidate = 300;
+
 const DEFAULT_METADATA: Metadata = {
   title: "Propriétés à vendre et à louer | Domify",
   description: "Parcourez notre sélection de villas, appartements, duplex et riads d'exception partout au Maroc.",
@@ -22,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-type SearchParams = { city?: string; listingType?: string; propertyType?: string; sort?: string };
+type SearchParams = { city?: string; listingType?: string; propertyType?: string; priceMax?: string; reference?: string; sort?: string };
 
 export default async function PropertiesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
@@ -31,6 +33,8 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
     city: params.city || undefined,
     listingType: params.listingType === "VENTE" || params.listingType === "LOCATION" ? params.listingType : undefined,
     propertyType: params.propertyType || undefined,
+    priceMax: Number(params.priceMax) > 0 ? Number(params.priceMax) : undefined,
+    reference: params.reference?.trim() || undefined,
     sort: params.sort === "price-asc" || params.sort === "price-desc" ? params.sort : "recent",
   };
 

@@ -37,9 +37,11 @@ export async function getFeaturedProperties(take = 4) {
 
 export type PropertyFilters = {
   city?: string; // city slug
+  neighborhood?: string; // neighborhood slug
   listingType?: "VENTE" | "LOCATION";
   propertyType?: string; // property type slug
   priceMax?: number;
+  reference?: string;
   sort?: "recent" | "price-asc" | "price-desc";
 };
 
@@ -47,9 +49,11 @@ export async function getProperties(filters: PropertyFilters = {}) {
   const where: Prisma.PropertyWhereInput = {
     status: "PUBLISHED",
     ...(filters.city ? { city: { slug: filters.city } } : {}),
+    ...(filters.neighborhood ? { neighborhood: { slug: filters.neighborhood } } : {}),
     ...(filters.listingType ? { listingType: filters.listingType } : {}),
     ...(filters.propertyType ? { propertyType: { slug: filters.propertyType } } : {}),
-    ...(filters.priceMax ? { price: { lte: filters.priceMax } } : {}),
+    ...(typeof filters.priceMax === "number" && filters.priceMax > 0 ? { price: { lte: filters.priceMax } } : {}),
+    ...(filters.reference ? { reference: { contains: filters.reference, mode: "insensitive" } } : {}),
   };
 
   const orderBy: Prisma.PropertyOrderByWithRelationInput =
@@ -93,12 +97,26 @@ export async function getSimilarProperties(property: PropertyWithRelations, take
 }
 
 export async function getCitiesWithCounts() {
-  return prisma.city.findMany({
-    include: { _count: { select: { properties: { where: { status: "PUBLISHED" } } } } },
-    orderBy: { name: "asc" },
-  });
+  if (!(await isPrismaReady())) return [];
+
+  try {
+    return await prisma.city.findMany({
+      include: { _count: { select: { properties: { where: { status: "PUBLISHED" } } } } },
+      orderBy: { name: "asc" },
+    });
+  } catch (error) {
+    if ((error as Prisma.PrismaClientKnownRequestError)?.code === "P2021") return [];
+    throw error;
+  }
 }
 
 export async function getPropertyTypes() {
-  return prisma.propertyType.findMany({ orderBy: { name: "asc" } });
+  if (!(await isPrismaReady())) return [];
+
+  try {
+    return await prisma.propertyType.findMany({ orderBy: { name: "asc" } });
+  } catch (error) {
+    if ((error as Prisma.PrismaClientKnownRequestError)?.code === "P2021") return [];
+    throw error;
+  }
 }
