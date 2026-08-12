@@ -25,6 +25,14 @@ function buildCsp(nonce: string) {
   ].join("; ");
 }
 
+function requestOrigin(request: NextRequest) {
+  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const host = forwardedHost || request.headers.get("host") || request.nextUrl.host;
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const protocol = forwardedProto || request.nextUrl.protocol.replace(":", "");
+  return `${protocol}://${host}`;
+}
+
 function withSecurityHeaders(request: NextRequest, response: NextResponse, nonce: string) {
   response.headers.set("Content-Security-Policy", buildCsp(nonce));
   response.headers.set("x-nonce", nonce);
@@ -39,7 +47,7 @@ export default auth((request) => {
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
   const role = request.auth?.user?.role;
   if (isAdminRoute && (!request.auth || (role !== "ADMIN" && role !== "EDITOR" && role !== "AGENT"))) {
-    const signInUrl = new URL("/connexion", request.nextUrl.origin);
+    const signInUrl = new URL("/connexion", requestOrigin(request));
     signInUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
     return withSecurityHeaders(request, NextResponse.redirect(signInUrl), nonce);
   }

@@ -6,6 +6,7 @@ import type { NextAuthConfig } from "next-auth";
 // and is only ever imported from Node-runtime code (API routes, server components,
 // server actions).
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   pages: {
     signIn: "/connexion",
   },
