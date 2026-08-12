@@ -9,8 +9,8 @@ export async function Footer({ dict }: { locale: Locale; dict: Dictionary }) {
   const settings = await getSiteSettings();
 
   const navLinks = [
-    { label: dict.nav.buy, href: "/proprietes?type=vente" },
-    { label: dict.nav.rent, href: "/proprietes?type=location" },
+    { label: dict.nav.buy, href: "/proprietes?listingType=VENTE" },
+    { label: dict.nav.rent, href: "/proprietes?listingType=LOCATION" },
     { label: dict.nav.agencies, href: "/agences" },
     { label: dict.nav.blog, href: "/blog" },
     { label: dict.nav.contact, href: "/contact" },
