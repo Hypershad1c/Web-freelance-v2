@@ -22,7 +22,9 @@ export async function isPrismaReady() {
   try {
     const result = await prisma.$queryRaw<{ exists: boolean }[]>`
       SELECT EXISTS (
-        SELECT 1 FROM information_schema.tables WHERE table_name = 'site_setting'
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = current_schema() AND table_name = 'SiteSetting'
       ) as exists
     `;
     const ready = Array.isArray(result) && result[0]?.exists === true;
