@@ -1,0 +1,12 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { BellPlus, LoaderCircle } from "lucide-react";
+import { createCrmSavedSearch } from "@/lib/actions/crm-operations";
+
+type Option = { id: string; name: string };
+export function SavedSearchForm({ cities, propertyTypes }: { cities: Option[]; propertyTypes: Option[] }) {
+  const [pending, startTransition] = useTransition(); const [message, setMessage] = useState<string | null>(null);
+  function submit(data: FormData) { setMessage(null); startTransition(async () => { try { await createCrmSavedSearch(data); setMessage("Alerte enregistrée. Vous serez informé des nouveaux biens correspondants."); (document.getElementById("saved-search-form") as HTMLFormElement | null)?.reset(); } catch (error) { setMessage(error instanceof Error ? error.message : "Impossible d’enregistrer l’alerte."); } }); }
+  return <form id="saved-search-form" action={submit} className="mt-4 grid gap-3 sm:grid-cols-2"><input name="name" required className="domify-select sm:col-span-2" placeholder="Ex. Appartement familial à Casablanca"/><select name="listingType" className="domify-select"><option value="">Achat ou location</option><option value="VENTE">Acheter</option><option value="LOCATION">Louer</option></select><select name="channel" defaultValue="EMAIL" className="domify-select"><option value="EMAIL">Email</option><option value="WHATSAPP">WhatsApp</option><option value="IN_APP">Dans mon espace</option></select><select name="cityId" className="domify-select"><option value="">Toutes les villes</option>{cities.map((city)=><option key={city.id} value={city.id}>{city.name}</option>)}</select><select name="propertyTypeId" className="domify-select"><option value="">Tous les types</option>{propertyTypes.map((item)=><option key={item.id} value={item.id}>{item.name}</option>)}</select><input name="minPrice" type="number" min="0" className="domify-select" placeholder="Prix minimum (MAD)"/><input name="maxPrice" type="number" min="0" className="domify-select" placeholder="Prix maximum (MAD)"/><input name="bedrooms" type="number" min="0" className="domify-select" placeholder="Chambres minimum"/>{message&&<p className="sm:col-span-2 text-sm text-domify-primary">{message}</p>}<button disabled={pending} className="pressable inline-flex items-center justify-center gap-2 rounded-xl bg-domify-gold px-4 py-3 text-sm font-semibold text-white sm:col-span-2">{pending?<LoaderCircle size={15} className="animate-spin"/>:<BellPlus size={15}/>}Créer mon alerte</button></form>;
+}

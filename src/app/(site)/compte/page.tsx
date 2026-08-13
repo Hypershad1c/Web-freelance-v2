@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Heart, Inbox, CalendarClock, Shield } from "lucide-react";
+import { Heart, Inbox, CalendarClock, Shield, BellRing } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { SavedSearchForm } from "@/components/account/SavedSearchForm";
 
 const LEAD_STATUS_LABELS: Record<string, string> = {
   NEW: "Nouveau",
@@ -23,7 +24,7 @@ export default async function AccountPage() {
   const session = await auth();
   if (!session?.user) redirect("/connexion?callbackUrl=/compte");
 
-  const [favoritesCount, leads, appointments] = await Promise.all([
+  const [favoritesCount, leads, appointments, savedSearches, cities, propertyTypes] = await Promise.all([
     prisma.favorite.count({ where: { userId: session.user.id } }),
     prisma.lead.findMany({
       where: { userId: session.user.id },
@@ -35,6 +36,9 @@ export default async function AccountPage() {
       include: { property: { select: { title: true, id: true } }, agent: { select: { name: true } } },
       orderBy: { date: "asc" },
     }),
+    prisma.crmSavedSearch.findMany({ where: { userId: session.user.id }, include: { city: { select: { name: true } }, propertyType: { select: { name: true } } }, orderBy: { createdAt: "desc" } }),
+    prisma.city.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    prisma.propertyType.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
   ]);
 
   return (
@@ -75,6 +79,8 @@ export default async function AccountPage() {
           </div>
         </div>
       </div>
+
+      <section className="mt-10 rounded-2xl bg-white p-6 shadow-luxury"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-domify-warm-white text-domify-gold"><BellRing size={18}/></span><div><h2 className="font-display text-xl font-semibold text-domify-dark">Mes alertes de recherche</h2><p className="mt-1 text-sm text-domify-dark/55">Recevez les nouveaux biens correspondant à vos critères.</p></div></div><SavedSearchForm cities={cities} propertyTypes={propertyTypes}/>{savedSearches.length>0&&<div className="mt-5 space-y-2">{savedSearches.map((search)=><div key={search.id} className="rounded-xl bg-domify-warm-white px-4 py-3 text-sm text-domify-dark"><b>{search.name}</b><p className="mt-1 text-xs text-domify-dark/55">{search.city?.name||"Toutes villes"} · {search.propertyType?.name||"Tous types"} · {search.channel}</p></div>)}</div>}</section>
 
       <div className="mt-10">
         <h2 className="mb-4 font-display text-xl font-semibold text-domify-dark">Mes visites</h2>

@@ -28,6 +28,7 @@ import {
   Menu,
   X,
   Handshake,
+  SlidersHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -72,6 +73,7 @@ const STAFF_SECTIONS: NavSection[] = [
     title: "Activité",
     items: [
       { label: "CRM", href: "/admin/crm", icon: Handshake },
+      { label: "Opérations CRM", href: "/admin/crm/operations", icon: SlidersHorizontal },
       { label: "Rendez-vous", href: "/admin/appointments", icon: CalendarClock },
       { label: "Leads", href: "/admin/leads", icon: Inbox },
       { label: "Validations", href: "/admin/approvals", icon: ClipboardCheck },

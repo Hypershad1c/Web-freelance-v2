@@ -97,6 +97,9 @@ export async function getCrmContactById(id: string, access: CrmAccess) {
       leads: { include: { property: { select: { id: true, title: true, reference: true } } }, orderBy: { createdAt: "desc" } },
       appointments: { include: { property: { select: { id: true, title: true } }, agent: { select: { name: true } } }, orderBy: { date: "desc" } },
       messages: { orderBy: { createdAt: "desc" } },
+      communications: { include: { owner: { select: { name: true, email: true } }, deal: { select: { id: true, title: true } } }, orderBy: { createdAt: "desc" }, take: 50 },
+      documents: { include: { deal: { select: { id: true, title: true } }, property: { select: { id: true, title: true } } }, orderBy: { createdAt: "desc" }, take: 50 },
+      sellerCases: { include: { property: { select: { id: true, title: true } } }, orderBy: { updatedAt: "desc" } },
       activities: {
         include: {
           actor: { select: { name: true, email: true } },
