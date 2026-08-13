@@ -28,9 +28,13 @@ export async function POST(request: Request) {
 
   // Always return success regardless of whether the account exists — this
   // deliberately avoids leaking which emails have accounts (user enumeration).
-  if (!user || !user.password) {
+  if (!user) {
     return NextResponse.json({ ok: true });
   }
+
+  // A Google-only account may not yet have a credentials password. Sending a
+  // reset link is safe because the recipient must prove control of the mailbox
+  // before a password can be established.
 
   // Clear any previous outstanding tokens for this user before issuing a new one.
   await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });
