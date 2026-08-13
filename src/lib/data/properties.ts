@@ -24,12 +24,44 @@ export async function getFeaturedProperties(take = 4) {
     return await prisma.property.findMany({
       where: { status: "PUBLISHED", featured: true },
       include: publishedInclude,
-      orderBy: { createdAt: "desc" },
+      // Updating the editorial flag brings the listing to the front of the homepage.
+      orderBy: { updatedAt: "desc" },
       take,
     });
   } catch (error) {
     if ((error as Prisma.PrismaClientKnownRequestError)?.code === "P2021") {
       return [];
+    }
+    throw error;
+  }
+}
+
+// The homepage is editorially led: listings selected in the admin always appear
+// first. When fewer than the requested number are selected, recent published
+// listings complete the grid so the public homepage never looks empty while
+// inventory exists. Draft, archived, sold, and under-offer properties remain
+// excluded from both parts of the query.
+export async function getHomepageProperties(take = 4) {
+  const featured = await getFeaturedProperties(take);
+  if (featured.length >= take || !(await isPrismaReady())) {
+    return featured;
+  }
+
+  try {
+    const fallback = await prisma.property.findMany({
+      where: {
+        status: "PUBLISHED",
+        id: { notIn: featured.map((property) => property.id) },
+      },
+      include: publishedInclude,
+      orderBy: { updatedAt: "desc" },
+      take: take - featured.length,
+    });
+
+    return [...featured, ...fallback];
+  } catch (error) {
+    if ((error as Prisma.PrismaClientKnownRequestError)?.code === "P2021") {
+      return featured;
     }
     throw error;
   }

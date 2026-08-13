@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowUpRight, Quote, ShieldCheck, Sparkles, TrendingUp, Users } from "lucide-react";
+import { ArrowUpRight, Check, Compass, Quote, ShieldCheck, Sparkles, TrendingUp, Users } from "lucide-react";
 import { SearchBar } from "@/components/home/SearchBar";
 import { PropertyCard } from "@/components/home/PropertyCard";
-import { getFeaturedProperties, getCitiesWithCounts, getPropertyTypes } from "@/lib/data/properties";
+import { getHomepageProperties, getCitiesWithCounts, getPropertyTypes } from "@/lib/data/properties";
 import { getSeoOverride } from "@/lib/data/seo";
 import { getSiteSettings } from "@/lib/data/settings";
 import { JsonLd } from "@/components/JsonLd";
@@ -32,7 +32,7 @@ export default async function HomePage() {
   const dict = getDictionary(locale);
 
   const [featuredProperties, settings, cities, propertyTypes] = await Promise.all([
-    getFeaturedProperties(4),
+    getHomepageProperties(4),
     getSiteSettings(),
     getCitiesWithCounts(),
     getPropertyTypes(),
@@ -106,7 +106,7 @@ export default async function HomePage() {
           <div className="pointer-events-none absolute -right-24 top-12 h-80 w-80 rounded-full border border-white/15 sm:right-[5%]" />
           <div className="pointer-events-none absolute right-[8%] top-28 h-52 w-52 rounded-full border border-domify-soft-gold/25" />
 
-          <div className="relative mx-auto flex min-h-[590px] max-w-7xl flex-col justify-end px-4 pb-36 pt-20 sm:min-h-[660px] sm:px-6 sm:pb-40 lg:min-h-[720px] lg:px-8 lg:pb-44">
+          <div className="relative mx-auto grid min-h-[590px] max-w-7xl items-end gap-10 px-4 pb-36 pt-20 sm:min-h-[660px] sm:px-6 sm:pb-40 lg:min-h-[720px] lg:grid-cols-[minmax(0,1fr)_18rem] lg:px-8 lg:pb-44">
             <MotionDiv
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
@@ -137,11 +137,30 @@ export default async function HomePage() {
                 </Link>
               </div>
             </MotionDiv>
+
+            <MotionDiv
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.65, delay: 0.28, ease: [0.25, 0.8, 0.25, 1] }}
+              className="hidden justify-self-end self-end lg:block"
+            >
+              <div className="w-72 rounded-[1.5rem] border border-white/20 bg-white/[0.09] p-5 shadow-[0_24px_60px_-34px_rgba(0,0,0,0.85)] backdrop-blur-md">
+                <div className="flex items-center justify-between">
+                  <span className="luxury-eyebrow text-domify-soft-gold">{dict.home.heroPanelEyebrow}</span>
+                  <Compass size={18} className="text-domify-soft-gold" strokeWidth={1.6} />
+                </div>
+                <p className="mt-5 font-display text-2xl font-semibold leading-8 text-white">{dict.home.heroPanelTitle}</p>
+                <div className="mt-6 space-y-3 border-t border-white/15 pt-5 text-sm text-white/76">
+                  <p className="flex items-center gap-2"><Check size={15} className="text-domify-soft-gold" /> {dict.home.heroPanelPoint1}</p>
+                  <p className="flex items-center gap-2"><Check size={15} className="text-domify-soft-gold" /> {dict.home.heroPanelPoint2}</p>
+                </div>
+              </div>
+            </MotionDiv>
           </div>
         </div>
 
         <MotionDiv
-          className="relative z-10 mx-auto -mt-20 max-w-7xl px-4 pb-5 sm:-mt-24 sm:px-6 lg:px-8"
+          className="relative z-10 mx-auto -mt-20 max-w-7xl px-4 pb-7 sm:-mt-24 sm:px-6 lg:px-8"
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.35, ease: [0.25, 0.8, 0.25, 1] }}
@@ -171,36 +190,41 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-        <FadeIn className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="luxury-eyebrow text-domify-gold">Sélection Domify</p>
-            <h2 className="mt-3 font-display text-4xl font-semibold text-domify-dark sm:text-5xl">{dict.home.featuredTitle}</h2>
-          </div>
-          <Link href="/proprietes" className="group inline-flex items-center gap-2 text-sm font-semibold text-domify-primary transition-luxury hover:text-domify-gold">
-            {dict.home.seeAll}
-            <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
-        </FadeIn>
-
-        {featuredProperties.length === 0 ? (
-          <FadeIn className="relative overflow-hidden rounded-[1.65rem] border border-domify-dark/8 bg-domify-warm-white p-8 sm:p-12">
-            <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full border border-domify-gold/25" />
-            <Sparkles className="relative text-domify-gold" size={28} strokeWidth={1.6} />
-            <p className="relative mt-5 max-w-lg font-display text-2xl font-semibold text-domify-dark">{dict.home.noFeatured}</p>
-            <Link href="/proprietes" className="relative mt-6 inline-flex items-center gap-2 text-sm font-semibold text-domify-primary transition-luxury hover:text-domify-gold">
-              {dict.home.seeAll} <ArrowUpRight size={15} />
+      <section className="relative overflow-hidden bg-[#fcfbf8] py-20 sm:py-24 lg:py-28">
+        <div className="pointer-events-none absolute -left-32 top-8 h-72 w-72 rounded-full border border-domify-gold/20" />
+        <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-domify-warm-white/90 blur-3xl" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <FadeIn className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl">
+              <p className="luxury-eyebrow flex items-center gap-3 text-domify-gold"><span className="h-px w-8 bg-domify-gold/70" /> {dict.home.featuredEyebrow}</p>
+              <h2 className="mt-4 font-display text-4xl font-semibold text-domify-dark sm:text-5xl">{dict.home.featuredTitle}</h2>
+              <p className="mt-4 text-base leading-7 text-domify-dark/62">{dict.home.featuredSubtitle}</p>
+            </div>
+            <Link href="/proprietes" className="group inline-flex w-fit items-center gap-2 rounded-full border border-domify-primary/15 bg-white px-4 py-2.5 text-sm font-semibold text-domify-primary shadow-[0_16px_30px_-25px_rgba(16,47,66,0.75)] transition-luxury hover:-translate-y-0.5 hover:border-domify-gold/50 hover:text-domify-gold">
+              {dict.home.seeAll}
+              <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           </FadeIn>
-        ) : (
-          <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4" stagger={0.08}>
-            {featuredProperties.map((property) => (
-              <MotionDiv key={property.id} variants={staggerItem}>
-                <PropertyCard property={property} />
-              </MotionDiv>
-            ))}
-          </StaggerReveal>
-        )}
+
+          {featuredProperties.length === 0 ? (
+            <FadeIn className="relative overflow-hidden rounded-[1.65rem] border border-domify-dark/8 bg-domify-warm-white p-8 sm:p-12">
+              <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full border border-domify-gold/25" />
+              <Sparkles className="relative text-domify-gold" size={28} strokeWidth={1.6} />
+              <p className="relative mt-5 max-w-lg font-display text-2xl font-semibold text-domify-dark">{dict.home.noFeatured}</p>
+              <Link href="/proprietes" className="relative mt-6 inline-flex items-center gap-2 text-sm font-semibold text-domify-primary transition-luxury hover:text-domify-gold">
+                {dict.home.seeAll} <ArrowUpRight size={15} />
+              </Link>
+            </FadeIn>
+          ) : (
+            <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4" stagger={0.08}>
+              {featuredProperties.map((property) => (
+                <MotionDiv key={property.id} variants={staggerItem}>
+                  <PropertyCard property={property} />
+                </MotionDiv>
+              ))}
+            </StaggerReveal>
+          )}
+        </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8 lg:pb-28">

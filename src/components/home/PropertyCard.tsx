@@ -41,9 +41,16 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
             className="object-cover transition-transform duration-700 [transition-timing-function:var(--ease-snappy)] group-hover:scale-[1.045]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-domify-primary-dark/45 via-transparent to-transparent opacity-85" />
-          <span className="absolute left-4 top-4 rounded-full bg-domify-gold px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.09em] text-white shadow-sm">
-            {property.listingType === "LOCATION" ? "À louer" : property.propertyType.name}
-          </span>
+          <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
+            <span className="rounded-full bg-domify-gold px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.09em] text-white shadow-sm">
+              {property.listingType === "LOCATION" ? "À louer" : property.propertyType.name}
+            </span>
+            {property.featured && (
+              <span className="rounded-full border border-white/25 bg-domify-primary-dark/80 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-domify-soft-gold shadow-sm backdrop-blur-sm">
+                Sélection Domify
+              </span>
+            )}
+          </div>
           <div className="absolute right-4 top-4 flex gap-2">
             <button
               aria-label={comparing ? "Retirer de la comparaison" : "Ajouter à la comparaison"}
