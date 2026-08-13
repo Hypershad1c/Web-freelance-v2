@@ -5,6 +5,7 @@ import { Bed, Bath, Square, MapPin, Calendar, Hash, Check, Eye } from "lucide-re
 import { getPropertyById, getSimilarProperties, incrementPropertyViews } from "@/lib/data/properties";
 import { PropertyGallery } from "@/components/properties/PropertyGallery";
 import { ContactAgentCard } from "@/components/properties/ContactAgentCard";
+import { WhatsAppConciergeButton } from "@/components/properties/WhatsAppConciergeButton";
 import { PropertyActionButtons } from "@/components/properties/PropertyActionButtons";
 import { PropertyCard } from "@/components/home/PropertyCard";
 import { PropertyMapClient } from "@/components/map/PropertyMapClient";
@@ -114,6 +115,9 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                 <Eye size={13} /> {property.viewsCount} vue{property.viewsCount === 1 ? "" : "s"}
               </span>
             </div>
+          </div>
+          <div className="mt-5 lg:hidden">
+            <WhatsAppConciergeButton propertyId={property.id} placement="detail" variant="prominent" className="w-full" />
           </div>
 
           {/* Key facts */}

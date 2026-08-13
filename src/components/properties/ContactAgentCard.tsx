@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Phone, Mail, CalendarClock, X, Building2 } from "lucide-react";
 import Image from "next/image";
 import type { PropertyWithRelations } from "@/lib/data/properties";
-import { whatsappLink, telLink } from "@/lib/utils";
-import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
+import { telLink } from "@/lib/utils";
+import { WhatsAppConciergeButton } from "@/components/properties/WhatsAppConciergeButton";
 import { HoneypotField } from "@/components/HoneypotField";
 import { Turnstile } from "@/components/Turnstile";
 
@@ -72,24 +72,22 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
         </div>
       )}
 
-      {contactPhone && (
-        <div className="mt-4 flex gap-2">
-          <a
-            href={whatsappLink(contactPhone, `Bonjour, je suis intéressé(e) par « ${property.title} » (${property.reference}) sur Domify.`)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pressable flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#25D366]/10 py-2.5 text-sm font-semibold text-[#128C4A] hover:bg-[#25D366] hover:text-white"
-          >
-            <WhatsAppIcon size={15} /> WhatsApp
-          </a>
+      <div className="mt-4 flex gap-2">
+        <WhatsAppConciergeButton
+          propertyId={property.id}
+          placement="detail"
+          variant="prominent"
+          className={contactPhone ? "flex-1" : "w-full"}
+        />
+        {contactPhone && (
           <a
             href={telLink(contactPhone)}
             className="pressable flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-domify-primary/10 py-2.5 text-sm font-semibold text-domify-primary hover:bg-domify-primary hover:text-white"
           >
             <Phone size={14} /> Appeler
           </a>
-        </div>
-      )}
+        )}
+      </div>
 
       <button
         onClick={() => setShowBooking(true)}

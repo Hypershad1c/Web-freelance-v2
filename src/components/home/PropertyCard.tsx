@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Heart, Bed, Bath, Square, Phone, Scale, Eye } from "lucide-react";
-import { formatMAD, cn, whatsappLink, telLink } from "@/lib/utils";
+import { formatMAD, cn, telLink } from "@/lib/utils";
 import { useFavorites } from "@/lib/favorites-context";
 import { useCompare } from "@/lib/compare-context";
-import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
+import { WhatsAppConciergeButton } from "@/components/properties/WhatsAppConciergeButton";
 import type { PropertyWithRelations } from "@/lib/data/properties";
 
 const FALLBACK_IMAGE =
@@ -101,22 +101,13 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
             <span className="flex items-center gap-1.5"><Square size={15} className="text-domify-primary/72" /> {property.surfaceArea} m²</span>
           </div>
 
-          {contactPhone && (
-            <div className="mt-5 flex gap-2 border-t border-domify-dark/8 pt-4">
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  window.open(
-                    whatsappLink(contactPhone, `Bonjour, je suis intéressé(e) par « ${property.title} » (${property.reference}) sur Domify.`),
-                    "_blank"
-                  );
-                }}
-                className="pressable flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#25D366]/10 py-2.5 text-xs font-semibold text-[#128C4A] hover:bg-[#25D366] hover:text-white"
-              >
-                <WhatsAppIcon size={14} /> WhatsApp
-              </button>
+          <div className="mt-5 flex gap-2 border-t border-domify-dark/8 pt-4">
+            <WhatsAppConciergeButton
+              propertyId={property.id}
+              placement="card"
+              className={contactPhone ? "flex-1" : "w-full"}
+            />
+            {contactPhone && (
               <button
                 type="button"
                 onClick={(event) => {
@@ -128,8 +119,8 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
               >
                 <Phone size={13} /> Appeler
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </Link>
     </motion.div>
