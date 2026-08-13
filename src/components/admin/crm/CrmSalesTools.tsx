@@ -2,13 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FileUp, Handshake, LoaderCircle, MessageCircleMore, Store } from "lucide-react";
-import { addCrmDocument, createCrmOffer, createCrmSellerCase, logCrmCommunication, updateCrmOfferStatus } from "@/lib/actions/crm-operations";
+import { FileSignature, FileUp, Handshake, LoaderCircle, MessageCircleMore, Store } from "lucide-react";
+import { addCrmDocument, createCrmOffer, createCrmSellerCase, logCrmCommunication, sendCrmSignatureRequest, updateCrmOfferStatus } from "@/lib/actions/crm-operations";
 
 type Deal = { id: string; title: string };
 type Property = { id: string; title: string; reference: string };
 type SellerCase = { id: string; title: string };
 type Offer = { id: string; amount: number; status: string; property?: { title: string } | null; sellerCase?: { title: string } | null };
+type DocumentItem = { id: string; name: string; url: string };
 
 function useFormAction(action: (data: FormData) => Promise<void>) {
   const router = useRouter();
@@ -28,11 +29,12 @@ function useFormAction(action: (data: FormData) => Promise<void>) {
   return { pending, error, submit };
 }
 
-export function CrmSalesTools({ contactId, deals, properties, sellerCases, offers }: { contactId: string; deals: Deal[]; properties: Property[]; sellerCases: SellerCase[]; offers: Offer[] }) {
+export function CrmSalesTools({ contactId, deals, properties, sellerCases, offers, documents }: { contactId: string; deals: Deal[]; properties: Property[]; sellerCases: SellerCase[]; offers: Offer[]; documents: DocumentItem[] }) {
   const comm = useFormAction((data) => logCrmCommunication(contactId, data));
   const doc = useFormAction((data) => addCrmDocument(contactId, data));
   const seller = useFormAction((data) => createCrmSellerCase(contactId, data));
   const offer = useFormAction((data) => createCrmOffer(contactId, data));
+  const signature = useFormAction((data) => sendCrmSignatureRequest(contactId, data));
 
   return <section className="grid gap-5">
     <Tool title="Journal des échanges" icon={MessageCircleMore}>
@@ -60,8 +62,10 @@ export function CrmSalesTools({ contactId, deals, properties, sellerCases, offer
     </Tool>
 
     <Tool title="Coffre documentaire" icon={FileUp}>
-      <form action={doc.submit} className="grid gap-3"><input name="name" required className="domify-select" placeholder="Nom du document" /><input name="url" required type="url" className="domify-select" placeholder="URL sécurisée du document" /><select name="type" className="domify-select"><option value="IDENTITY">Identité</option><option value="MANDATE">Mandat</option><option value="TITLE_DEED">Titre de propriété</option><option value="FINANCING">Financement</option><option value="OFFER">Offre</option><option value="CONTRACT">Contrat</option><option value="OTHER">Autre</option></select><select name="dealId" className="domify-select"><option value="">Sans opportunité</option>{deals.map((deal) => <option key={deal.id} value={deal.id}>{deal.title}</option>)}</select><select name="propertyId" className="domify-select"><option value="">Sans bien</option>{properties.map((property) => <option key={property.id} value={property.id}>{property.reference} — {property.title}</option>)}</select><textarea name="notes" rows={2} className="rounded-xl border border-domify-dark/10 px-3 py-2 text-sm" placeholder="Note interne" />{doc.error && <p className="text-xs text-red-700">{doc.error}</p>}<Submit pending={doc.pending} label="Ajouter au coffre" /></form>
+      <form action={doc.submit} className="grid gap-3"><input name="name" required className="domify-select" placeholder="Nom du document" /><input name="url" type="url" className="domify-select" placeholder="URL sécurisée du document (facultative pour une demande)" /><div className="grid grid-cols-2 gap-3"><select name="visibility" className="domify-select"><option value="INTERNAL">Interne</option><option value="SELLER">Visible dans l’espace vendeur</option></select><select name="status" className="domify-select"><option value="UPLOADED">Téléversé</option><option value="REQUESTED">À demander au vendeur</option><option value="VERIFIED">Vérifié</option><option value="REJECTED">À corriger</option></select></div><select name="type" className="domify-select"><option value="IDENTITY">Identité</option><option value="MANDATE">Mandat</option><option value="TITLE_DEED">Titre de propriété</option><option value="FINANCING">Financement</option><option value="OFFER">Offre</option><option value="CONTRACT">Contrat</option><option value="OTHER">Autre</option></select><select name="dealId" className="domify-select"><option value="">Sans opportunité</option>{deals.map((deal) => <option key={deal.id} value={deal.id}>{deal.title}</option>)}</select><select name="propertyId" className="domify-select"><option value="">Sans bien</option>{properties.map((property) => <option key={property.id} value={property.id}>{property.reference} — {property.title}</option>)}</select><textarea name="notes" rows={2} className="rounded-xl border border-domify-dark/10 px-3 py-2 text-sm" placeholder="Note interne" />{doc.error && <p className="text-xs text-red-700">{doc.error}</p>}<Submit pending={doc.pending} label="Ajouter au coffre" /></form>
     </Tool>
+
+    <Tool title="Signature électronique" icon={FileSignature}>{documents.length === 0 ? <p className="rounded-xl bg-domify-warm-white p-3 text-xs leading-5 text-domify-dark/60">Ajoutez d’abord un document téléversé et accessible via HTTPS dans le coffre.</p> : <form action={signature.submit} className="grid gap-3"><input name="title" required className="domify-select" placeholder="Ex. Mandat de vente Domify"/><select name="documentId" required className="domify-select"><option value="">Document à signer</option>{documents.filter((document) => /^https:\/\//.test(document.url) && document.url !== "https://domify.ma/document-request").map((document) => <option key={document.id} value={document.id}>{document.name}</option>)}</select><select name="sellerCaseId" className="domify-select"><option value="">Sans dossier vendeur</option>{sellerCases.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select><select name="offerId" className="domify-select"><option value="">Sans offre associée</option>{offers.map((item) => <option key={item.id} value={item.id}>{new Intl.NumberFormat("fr-MA").format(item.amount)} MAD</option>)}</select><input name="expiresAt" type="date" className="domify-select" aria-label="Date d’expiration"/>{signature.error && <p className="text-xs text-red-700">{signature.error}</p>}<Submit pending={signature.pending} label="Envoyer via Lumin Sign"/></form>}</Tool>
 
     <Tool title="Parcours vendeur" icon={Store}>
       <form action={seller.submit} className="grid gap-3"><input name="title" required className="domify-select" placeholder="Ex. Vente villa à Souissi" /><input name="estimatedValue" type="number" min="0" className="domify-select" placeholder="Estimation (MAD)" /><select name="propertyId" className="domify-select"><option value="">Bien à créer ou non rattaché</option>{properties.map((property) => <option key={property.id} value={property.id}>{property.reference} — {property.title}</option>)}</select><input name="nextActionAt" type="datetime-local" className="domify-select" /><textarea name="notes" rows={2} className="rounded-xl border border-domify-dark/10 px-3 py-2 text-sm" placeholder="Contexte de la valorisation ou du mandat" />{seller.error && <p className="text-xs text-red-700">{seller.error}</p>}<Submit pending={seller.pending} label="Ouvrir le dossier vendeur" /></form>

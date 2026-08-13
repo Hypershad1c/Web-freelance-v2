@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { sendTwilioWhatsApp } from "@/lib/twilio-whatsapp";
 
 async function authorized(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -31,6 +32,17 @@ async function processQueuedFollowUps() {
         await prisma.crmCommunication.update({ where: { id: item.id }, data: { status: "SENT", sentAt: new Date() } });
         sent += 1;
       } else skipped += 1;
+    } else if (item.channel === "WHATSAPP") {
+      if (!item.contact.whatsappOptIn || !item.contact.phone) { skipped += 1; continue; }
+      try {
+        const result = await sendTwilioWhatsApp({ to: item.contact.phone, body: item.body });
+        if (result.skipped) { skipped += 1; continue; }
+        await prisma.crmCommunication.update({ where: { id: item.id }, data: { status: "SENT", sentAt: new Date(), externalId: result.sid } });
+        sent += 1;
+      } catch (error) {
+        await prisma.crmCommunication.update({ where: { id: item.id }, data: { status: "FAILED" } });
+        console.error("[crm automation] WhatsApp delivery failed", error);
+      }
     } else if (item.channel === "IN_APP" && item.ownerId) {
       await prisma.notification.create({ data: { userId: item.ownerId, type: "SYSTEM", title: item.subject || "Suivi CRM", body: item.body, href: `/admin/crm/contacts/${item.contactId}` } });
       await prisma.crmCommunication.update({ where: { id: item.id }, data: { status: "SENT", sentAt: new Date() } });

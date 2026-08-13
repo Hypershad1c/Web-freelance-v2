@@ -5,6 +5,7 @@ import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { MediaLibraryUploadButton } from "@/components/admin/MediaLibraryUploadButton";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { deleteMedia } from "@/lib/actions/media";
+import { MediaWorkflowSelect } from "@/components/admin/MediaWorkflowSelect";
 import { isCloudinaryConfigured } from "@/lib/cloudinary";
 
 export default async function AdminMediaPage() {
@@ -43,14 +44,10 @@ export default async function AdminMediaPage() {
                 <div className="relative aspect-square">
                   <Image src={m.url} alt={m.alt ?? ""} fill className="object-cover" unoptimized />
                   <div className="absolute inset-0 flex items-center justify-center bg-domify-dark/0 transition-luxury group-hover:bg-domify-dark/40">
-                    <div className="opacity-0 transition-luxury group-hover:opacity-100">
-                      <DeleteButton action={deleteMedia.bind(null, m.id)} confirmLabel="Supprimer ce fichier ?" />
-                    </div>
+                    <div className="flex items-center gap-1 opacity-0 transition-luxury group-hover:opacity-100"><MediaWorkflowSelect id={m.id} status={m.workflowStatus}/><DeleteButton action={deleteMedia.bind(null, m.id)} confirmLabel="Supprimer ce fichier ?" /></div>
                   </div>
                 </div>
-                {m.property && (
-                  <p className="truncate px-2 py-1.5 text-[11px] text-domify-dark/50">{m.property.title}</p>
-                )}
+                <div className="flex items-center justify-between gap-2 px-2 py-1.5"><p className="truncate text-[11px] text-domify-dark/50">{m.property?.title || m.type}</p><span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${m.workflowStatus === "APPROVED" ? "bg-emerald-50 text-emerald-700" : m.workflowStatus === "REJECTED" ? "bg-red-50 text-red-700" : "bg-domify-warm-white text-domify-dark/55"}`}>{m.workflowStatus === "APPROVED" ? "VALIDÉ" : m.workflowStatus === "REJECTED" ? "REFUSÉ" : "À VÉRIFIER"}</span></div>
               </div>
             ))}
           </div>

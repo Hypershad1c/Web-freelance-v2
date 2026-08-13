@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Phone, Mail, CalendarClock, X, Building2 } from "lucide-react";
 import Image from "next/image";
 import type { PropertyWithRelations } from "@/lib/data/properties";
@@ -152,71 +152,42 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
   );
 }
 
-function BookingModal({
-  property,
-  agentName,
-  onClose,
-}: {
-  property: PropertyWithRelations;
-  agentName: string;
-  onClose: () => void;
-}) {
+type AvailabilitySlot = { id: string; startsAt: string; endsAt: string; location: string | null; remaining: number };
+
+function BookingModal({ property, agentName, onClose }: { property: PropertyWithRelations; agentName: string; onClose: () => void }) {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [honeypot, setHoneypot] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(Boolean(property.agentId));
+  const [selectedSlotId, setSelectedSlotId] = useState("");
   const [form, setForm] = useState({ name: "", email: "", phone: "", date: "", notes: "" });
+
+  useEffect(() => {
+    if (!property.agentId) return;
+    let cancelled = false;
+    fetch(`/api/availability?propertyId=${encodeURIComponent(property.id)}`).then(async (response) => {
+      const payload = await response.json().catch(() => ({ slots: [] }));
+      if (!cancelled) setSlots(Array.isArray(payload.slots) ? payload.slots : []);
+    }).catch(() => { if (!cancelled) setSlots([]); }).finally(() => { if (!cancelled) setSlotsLoading(false); });
+    return () => { cancelled = true; };
+  }, [property.agentId, property.id]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (honeypot) return; // bot — silently drop
-    setSending(true);
-    setError(null);
+    if (honeypot) return;
+    const selectedSlot = slots.find((slot) => slot.id === selectedSlotId);
+    if (!selectedSlot && !form.date) { setError("Choisissez un créneau ou une date de visite."); return; }
+    setSending(true); setError(null);
     try {
-      const response = await fetch("/api/appointments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, propertyId: property.id, agentId: property.agentId ?? undefined, website: honeypot, turnstileToken }),
-      });
-      if (!response.ok) throw new Error();
+      const response = await fetch("/api/appointments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, date: selectedSlot?.startsAt || form.date, availabilitySlotId: selectedSlot?.id, propertyId: property.id, agentId: property.agentId ?? undefined, source: selectedSlot ? "availability_booking" : "property_detail", website: honeypot, turnstileToken }) });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.error || "La demande n’a pas pu être envoyée.");
       setSent(true);
-    } catch {
-      setError("La demande de visite n’a pas pu être envoyée. Merci de réessayer.");
-    } finally {
-      setSending(false);
-    }
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "La demande de visite n’a pas pu être envoyée. Merci de réessayer."); } finally { setSending(false); }
   }
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-domify-dark/50 p-4">
-      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-luxury">
-        <button onClick={onClose} className="absolute right-4 top-4 text-domify-dark/40 hover:text-domify-dark" aria-label="Fermer">
-          <X size={18} />
-        </button>
-        <h3 className="font-display text-xl font-semibold text-domify-dark">Planifier une visite</h3>
-        <p className="mt-1 text-sm text-domify-dark/60">{property.title} — {property.city.name}</p>
-
-        {sent ? (
-          <p className="mt-6 rounded-xl bg-domify-warm-white p-4 text-sm text-domify-dark">
-            Votre demande de visite a été envoyée à {agentName}. Vous recevrez une confirmation par email.
-          </p>
-        ) : (
-          <form onSubmit={handleSubmit} className="mt-6 space-y-3">
-            <HoneypotField value={honeypot} onChange={setHoneypot} />
-            <input required placeholder="Nom complet" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" />
-            <input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" />
-            <input placeholder="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" />
-            <input required type="datetime-local" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" />
-            <textarea rows={2} placeholder="Notes (optionnel)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" />
-            <Turnstile action="appointment" onTokenChange={setTurnstileToken} />
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            <button type="submit" disabled={sending || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken)} className="w-full rounded-xl bg-domify-primary py-2.5 text-sm font-semibold text-white transition-luxury hover:bg-domify-primary-dark disabled:opacity-60">
-              {sending ? "Envoi..." : "Confirmer la demande"}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
-  );
+  return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-domify-dark/50 p-4"><div className="relative max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-luxury"><button onClick={onClose} className="absolute right-4 top-4 text-domify-dark/40 hover:text-domify-dark" aria-label="Fermer"><X size={18} /></button><h3 className="font-display text-xl font-semibold text-domify-dark">Planifier une visite</h3><p className="mt-1 text-sm text-domify-dark/60">{property.title} — {property.city.name}</p>{sent ? <p className="mt-6 rounded-xl bg-domify-warm-white p-4 text-sm text-domify-dark">Votre demande de visite a été envoyée à {agentName}. Vous recevrez une confirmation par email.</p> : <form onSubmit={handleSubmit} className="mt-6 space-y-3"><HoneypotField value={honeypot} onChange={setHoneypot} /><input required placeholder="Nom complet" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" /><input required type="email" placeholder="Email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" /><input placeholder="Téléphone" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" />{slotsLoading ? <p className="rounded-lg bg-domify-warm-white p-3 text-sm text-domify-dark/60">Chargement des disponibilités…</p> : slots.length > 0 ? <fieldset><legend className="mb-2 text-sm font-semibold text-domify-dark">Choisissez un créneau disponible</legend><select required value={selectedSlotId} onChange={(event) => setSelectedSlotId(event.target.value)} className="w-full rounded-lg border border-domify-primary/20 bg-domify-warm-white px-3 py-2.5 text-sm text-domify-dark"><option value="">Sélectionner un créneau</option>{slots.map((slot) => <option key={slot.id} value={slot.id}>{new Intl.DateTimeFormat("fr-MA", { dateStyle: "full", timeStyle: "short" }).format(new Date(slot.startsAt))}{slot.location ? ` · ${slot.location}` : ""}</option>)}</select></fieldset> : <fieldset><label className="mb-2 block text-sm font-semibold text-domify-dark">Date souhaitée</label><input required type="datetime-local" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" /><p className="mt-1 text-xs text-domify-dark/50">Votre demande sera confirmée selon l’agenda du conseiller.</p></fieldset>}<textarea rows={2} placeholder="Notes (optionnel)" value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm" /><Turnstile action="appointment" onTokenChange={setTurnstileToken} />{error && <p className="text-sm text-red-600">{error}</p>}<button type="submit" disabled={sending || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken)} className="w-full rounded-xl bg-domify-primary py-2.5 text-sm font-semibold text-white transition-luxury hover:bg-domify-primary-dark disabled:opacity-60">{sending ? "Envoi..." : selectedSlotId ? "Réserver ce créneau" : "Confirmer la demande"}</button></form>}</div></div>;
 }

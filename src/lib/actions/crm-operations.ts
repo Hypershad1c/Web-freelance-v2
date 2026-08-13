@@ -1,10 +1,11 @@
 "use server";
 
-import { CrmCommunicationChannel, CrmCommunicationDirection, CrmCommunicationStatus, CrmDocumentType, CrmOfferStatus, CrmSellerCaseStage } from "@prisma/client";
+import { CrmCommunicationChannel, CrmCommunicationDirection, CrmCommunicationStatus, CrmDocumentStatus, CrmDocumentType, CrmDocumentVisibility, CrmOfferStatus, CrmSellerCaseStage } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { recomputeCrmLeadScore } from "@/lib/crm";
+import { sendLuminSignatureRequest } from "@/lib/lumin-sign";
 import { prisma } from "@/lib/prisma";
 import { recordAudit } from "@/lib/workflow";
 
@@ -32,8 +33,9 @@ export async function logCrmCommunication(contactId: string, formData: FormData)
   await assertContact(contactId, session.user.id, session.user.role);
   const data = CommunicationSchema.parse(Object.fromEntries(formData));
   if (data.dealId) { const deal = await prisma.crmDeal.findFirst({ where: { id: data.dealId, contactId } }); if (!deal) throw new Error("Opportunité invalide"); }
-  const item = await prisma.crmCommunication.create({ data: { channel: data.channel, direction: data.direction, status: CrmCommunicationStatus.LOGGED, subject: data.subject || null, body: data.body, sentAt: data.direction === "OUTBOUND" ? new Date() : null, contactId, dealId: data.dealId || null, ownerId: session.user.id } });
-  await prisma.crmContact.update({ where: { id: contactId }, data: { lastContactedAt: new Date() } });
+  const queuedForTwilio = data.channel === "WHATSAPP" && data.direction === "OUTBOUND";
+  const item = await prisma.crmCommunication.create({ data: { channel: data.channel, direction: data.direction, status: queuedForTwilio ? CrmCommunicationStatus.QUEUED : CrmCommunicationStatus.LOGGED, subject: data.subject || null, body: data.body, sentAt: queuedForTwilio ? null : data.direction === "OUTBOUND" ? new Date() : null, contactId, dealId: data.dealId || null, ownerId: session.user.id } });
+  await prisma.crmContact.update({ where: { id: contactId }, data: { lastContactedAt: new Date(), ...(data.direction === "OUTBOUND" ? { firstRespondedAt: new Date() } : {}) } });
   await recomputeCrmLeadScore(contactId);
   await recordAudit({ actorId: session.user.id, action: "CRM_COMMUNICATION_LOGGED", entityType: "CrmCommunication", entityId: item.id, summary: `${data.channel} ${data.direction} enregistré` });
   refresh(contactId);
@@ -105,13 +107,38 @@ export async function updateCrmOfferStatus(offerId: string, status: string) {
   refresh(item.contactId);
 }
 
-const DocumentSchema = z.object({ name: z.string().min(2).max(180), url: z.string().url(), type: z.nativeEnum(CrmDocumentType), notes: z.string().max(2000).optional(), dealId: z.string().optional(), propertyId: z.string().optional() });
+const DocumentSchema = z.object({ name: z.string().min(2).max(180), url: z.string().url().optional(), type: z.nativeEnum(CrmDocumentType), visibility: z.nativeEnum(CrmDocumentVisibility).default(CrmDocumentVisibility.INTERNAL), status: z.nativeEnum(CrmDocumentStatus).default(CrmDocumentStatus.UPLOADED), notes: z.string().max(2000).optional(), dealId: z.string().optional(), propertyId: z.string().optional() });
 export async function addCrmDocument(contactId: string, formData: FormData) {
   const session = await requireStaff();
   await assertContact(contactId, session.user.id, session.user.role);
   const data = DocumentSchema.parse(Object.fromEntries(formData));
-  const item = await prisma.crmDocument.create({ data: { name: data.name, url: data.url, type: data.type, notes: data.notes || null, contactId, dealId: data.dealId || null, propertyId: data.propertyId || null, uploadedById: session.user.id } });
+  if (data.status !== CrmDocumentStatus.REQUESTED && !data.url) throw new Error("Une URL sécurisée est requise pour un document téléversé");
+  const item = await prisma.crmDocument.create({ data: { name: data.name, url: data.url || "https://domify.ma/document-request", type: data.type, visibility: data.visibility, status: data.status, requestedAt: data.status === CrmDocumentStatus.REQUESTED ? new Date() : null, notes: data.notes || null, contactId, dealId: data.dealId || null, propertyId: data.propertyId || null, uploadedById: session.user.id } });
   await recordAudit({ actorId: session.user.id, action: "CRM_DOCUMENT_ADDED", entityType: "CrmDocument", entityId: item.id, summary: `Document CRM : ${item.name}` });
+  refresh(contactId);
+}
+
+const SignatureSchema = z.object({ title: z.string().min(3).max(255), documentId: z.string().min(1), sellerCaseId: z.string().optional(), offerId: z.string().optional(), expiresAt: z.string().optional() });
+export async function sendCrmSignatureRequest(contactId: string, formData: FormData) {
+  const session = await requireStaff();
+  await assertContact(contactId, session.user.id, session.user.role);
+  const data = SignatureSchema.parse(Object.fromEntries(formData));
+  const [contact, document] = await Promise.all([prisma.crmContact.findUnique({ where: { id: contactId }, select: { name: true, email: true } }), prisma.crmDocument.findFirst({ where: { id: data.documentId, contactId }, select: { id: true, url: true } })]);
+  if (!contact || !document || document.url === "https://domify.ma/document-request") throw new Error("Ajoutez d’abord un document HTTPS téléversé pour l’envoyer en signature.");
+  if (data.sellerCaseId) { const sellerCase = await prisma.crmSellerCase.findFirst({ where: { id: data.sellerCaseId, contactId } }); if (!sellerCase) throw new Error("Dossier vendeur invalide"); }
+  if (data.offerId) { const offer = await prisma.crmOffer.findFirst({ where: { id: data.offerId, contactId } }); if (!offer) throw new Error("Offre invalide"); }
+  const expiresAt = data.expiresAt ? new Date(data.expiresAt) : null;
+  if (expiresAt && (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date())) throw new Error("Date d’expiration invalide");
+  const item = await prisma.crmSignatureRequest.create({ data: { title: data.title, provider: "LUMIN", status: "DRAFT", contactId, sellerCaseId: data.sellerCaseId || null, offerId: data.offerId || null, documentId: document.id, expiresAt } });
+  try {
+    const result = await sendLuminSignatureRequest({ title: data.title, fileUrl: document.url, signers: [{ name: contact.name, email: contact.email }], expiresAt });
+    if (result.skipped) await prisma.crmSignatureRequest.update({ where: { id: item.id }, data: { status: "READY", error: result.reason } });
+    else await prisma.crmSignatureRequest.update({ where: { id: item.id }, data: { status: "SENT", externalId: result.id, sentAt: new Date(), error: null } });
+  } catch (cause) {
+    await prisma.crmSignatureRequest.update({ where: { id: item.id }, data: { status: "FAILED", error: cause instanceof Error ? cause.message : "Échec Lumin Sign" } });
+    throw cause;
+  }
+  await recordAudit({ actorId: session.user.id, action: "CRM_SIGNATURE_REQUEST_CREATED", entityType: "CrmSignatureRequest", entityId: item.id, summary: `Demande de signature : ${data.title}` });
   refresh(contactId);
 }
 

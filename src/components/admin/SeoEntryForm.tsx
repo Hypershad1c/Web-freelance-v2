@@ -14,7 +14,7 @@ export function SeoEntryForm({
   submitLabel,
 }: {
   action: (prevState: SimpleFormState, formData: FormData) => Promise<SimpleFormState>;
-  defaultValues?: Partial<{ path: string; title: string; description: string; ogImage: string | null }>;
+  defaultValues?: Partial<{ path: string; title: string; description: string; ogImage: string | null; focusKeyword: string | null; content: string | null }> ;
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
@@ -45,6 +45,14 @@ export function SeoEntryForm({
             <span className="mb-1.5 block text-xs font-medium text-domify-dark/60">Meta description</span>
             <textarea name="description" defaultValue={defaultValues.description} rows={3} className="input" required />
             {state.errors?.description && <span className="mt-1 block text-xs text-red-600">{state.errors.description[0]}</span>}
+          </label>
+          <label>
+            <span className="mb-1.5 block text-xs font-medium text-domify-dark/60">Mot-clé prioritaire (optionnel)</span>
+            <input name="focusKeyword" defaultValue={defaultValues.focusKeyword ?? ""} className="input" placeholder="Ex. villa à vendre à Casablanca" />
+          </label>
+          <label>
+            <span className="mb-1.5 block text-xs font-medium text-domify-dark/60">Contenu éditorial de la page (optionnel)</span>
+            <textarea name="content" defaultValue={defaultValues.content ?? ""} rows={8} className="input" placeholder="Ajoutez une introduction locale, les atouts du secteur, des réponses aux questions fréquentes et des liens internes pertinents." />
           </label>
           <label>
             <span className="mb-1.5 block text-xs font-medium text-domify-dark/60">Image Open Graph (URL, optionnel)</span>

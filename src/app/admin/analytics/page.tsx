@@ -11,7 +11,7 @@ export default async function AdminAnalyticsPage() {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") redirect("/admin");
 
-  const [totalViews, todayViews, topPagesRaw, dailyRaw, leadsCount, appointmentsCount] = await Promise.all([
+  const [totalViews, todayViews, topPagesRaw, dailyRaw, leadsCount, appointmentsCount, attributionRaw, valuationsCount, financingCount] = await Promise.all([
     prisma.analyticsEvent.count({ where: { type: "page_view" } }),
     prisma.analyticsEvent.count({
       where: { type: "page_view", createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } },
@@ -32,6 +32,9 @@ export default async function AdminAnalyticsPage() {
     `,
     prisma.lead.count(),
     prisma.appointment.count(),
+    prisma.analyticsEvent.groupBy({ by: ["source"], where: { source: { not: null }, createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } }, _count: { source: true }, orderBy: { _count: { source: "desc" } }, take: 8 }),
+    prisma.lead.count({ where: { source: "valuation_funnel" } }),
+    prisma.lead.count({ where: { source: "financing_readiness" } }),
   ]);
 
   const dailyData = dailyRaw.map((d) => ({
@@ -44,13 +47,15 @@ export default async function AdminAnalyticsPage() {
     { label: "Vues aujourd'hui", value: todayViews, icon: TrendingUp },
     { label: "Leads (total)", value: leadsCount, icon: Inbox },
     { label: "Rendez-vous (total)", value: appointmentsCount, icon: FileText },
+    { label: "Estimations", value: valuationsCount, icon: TrendingUp },
+    { label: "Préqualifications", value: financingCount, icon: Inbox },
   ];
 
   return (
     <>
       <AdminTopbar title="Analytique" />
       <div className="p-6 lg:p-10">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {stats.map((s) => (
             <div key={s.label} className="rounded-2xl bg-white p-6 shadow-luxury">
               <s.icon className="text-domify-gold" size={22} />
@@ -71,7 +76,8 @@ export default async function AdminAnalyticsPage() {
           )}
         </div>
 
-        <div className="mt-8 rounded-2xl bg-white p-6 shadow-luxury">
+        <div className="mt-8 grid gap-8 xl:grid-cols-2"><section className="rounded-2xl bg-white p-6 shadow-luxury"><h2 className="mb-4 font-display text-lg font-semibold text-domify-dark">Canaux d’acquisition — 30 jours</h2>{attributionRaw.length === 0 ? <p className="text-sm text-domify-dark/50">Aucune campagne attribuée pour le moment. Les visites avec des paramètres UTM apparaîtront ici.</p> : <div className="space-y-3">{attributionRaw.map((item) => <div key={item.source} className="flex items-center justify-between rounded-xl bg-domify-warm-white px-4 py-3"><span className="text-sm font-medium text-domify-dark">{item.source}</span><span className="text-sm font-semibold text-domify-primary">{item._count.source}</span></div>)}</div>}</section>
+        <section className="rounded-2xl bg-white p-6 shadow-luxury">
           <h2 className="mb-4 font-display text-lg font-semibold text-domify-dark">Pages les plus consultées</h2>
           {topPagesRaw.length === 0 ? (
             <p className="text-sm text-domify-dark/50">Aucune donnée pour le moment.</p>
@@ -85,7 +91,7 @@ export default async function AdminAnalyticsPage() {
               ))}
             </div>
           )}
-        </div>
+        </section></div>
       </div>
     </>
   );

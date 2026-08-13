@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { MediaWorkflowStatus } from "@prisma/client";
 
 async function requireAdmin() {
   const session = await auth();
@@ -32,5 +33,11 @@ export async function registerUploadedMedia(input: { url: string; cloudinaryId?:
 export async function deleteMedia(id: string) {
   await requireAdmin();
   await prisma.media.delete({ where: { id } });
+  revalidatePath("/admin/media");
+}
+
+export async function updateMediaWorkflow(id: string, workflowStatus: MediaWorkflowStatus, reviewNote?: string) {
+  await requireAdmin();
+  await prisma.media.update({ where: { id }, data: { workflowStatus, reviewNote: reviewNote || null, processedAt: workflowStatus === MediaWorkflowStatus.APPROVED ? new Date() : null } });
   revalidatePath("/admin/media");
 }

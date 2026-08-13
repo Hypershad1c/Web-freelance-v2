@@ -24,6 +24,9 @@ export default async function AgentPerformancePage() {
     orderBy: { name: "asc" },
   });
 
+  const ownedContacts = await prisma.crmContact.findMany({ where: { ownerId: { not: null } }, select: { ownerId: true, firstRespondedAt: true, slaDueAt: true } });
+  const now = new Date();
+
   const performance = agents.map((agent) => {
     const leads = agent.properties.flatMap((property) => property.leads);
     const convertedLeads = leads.filter((lead) => lead.status === "CONVERTED").length;
@@ -31,6 +34,9 @@ export default async function AgentPerformancePage() {
     const activeListings = agent.properties.filter((property) => ["PUBLISHED", "UNDER_OFFER"].includes(property.status)).length;
     const totalViews = agent.properties.reduce((sum, property) => sum + property.viewsCount, 0);
     const completedVisits = agent.appointments.filter((appointment) => appointment.status === "COMPLETED").length;
+    const owned = ownedContacts.filter((contact) => contact.ownerId === agent.userId);
+    const unanswered = owned.filter((contact) => !contact.firstRespondedAt).length;
+    const overdueSla = owned.filter((contact) => !contact.firstRespondedAt && contact.slaDueAt && contact.slaDueAt < now).length;
     return {
       agent,
       activeListings,
@@ -39,6 +45,8 @@ export default async function AgentPerformancePage() {
       openLeads,
       convertedLeads,
       completedVisits,
+      unanswered,
+      overdueSla,
       conversionRate: leads.length ? Math.round((convertedLeads / leads.length) * 100) : 0,
     };
   });
@@ -48,7 +56,8 @@ export default async function AgentPerformancePage() {
     totalViews: accumulator.totalViews + item.totalViews,
     openLeads: accumulator.openLeads + item.openLeads,
     completedVisits: accumulator.completedVisits + item.completedVisits,
-  }), { activeListings: 0, totalViews: 0, openLeads: 0, completedVisits: 0 });
+    overdueSla: accumulator.overdueSla + item.overdueSla,
+  }), { activeListings: 0, totalViews: 0, openLeads: 0, completedVisits: 0, overdueSla: 0 });
 
   return (
     <>
@@ -60,26 +69,28 @@ export default async function AgentPerformancePage() {
           <p className="mt-2 text-sm text-domify-dark/60">Suivez l&apos;activité de chaque agent à partir de ses biens, leads et visites.</p>
         </div>
 
-        <div className="mb-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="mb-7 grid grid-cols-2 gap-4 lg:grid-cols-5">
           <Metric icon={Building2} label="Annonces actives" value={totals.activeListings} />
           <Metric icon={Eye} label="Vues cumulées" value={totals.totalViews.toLocaleString("fr-MA")} />
           <Metric icon={Target} label="Leads ouverts" value={totals.openLeads} />
           <Metric icon={CalendarCheck} label="Visites réalisées" value={totals.completedVisits} />
+          <Metric icon={Target} label="SLA en retard" value={totals.overdueSla} />
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-black/7 bg-white shadow-luxury">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-black/5 bg-domify-warm-white/50 text-xs uppercase tracking-wide text-domify-dark/50">
-                <tr><th className="px-5 py-3 font-medium">Agent</th><th className="px-5 py-3 font-medium">Biens actifs</th><th className="px-5 py-3 font-medium">Vues</th><th className="px-5 py-3 font-medium">Leads ouverts</th><th className="px-5 py-3 font-medium">Conversion</th><th className="px-5 py-3 font-medium">Visites réalisées</th></tr>
+                <tr><th className="px-5 py-3 font-medium">Agent</th><th className="px-5 py-3 font-medium">Biens actifs</th><th className="px-5 py-3 font-medium">Vues</th><th className="px-5 py-3 font-medium">Leads ouverts</th><th className="px-5 py-3 font-medium">SLA en attente</th><th className="px-5 py-3 font-medium">Conversion</th><th className="px-5 py-3 font-medium">Visites réalisées</th></tr>
               </thead>
               <tbody className="divide-y divide-black/5">
-                {performance.length === 0 ? <tr><td colSpan={6} className="px-5 py-10 text-center text-domify-dark/50">Aucun agent créé pour le moment.</td></tr> : performance.map((item) => (
+                {performance.length === 0 ? <tr><td colSpan={7} className="px-5 py-10 text-center text-domify-dark/50">Aucun agent créé pour le moment.</td></tr> : performance.map((item) => (
                   <tr key={item.agent.id} className="hover:bg-domify-warm-white/30">
                     <td className="px-5 py-4"><p className="font-semibold text-domify-dark">{item.agent.name}</p><p className="mt-0.5 text-xs text-domify-dark/50">{item.agent.agency?.name ?? "Indépendant"}</p></td>
                     <td className="px-5 py-4 font-medium text-domify-dark">{item.activeListings}</td>
                     <td className="px-5 py-4 text-domify-dark/70">{item.totalViews.toLocaleString("fr-MA")}</td>
                     <td className="px-5 py-4 text-domify-dark/70">{item.openLeads}</td>
+                    <td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${item.overdueSla ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-800"}`}>{item.overdueSla ? `${item.overdueSla} en retard` : `${item.unanswered} en attente`}</span></td>
                     <td className="px-5 py-4"><span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">{item.conversionRate}%</span></td>
                     <td className="px-5 py-4 text-domify-dark/70">{item.completedVisits}</td>
                   </tr>

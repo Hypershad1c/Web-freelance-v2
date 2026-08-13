@@ -32,6 +32,7 @@ export async function upsertCrmContact(input: CrmInboundContact) {
       phone: input.phone || null,
       source: input.source || null,
       ownerId,
+      slaDueAt: new Date(Date.now() + 60 * 60 * 1000),
     },
     update: {
       name: input.name,

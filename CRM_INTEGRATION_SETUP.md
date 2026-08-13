@@ -29,3 +29,39 @@ WhatsApp and calendar providers involve account-level authorization, approved bu
 ## AI assistant activation
 
 The assistant should remain server-side and should receive only the CRM context necessary for a requested summary or draft. Before enabling it, choose the provider/model, set a usage budget, and add a human-review step before any external send. The CRM should never automatically send AI-drafted text without agent approval.
+
+## Twilio WhatsApp Business activation
+
+Domify now supports consent-aware WhatsApp delivery through Twilio. Configure `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_WHATSAPP_FROM` in production, with the sender written as its E.164 number (for example, `+212...`). The application applies the WhatsApp channel prefix itself.
+
+In Twilio, configure the approved WhatsApp sender or Messaging Service to POST inbound messages to:
+
+```text
+https://domify.ma/api/webhooks/twilio/inbound
+```
+
+Twilio delivery-status callbacks are supplied automatically for messages sent through the integration and target:
+
+```text
+https://domify.ma/api/webhooks/twilio/status
+```
+
+Only CRM contacts that have both a phone number and `whatsappOptIn` enabled are eligible for delivery. Outbound WhatsApp entries created by staff are queued and then delivered by the existing protected CRM automation processor. Inbound messages are stored only when their normalized phone number matches an opted-in CRM contact.
+
+## Lumin Sign activation
+
+Domify now creates signature-request records from contact-owned, HTTPS-accessible CRM document URLs. Configure `LUMIN_API_KEY` for signature delivery and `LUMIN_WEBHOOK_SIGNING_SECRET` for callback verification.
+
+In Lumin Sign Developer Settings, configure the HTTPS app webhook URL:
+
+```text
+https://domify.ma/api/webhooks/lumin
+```
+
+The webhook endpoint verifies Lumin's `X-Signature` HMAC-SHA256 header using `LUMIN_WEBHOOK_SIGNING_SECRET`, then updates the corresponding CRM signature-request state for approved, declined, expired, or viewed requests. Do not enable the webhook until the signing secret has been saved in Vercel.
+
+## Required production follow-up
+
+Add the Twilio and Lumin values from `.env.example` to Vercel, then redeploy. Both providers need their own business-account onboarding and API credentials; the application deliberately performs no external send when configuration is absent.
+
+> The legal suitability of a particular electronic-signature workflow should be confirmed for the transaction type and jurisdiction before operational use.

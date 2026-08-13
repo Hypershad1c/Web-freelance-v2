@@ -49,6 +49,7 @@ model User {
   crmAssignmentRules  CrmAssignmentRule[] @relation("CrmAssignmentAssignee")
   crmSavedSearches    CrmSavedSearch[]
   crmAutomationTemplates CrmAutomationTemplate[] @relation("CrmAutomationOwner")
+  financingProfiles    FinancingProfile[]
 }
 
 model PasswordResetToken {
@@ -163,6 +164,7 @@ model Agent {
 
   properties   Property[]
   appointments Appointment[]
+  availability AgentAvailability[]
 }
 
 // ---------- PROPERTY CATALOG ----------
@@ -246,6 +248,7 @@ model Property {
 
   amenities Amenity[]
   media     Media[]
+  ownerReports OwnerReport[]
   leads     Lead[]
   favorites Favorite[]
   appointments Appointment[]
@@ -268,6 +271,9 @@ model Media {
   type          String    @default("image") // image | video | floorplan
   alt           String?
   order         Int       @default(0)
+  workflowStatus MediaWorkflowStatus @default(UPLOADED)
+  reviewNote    String?
+  processedAt   DateTime?
   propertyId    String?
   property      Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   blogPostId    String?
@@ -305,6 +311,10 @@ model Lead {
   status     LeadStatus @default(NEW)
   position   Int        @default(0)
   source     String?
+  utmSource  String?
+  utmMedium  String?
+  utmCampaign String?
+  referrer   String?
   userId     String?
   user       User?      @relation(fields: [userId], references: [id])
   propertyId   String?
@@ -323,25 +333,99 @@ enum AppointmentStatus {
   COMPLETED
 }
 
+enum MediaWorkflowStatus {
+  UPLOADED
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum CrmDocumentVisibility {
+  INTERNAL
+  SELLER
+}
+
+enum CrmDocumentStatus {
+  REQUESTED
+  UPLOADED
+  VERIFIED
+  REJECTED
+}
+
+enum CrmSignatureStatus {
+  DRAFT
+  READY
+  SENT
+  VIEWED
+  SIGNED
+  DECLINED
+  EXPIRED
+  FAILED
+}
+
+enum FinancingReadinessStatus {
+  NEW
+  REVIEWING
+  PREQUALIFIED
+  NOT_READY
+}
+
+enum OwnerReportStatus {
+  DRAFT
+  SENT
+  SKIPPED
+  FAILED
+}
+
 model Appointment {
   id         String            @id @default(cuid())
   name       String
   email      String
   phone      String?
   date       DateTime
+  durationMinutes Int @default(45)
   status     AppointmentStatus @default(PENDING)
   notes      String?
+  location   String?
+  meetingUrl String?
+  confirmedAt DateTime?
+  cancelledAt DateTime?
+  source     String?
+  utmSource  String?
+  utmMedium  String?
+  utmCampaign String?
   userId     String?
   user       User?             @relation(fields: [userId], references: [id])
   propertyId String?
   property   Property?         @relation(fields: [propertyId], references: [id])
   agentId      String?
   agent        Agent?            @relation(fields: [agentId], references: [id])
+  availabilitySlotId String?
+  availabilitySlot AgentAvailability? @relation(fields: [availabilitySlotId], references: [id], onDelete: SetNull)
   crmContactId String?
   crmContact   CrmContact?       @relation(fields: [crmContactId], references: [id], onDelete: SetNull)
   createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 
   @@index([crmContactId])
+  @@index([agentId, date])
+  @@index([availabilitySlotId, date])
+}
+
+model AgentAvailability {
+  id        String   @id @default(cuid())
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  startsAt  DateTime
+  endsAt    DateTime
+  capacity  Int      @default(1)
+  active    Boolean  @default(true)
+  location  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  appointments Appointment[]
+
+  @@index([agentId, startsAt, active])
 }
 
 model Message {
@@ -461,6 +545,8 @@ model CrmContact {
   leadScore         Int      @default(0)
   scoreReason       String?
   lastContactedAt   DateTime?
+  firstRespondedAt  DateTime?
+  slaDueAt          DateTime?
   emailOptIn        Boolean  @default(true)
   whatsappOptIn     Boolean  @default(false)
   ownerId           String?
@@ -474,6 +560,9 @@ model CrmContact {
   documents         CrmDocument[]
   sellerCases       CrmSellerCase[]
   offers            CrmOffer[]
+  signatureRequests CrmSignatureRequest[]
+  financingProfiles FinancingProfile[]
+  ownerReports      OwnerReport[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -536,6 +625,12 @@ model CrmDocument {
   type         CrmDocumentType @default(OTHER)
   mimeType     String?
   sizeBytes    Int?
+  visibility   CrmDocumentVisibility @default(INTERNAL)
+  status       CrmDocumentStatus @default(UPLOADED)
+  requestedAt  DateTime?
+  verifiedAt   DateTime?
+  rejectedReason String?
+  externalStorageKey String?
   notes        String?
   contactId    String?
   contact      CrmContact?     @relation(fields: [contactId], references: [id], onDelete: Cascade)
@@ -545,6 +640,7 @@ model CrmDocument {
   property     Property?       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   uploadedById String?
   uploadedBy   User?           @relation("CrmDocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+  signatureRequests CrmSignatureRequest[]
   createdAt    DateTime        @default(now())
 
   @@index([contactId, createdAt])
@@ -567,6 +663,8 @@ model CrmSellerCase {
   ownerId        String?
   owner          User?              @relation("CrmSellerCaseOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   offers         CrmOffer[]
+  signatureRequests CrmSignatureRequest[]
+  ownerReports   OwnerReport[]
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
@@ -593,12 +691,83 @@ model CrmOffer {
   sellerCase    CrmSellerCase? @relation(fields: [sellerCaseId], references: [id], onDelete: SetNull)
   ownerId       String?
   owner         User?          @relation("CrmOfferOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  signatureRequests CrmSignatureRequest[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   @@index([propertyId, status, updatedAt])
   @@index([contactId, createdAt])
   @@index([sellerCaseId, updatedAt])
+}
+
+model CrmSignatureRequest {
+  id          String             @id @default(cuid())
+  title       String
+  provider    String?
+  status      CrmSignatureStatus @default(DRAFT)
+  externalId  String?
+  signingUrl  String?
+  sentAt      DateTime?
+  signedAt    DateTime?
+  expiresAt   DateTime?
+  error       String?
+  contactId   String
+  contact     CrmContact         @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  sellerCaseId String?
+  sellerCase  CrmSellerCase?     @relation(fields: [sellerCaseId], references: [id], onDelete: SetNull)
+  offerId     String?
+  offer       CrmOffer?          @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  documentId  String?
+  document    CrmDocument?       @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([contactId, status, updatedAt])
+  @@index([sellerCaseId, status])
+}
+
+model FinancingProfile {
+  id                String                    @id @default(cuid())
+  status            FinancingReadinessStatus  @default(NEW)
+  monthlyIncome     Int?
+  monthlyDebt       Int?
+  savings           Int?
+  estimatedBudget   Int?
+  downPayment       Int?
+  employmentType    String?
+  preferredBank     String?
+  bankPreApproved   Boolean                   @default(false)
+  consent           Boolean                   @default(false)
+  notes             String?
+  contactId         String
+  contact           CrmContact                @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  userId            String?
+  user              User?                     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+
+  @@index([contactId, status, updatedAt])
+  @@index([userId, createdAt])
+}
+
+model OwnerReport {
+  id           String            @id @default(cuid())
+  status       OwnerReportStatus @default(DRAFT)
+  periodStart  DateTime
+  periodEnd    DateTime
+  summary      Json
+  deliveredAt  DateTime?
+  error        String?
+  contactId    String
+  contact      CrmContact        @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  sellerCaseId String
+  sellerCase   CrmSellerCase     @relation(fields: [sellerCaseId], references: [id], onDelete: Cascade)
+  propertyId   String?
+  property     Property?         @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  createdAt    DateTime          @default(now())
+
+  @@unique([sellerCaseId, periodStart, periodEnd])
+  @@index([contactId, status, createdAt])
 }
 
 model CrmAssignmentRule {
@@ -769,12 +938,23 @@ model SeoEntry {
   title       String
   description String
   ogImage     String?
+  focusKeyword String?
+  content     String?
+  structuredData Json?
+  publishedAt DateTime?
 }
 
 model AnalyticsEvent {
   id        String   @id @default(cuid())
-  type      String // page_view | lead | search | favorite
+  type      String // page_view | lead | search | favorite | appointment | valuation | whatsapp
   path      String?
+  source    String?
+  medium    String?
+  campaign  String?
+  referrer  String?
   meta      Json?
   createdAt DateTime @default(now())
+
+  @@index([type, source, createdAt])
+  @@index([campaign, createdAt])
 }

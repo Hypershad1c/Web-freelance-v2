@@ -5,6 +5,10 @@
     {
       "path": "/api/admin/crm/automation/run",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/admin/owner-reports/run",
+      "schedule": "0 9 * * 1"
     }
   ]
 }

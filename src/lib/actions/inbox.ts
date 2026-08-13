@@ -129,6 +129,29 @@ export async function deleteAppointment(id: string) {
   revalidatePath("/admin/appointments");
 }
 
+const AvailabilitySchema = z.object({ agentId: z.string().min(1), startsAt: z.string().min(1), endsAt: z.string().min(1), capacity: z.coerce.number().int().min(1).max(12).default(1), location: z.string().max(240).optional() });
+export async function createAgentAvailability(formData: FormData) {
+  const session = await requireStaff();
+  const data = AvailabilitySchema.parse(Object.fromEntries(formData));
+  const ownAgentId = session.user.role === "AGENT" ? await getOwnAgentId(session.user.id) : null;
+  if (session.user.role === "AGENT" && ownAgentId !== data.agentId) throw new Error("Vous pouvez uniquement gérer vos disponibilités");
+  const startsAt = new Date(data.startsAt); const endsAt = new Date(data.endsAt);
+  if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt || startsAt <= new Date()) throw new Error("Créneau invalide");
+  const item = await prisma.agentAvailability.create({ data: { ...data, startsAt, endsAt, location: data.location || null } });
+  await recordAudit({ actorId: session.user.id, action: "AGENT_AVAILABILITY_CREATED", entityType: "AgentAvailability", entityId: item.id, summary: `Créneau disponible le ${startsAt.toLocaleString("fr-MA")}` });
+  revalidatePath("/admin/appointments"); revalidatePath("/admin/appointments/disponibilites");
+}
+
+export async function toggleAgentAvailability(id: string, active: boolean) {
+  const session = await requireStaff();
+  const item = await prisma.agentAvailability.findUnique({ where: { id } });
+  if (!item) throw new Error("Créneau introuvable");
+  if (session.user.role === "AGENT" && (await getOwnAgentId(session.user.id)) !== item.agentId) throw new Error("Non autorisé");
+  await prisma.agentAvailability.update({ where: { id }, data: { active } });
+  await recordAudit({ actorId: session.user.id, action: "AGENT_AVAILABILITY_UPDATED", entityType: "AgentAvailability", entityId: id, summary: active ? "Créneau activé" : "Créneau retiré" });
+  revalidatePath("/admin/appointments"); revalidatePath("/admin/appointments/disponibilites");
+}
+
 export async function toggleMessageRead(id: string, read: boolean) {
   const session = await requireAdminOrEditor();
   await prisma.message.update({ where: { id }, data: { read } });

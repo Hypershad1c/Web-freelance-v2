@@ -25,6 +25,8 @@ const SeoEntrySchema = z.object({
   title: z.string().min(3, "Titre requis"),
   description: z.string().min(10, "Description requise (10 caractères min.)"),
   ogImage: z.string().optional(),
+  focusKeyword: z.string().max(180).optional(),
+  content: z.string().max(20000).optional(),
 });
 
 export async function createSeoEntry(_prev: SimpleFormState, formData: FormData): Promise<SimpleFormState> {
@@ -34,6 +36,8 @@ export async function createSeoEntry(_prev: SimpleFormState, formData: FormData)
     title: formData.get("title"),
     description: formData.get("description"),
     ogImage: formData.get("ogImage") || undefined,
+    focusKeyword: formData.get("focusKeyword") || undefined,
+    content: formData.get("content") || undefined,
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors };
 
@@ -58,6 +62,8 @@ export async function updateSeoEntry(id: string, _prev: SimpleFormState, formDat
     title: formData.get("title"),
     description: formData.get("description"),
     ogImage: formData.get("ogImage") || undefined,
+    focusKeyword: formData.get("focusKeyword") || undefined,
+    content: formData.get("content") || undefined,
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors };
 

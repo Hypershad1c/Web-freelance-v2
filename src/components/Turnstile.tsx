@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 
-type Action = "lead" | "contact" | "appointment" | "registration" | "valuation";
+type Action = "lead" | "contact" | "appointment" | "registration" | "valuation" | "financing";
 
 declare global {
   interface Window {

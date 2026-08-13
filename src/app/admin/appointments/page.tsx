@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendarClock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
@@ -37,7 +38,7 @@ export default async function AdminAppointmentsPage({
     <>
       <AdminTopbar title={isAgent ? "Mes rendez-vous" : "Rendez-vous"} />
       <div className="p-6 lg:p-10">
-        <form className="mb-6 flex items-center gap-3">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><form className="flex items-center gap-3">
           <select name="status" defaultValue={status ?? ""} className="rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm">
             <option value="">Tous les statuts</option>
             {STATUS_OPTIONS.map((s) => (
@@ -45,7 +46,7 @@ export default async function AdminAppointmentsPage({
             ))}
           </select>
           <button className="rounded-xl bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white">Filtrer</button>
-        </form>
+        </form><Link href="/admin/appointments/disponibilites" className="pressable inline-flex items-center justify-center gap-2 rounded-xl border border-domify-primary/18 bg-white px-4 py-2.5 text-sm font-semibold text-domify-primary hover:bg-domify-warm-white"><CalendarClock size={16}/> Gérer les disponibilités</Link></div>
 
         <div className="overflow-hidden rounded-2xl bg-white shadow-luxury">
           <div className="overflow-x-auto">
