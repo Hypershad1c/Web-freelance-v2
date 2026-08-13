@@ -6,6 +6,7 @@ import { sendEmail, emailLayout } from "@/lib/email";
 import { getSiteSettings } from "@/lib/data/settings";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { syncInboundLead } from "@/lib/crm";
 
 const LeadSchema = z.object({
   name: z.string().min(2),
@@ -56,7 +57,9 @@ export async function POST(request: Request) {
     include: { property: { include: { agent: true } } },
   });
 
-  // Best-effort notifications — never block or fail the request if email is down.
+  // CRM sync and email notifications are best-effort: an auxiliary service failure
+  // must never reject a genuine visitor enquiry.
+  syncInboundLead(lead).catch((e) => console.error("[leads] CRM sync failed:", e));
   notifyNewLead(lead).catch((e) => console.error("[leads] notification failed:", e));
 
   return NextResponse.json(lead, { status: 201 });

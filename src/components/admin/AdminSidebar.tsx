@@ -27,6 +27,7 @@ import {
   ArrowLeft,
   Menu,
   X,
+  Handshake,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -70,6 +71,7 @@ const STAFF_SECTIONS: NavSection[] = [
   {
     title: "Activité",
     items: [
+      { label: "CRM", href: "/admin/crm", icon: Handshake },
       { label: "Rendez-vous", href: "/admin/appointments", icon: CalendarClock },
       { label: "Leads", href: "/admin/leads", icon: Inbox },
       { label: "Validations", href: "/admin/approvals", icon: ClipboardCheck },
@@ -99,6 +101,7 @@ const AGENT_SECTIONS: NavSection[] = [
     title: "Mon activité",
     items: [
       { label: "Mes propriétés", href: "/admin/properties", icon: Building2 },
+      { label: "Mon CRM", href: "/admin/crm", icon: Handshake },
       { label: "Mes rendez-vous", href: "/admin/appointments", icon: CalendarClock },
       { label: "Mes leads", href: "/admin/leads", icon: Inbox },
     ],

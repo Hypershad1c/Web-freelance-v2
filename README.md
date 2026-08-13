@@ -1,12 +1,12 @@
 # Domify — Find Your Perfect Place
 
-Domify is a premium Moroccan real-estate platform built with **Next.js 15**, **React 19**, **TypeScript**, **Tailwind CSS**, **Prisma**, **PostgreSQL**, and **Auth.js**. It provides a public property marketplace and an operational back office for properties, locations, agencies, agents, content, leads, visits, SEO, analytics, permissions, and media.
+Domify is a premium Moroccan real-estate platform built with **Next.js 15**, **React 19**, **TypeScript**, **Tailwind CSS**, **Prisma**, **PostgreSQL**, and **Auth.js**. It provides a public property marketplace, an operational back office, and an integrated CRM for properties, locations, agencies, agents, content, leads, visits, relationships, SEO, analytics, permissions, and media.
 
 ## Product capabilities
 
 The public experience includes property discovery, server-side filtering by city, transaction type, property type, maximum price, and reference; property details; favorites; comparison; map search; city and neighborhood discovery; agency and advisor profiles; blog; valuation requests; mortgage and investment calculators; contact forms; lead capture; appointment booking; and credentials or Google authentication.
 
-The administrative experience provides authenticated, role-aware management of properties, cities, neighborhoods, property types, amenities, agencies, advisors, media, users, permissions, blog content, testimonials, leads, appointments, messages, SEO entries, analytics, and site settings. It also includes property bulk actions, CSV import/export, lead Kanban, approval workflow, audit logging, notifications, and agent performance reporting.
+The administrative experience provides authenticated, role-aware management of properties, cities, neighborhoods, property types, amenities, agencies, advisors, media, users, permissions, blog content, testimonials, leads, appointments, messages, SEO entries, analytics, and site settings. The integrated **CRM** automatically unifies future leads, appointments, and messages into deduplicated contacts, opportunities, activities, follow-ups, and an owner-scoped pipeline. It also includes property bulk actions, CSV import/export, lead Kanban, approval workflow, audit logging, notifications, and agent performance reporting.
 
 ## Stack
 

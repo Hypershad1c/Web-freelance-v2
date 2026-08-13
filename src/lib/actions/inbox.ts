@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { notifyUsers, recordAudit } from "@/lib/workflow";
+import { crmDealUpdateForStage, crmStageFromLeadStatus } from "@/lib/crm";
 
 async function requireStaff() {
   const session = await auth();
@@ -56,6 +57,22 @@ export async function updateLeadStatus(id: string, status: string) {
     where: { id },
     data: { status: parsed.data, position: (lastLead?.position ?? -1) + 1 },
   });
+
+  const crmStage = crmStageFromLeadStatus(parsed.data);
+  await prisma.crmDeal.updateMany({
+    where: { source: `lead:${id}` },
+    data: crmDealUpdateForStage(crmStage.stage),
+  });
+  if (lead.crmContactId) {
+    await prisma.crmActivity.create({
+      data: {
+        type: "SYSTEM",
+        body: `Lead déplacé vers « ${leadStatusLabel(parsed.data)} » dans le pipeline.`,
+        contactId: lead.crmContactId,
+        actorId: session.user.id,
+      },
+    });
+  }
 
   const recipients = [lead.userId, lead.property?.agent?.userId].filter((id): id is string => Boolean(id && id !== session.user.id));
   await notifyUsers({

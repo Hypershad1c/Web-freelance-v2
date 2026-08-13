@@ -39,6 +39,9 @@ model User {
   auditLogs     AuditLog[]
   submittedProperties Property[] @relation("PropertySubmittedBy")
   approvedProperties  Property[] @relation("PropertyApprovedBy")
+  crmContactsOwned    CrmContact[] @relation("CrmContactOwner")
+  crmDealsOwned       CrmDeal[]    @relation("CrmDealOwner")
+  crmActivities       CrmActivity[] @relation("CrmActivityActor")
 }
 
 model PasswordResetToken {
@@ -235,6 +238,7 @@ model Property {
   leads     Lead[]
   favorites Favorite[]
   appointments Appointment[]
+  crmDeals     CrmDeal[]
 
   seoTitle       String?
   seoDescription String?
@@ -289,9 +293,13 @@ model Lead {
   source     String?
   userId     String?
   user       User?      @relation(fields: [userId], references: [id])
-  propertyId String?
-  property   Property?  @relation(fields: [propertyId], references: [id])
-  createdAt  DateTime   @default(now())
+  propertyId   String?
+  property     Property?  @relation(fields: [propertyId], references: [id])
+  crmContactId String?
+  crmContact   CrmContact? @relation(fields: [crmContactId], references: [id], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+
+  @@index([crmContactId])
 }
 
 enum AppointmentStatus {
@@ -313,9 +321,13 @@ model Appointment {
   user       User?             @relation(fields: [userId], references: [id])
   propertyId String?
   property   Property?         @relation(fields: [propertyId], references: [id])
-  agentId    String?
-  agent      Agent?            @relation(fields: [agentId], references: [id])
-  createdAt  DateTime          @default(now())
+  agentId      String?
+  agent        Agent?            @relation(fields: [agentId], references: [id])
+  crmContactId String?
+  crmContact   CrmContact?       @relation(fields: [crmContactId], references: [id], onDelete: SetNull)
+  createdAt    DateTime          @default(now())
+
+  @@index([crmContactId])
 }
 
 model Message {
@@ -325,9 +337,100 @@ model Message {
   subject   String?
   body      String
   read      Boolean  @default(false)
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  userId       String?
+  user         User?      @relation(fields: [userId], references: [id])
+  crmContactId String?
+  crmContact   CrmContact? @relation(fields: [crmContactId], references: [id], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+
+  @@index([crmContactId])
+}
+
+enum CrmDealStage {
+  NEW
+  QUALIFIED
+  VIEWING
+  OFFER
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum CrmActivityType {
+  NOTE
+  CALL
+  EMAIL
+  WHATSAPP
+  MEETING
+  TASK
+  SYSTEM
+}
+
+model CrmContact {
+  id                String   @id @default(cuid())
+  name              String
+  email             String   @unique
+  phone             String?
+  source            String?
+  notes             String?
+  budgetMin         Int?
+  budgetMax         Int?
+  preferredLocation String?
+  ownerId           String?
+  owner             User?    @relation("CrmContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  leads             Lead[]
+  appointments      Appointment[]
+  messages          Message[]
+  deals             CrmDeal[]
+  activities        CrmActivity[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([ownerId, updatedAt])
+}
+
+model CrmDeal {
+  id               String       @id @default(cuid())
+  title            String
+  stage            CrmDealStage @default(NEW)
+  value            Int?
+  source           String?
+  probability      Int          @default(10)
+  nextFollowUpAt   DateTime?
+  expectedCloseAt  DateTime?
+  wonAt            DateTime?
+  lostReason       String?
+  contactId        String
+  contact          CrmContact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  propertyId       String?
+  property         Property?    @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  ownerId          String?
+  owner            User?        @relation("CrmDealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  activities       CrmActivity[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([stage, ownerId, updatedAt])
+  @@index([contactId, createdAt])
+}
+
+model CrmActivity {
+  id          String          @id @default(cuid())
+  type        CrmActivityType @default(NOTE)
+  body        String
+  dueAt       DateTime?
+  completedAt DateTime?
+  contactId   String
+  contact     CrmContact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  dealId      String?
+  deal        CrmDeal?        @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  actorId     String?
+  actor       User?           @relation("CrmActivityActor", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt   DateTime        @default(now())
+
+  @@index([contactId, createdAt])
+  @@index([dealId, dueAt])
+  @@index([dueAt, completedAt])
 }
 
 enum NotificationType {

@@ -6,6 +6,7 @@ import { sendEmail, emailLayout } from "@/lib/email";
 import { getSiteSettings } from "@/lib/data/settings";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { syncInboundAppointment } from "@/lib/crm";
 
 const AppointmentSchema = z.object({
   name: z.string().min(2),
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
     include: { property: true, agent: true },
   });
 
+  syncInboundAppointment(appointment).catch((e) => console.error("[appointments] CRM sync failed:", e));
   notifyNewAppointment(appointment).catch((e) => console.error("[appointments] notification failed:", e));
 
   return NextResponse.json(appointment, { status: 201 });

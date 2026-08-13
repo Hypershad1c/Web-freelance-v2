@@ -6,6 +6,7 @@ import { sendEmail, emailLayout } from "@/lib/email";
 import { getSiteSettings } from "@/lib/data/settings";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { syncInboundMessage } from "@/lib/crm";
 
 const MessageSchema = z.object({
   name: z.string().min(2),
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
     data: { ...data, userId: session?.user?.id },
   });
 
+  syncInboundMessage(message).catch((e) => console.error("[messages] CRM sync failed:", e));
   notifyNewMessage(message).catch((e) => console.error("[messages] notification failed:", e));
 
   return NextResponse.json(message, { status: 201 });
