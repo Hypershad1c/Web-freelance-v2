@@ -45,6 +45,7 @@ model User {
   crmCommunications   CrmCommunication[] @relation("CrmCommunicationOwner")
   crmDocumentsUploaded CrmDocument[] @relation("CrmDocumentUploadedBy")
   crmSellerCasesOwned CrmSellerCase[] @relation("CrmSellerCaseOwner")
+  crmOffersOwned      CrmOffer[]      @relation("CrmOfferOwner")
   crmAssignmentRules  CrmAssignmentRule[] @relation("CrmAssignmentAssignee")
   crmSavedSearches    CrmSavedSearch[]
   crmAutomationTemplates CrmAutomationTemplate[] @relation("CrmAutomationOwner")
@@ -251,6 +252,7 @@ model Property {
   crmDeals     CrmDeal[]
   crmDocuments CrmDocument[]
   crmSellerCases CrmSellerCase[]
+  crmOffers      CrmOffer[]
 
   seoTitle       String?
   seoDescription String?
@@ -399,6 +401,15 @@ enum CrmSellerCaseStage {
   LOST
 }
 
+enum CrmOfferStatus {
+  SUBMITTED
+  COUNTERED
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+  EXPIRED
+}
+
 enum CrmDocumentType {
   IDENTITY
   MANDATE
@@ -462,6 +473,7 @@ model CrmContact {
   communications    CrmCommunication[]
   documents         CrmDocument[]
   sellerCases       CrmSellerCase[]
+  offers            CrmOffer[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -488,6 +500,7 @@ model CrmDeal {
   activities       CrmActivity[]
   communications   CrmCommunication[]
   documents        CrmDocument[]
+  offers           CrmOffer[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
@@ -553,11 +566,39 @@ model CrmSellerCase {
   property       Property?          @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   ownerId        String?
   owner          User?              @relation("CrmSellerCaseOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  offers         CrmOffer[]
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
   @@index([stage, ownerId, updatedAt])
   @@index([contactId, createdAt])
+}
+
+model CrmOffer {
+  id            String         @id @default(cuid())
+  amount        Int
+  status        CrmOfferStatus @default(SUBMITTED)
+  message       String?
+  conditions    String?
+  expiresAt     DateTime?
+  submittedAt   DateTime       @default(now())
+  respondedAt   DateTime?
+  contactId     String
+  contact       CrmContact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  dealId        String
+  deal          CrmDeal        @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  propertyId    String
+  property      Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  sellerCaseId  String?
+  sellerCase    CrmSellerCase? @relation(fields: [sellerCaseId], references: [id], onDelete: SetNull)
+  ownerId       String?
+  owner         User?          @relation("CrmOfferOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([propertyId, status, updatedAt])
+  @@index([contactId, createdAt])
+  @@index([sellerCaseId, updatedAt])
 }
 
 model CrmAssignmentRule {

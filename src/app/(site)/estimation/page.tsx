@@ -1,137 +1,146 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, TrendingUp, ShieldCheck, Clock } from "lucide-react";
+import { CheckCircle2, CircleGauge, Clock3, ShieldCheck, TrendingUp } from "lucide-react";
 import { HoneypotField } from "@/components/HoneypotField";
+import { Turnstile } from "@/components/Turnstile";
 
 const PROPERTY_TYPES = ["Appartement", "Villa", "Duplex", "Terrain", "Riad", "Bureau"];
+const TIMELINES = [
+  { value: "ASAP", label: "Dès que possible" },
+  { value: "THREE_MONTHS", label: "Sous 3 mois" },
+  { value: "SIX_MONTHS", label: "Sous 6 mois" },
+  { value: "EXPLORING", label: "Je prépare mon projet" },
+];
 
 export default function EstimationPage() {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [honeypot, setHoneypot] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
     propertyType: PROPERTY_TYPES[0],
     city: "",
+    neighborhood: "",
+    transactionType: "VENTE",
     surfaceArea: "",
+    bedrooms: "",
+    desiredPrice: "",
+    timeline: "THREE_MONTHS",
     notes: "",
   });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (honeypot) return; // bot — silently drop
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (honeypot) return;
     setSending(true);
     setError(null);
 
-    const message = [
-      `Demande d'estimation — ${form.propertyType}`,
-      form.city && `Ville : ${form.city}`,
-      form.surfaceArea && `Surface : ${form.surfaceArea} m²`,
-      form.notes && `Notes : ${form.notes}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
-
     try {
-      const res = await fetch("/api/leads", {
+      const response = await fetch("/api/valuation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          message,
-          source: "estimation",
+          ...form,
+          surfaceArea: form.surfaceArea || undefined,
+          bedrooms: form.bedrooms || undefined,
+          desiredPrice: form.desiredPrice || undefined,
           website: honeypot,
+          turnstileToken,
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || "Une erreur est survenue.");
+      }
       setSent(true);
-    } catch {
-      setError("Une erreur est survenue. Merci de réessayer.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Une erreur est survenue. Merci de réessayer.");
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   }
 
   return (
-    <div>
-      <section className="bg-domify-primary-dark py-16 text-white">
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="font-display text-3xl font-bold sm:text-4xl">Estimez la valeur de votre bien</h1>
-          <p className="mt-3 text-white/70">
-            Obtenez une estimation gratuite et personnalisée par l&apos;un de nos experts, sous 48h.
-          </p>
+    <div className="bg-[#fbfaf7]">
+      <section className="relative overflow-hidden bg-domify-primary-dark py-16 text-white sm:py-20">
+        <div className="pointer-events-none absolute -right-16 top-0 h-64 w-64 rounded-full border border-domify-soft-gold/25" />
+        <div className="pointer-events-none absolute bottom-0 left-[12%] h-40 w-40 rounded-full border border-white/10" />
+        <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+          <p className="luxury-eyebrow text-domify-soft-gold">Parcours propriétaire</p>
+          <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Votre estimation, enfin actionnable.</h1>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-white/72">Partagez les informations essentielles. Un conseiller Domify étudie votre projet et ouvre un dossier vendeur suivi avec vous.</p>
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.2fr]">
-          <div className="space-y-6">
-            <Benefit icon={TrendingUp} title="Estimation précise" desc="Basée sur les transactions récentes et la connaissance fine du marché local." />
-            <Benefit icon={ShieldCheck} title="Sans engagement" desc="Une estimation gratuite, sans obligation de vendre ou de louer avec Domify." />
-            <Benefit icon={Clock} title="Réponse rapide" desc="Un de nos experts vous recontacte sous 48h avec votre estimation détaillée." />
-          </div>
+      <main className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8 lg:py-16">
+        <aside className="space-y-5 lg:pt-6">
+          <p className="luxury-eyebrow text-domify-gold">Ce que vous obtenez</p>
+          <h2 className="font-display text-3xl font-semibold text-domify-dark">Un accompagnement, pas une estimation automatique.</h2>
+          <Benefit icon={CircleGauge} title="Lecture du marché local" desc="Un expert rapproche votre bien des transactions et des opportunités comparables." />
+          <Benefit icon={TrendingUp} title="Dossier vendeur dédié" desc="Votre projet est centralisé, suivi et prêt pour les prochaines étapes." />
+          <Benefit icon={Clock3} title="Retour sous 48h" desc="Nous vous recontactons rapidement pour préciser votre stratégie de vente ou location." />
+          <Benefit icon={ShieldCheck} title="Sans engagement" desc="L’estimation est gratuite et confidentielle, sans obligation de mandat." />
+        </aside>
 
-          <div className="rounded-2xl bg-white p-8 shadow-luxury">
-            {sent ? (
-              <div className="flex flex-col items-center py-10 text-center">
-                <CheckCircle2 className="text-domify-gold" size={36} />
-                <p className="mt-4 font-display text-lg font-semibold text-domify-dark">Demande envoyée !</p>
-                <p className="mt-1 text-sm text-domify-dark/60">
-                  Un expert Domify vous recontactera sous 48h avec votre estimation.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <HoneypotField value={honeypot} onChange={setHoneypot} />
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <input required placeholder="Nom complet" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="rounded-xl border border-black/10 px-4 py-3 text-sm" />
-                  <input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="rounded-xl border border-black/10 px-4 py-3 text-sm" />
+        <section className="rounded-[1.75rem] border border-domify-dark/8 bg-white p-5 shadow-[0_24px_55px_-38px_rgba(16,47,66,0.5)] sm:p-8">
+          {sent ? (
+            <div className="flex min-h-96 flex-col items-center justify-center px-4 text-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"><CheckCircle2 size={32} /></span>
+              <p className="mt-6 font-display text-2xl font-semibold text-domify-dark">Votre dossier vendeur est ouvert.</p>
+              <p className="mt-3 max-w-md text-sm leading-6 text-domify-dark/62">Merci pour ces informations. Un expert Domify vous recontactera sous 48h pour affiner votre estimation et définir la meilleure suite pour votre bien.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-7">
+              <HoneypotField value={honeypot} onChange={setHoneypot} />
+              <fieldset>
+                <legend className="font-display text-xl font-semibold text-domify-dark">1. Vos coordonnées</legend>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <input required placeholder="Nom complet" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="domify-select" />
+                  <input required type="email" placeholder="Email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="domify-select" />
+                  <input placeholder="Téléphone" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="domify-select sm:col-span-2" />
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <input placeholder="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="rounded-xl border border-black/10 px-4 py-3 text-sm" />
-                  <select value={form.propertyType} onChange={(e) => setForm({ ...form, propertyType: e.target.value })} className="rounded-xl border border-black/10 px-4 py-3 text-sm">
-                    {PROPERTY_TYPES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
+              </fieldset>
+
+              <fieldset className="border-t border-domify-dark/8 pt-6">
+                <legend className="font-display text-xl font-semibold text-domify-dark">2. Votre bien</legend>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <select value={form.transactionType} onChange={(event) => setForm({ ...form, transactionType: event.target.value })} className="domify-select"><option value="VENTE">Je souhaite vendre</option><option value="LOCATION">Je souhaite louer</option></select>
+                  <select value={form.propertyType} onChange={(event) => setForm({ ...form, propertyType: event.target.value })} className="domify-select">{PROPERTY_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}</select>
+                  <input required placeholder="Ville" value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} className="domify-select" />
+                  <input placeholder="Quartier (facultatif)" value={form.neighborhood} onChange={(event) => setForm({ ...form, neighborhood: event.target.value })} className="domify-select" />
+                  <input type="number" min="1" placeholder="Surface (m²)" value={form.surfaceArea} onChange={(event) => setForm({ ...form, surfaceArea: event.target.value })} className="domify-select" />
+                  <input type="number" min="0" placeholder="Chambres" value={form.bedrooms} onChange={(event) => setForm({ ...form, bedrooms: event.target.value })} className="domify-select" />
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <input placeholder="Ville" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded-xl border border-black/10 px-4 py-3 text-sm" />
-                  <input placeholder="Surface (m²)" value={form.surfaceArea} onChange={(e) => setForm({ ...form, surfaceArea: e.target.value })} className="rounded-xl border border-black/10 px-4 py-3 text-sm" />
+              </fieldset>
+
+              <fieldset className="border-t border-domify-dark/8 pt-6">
+                <legend className="font-display text-xl font-semibold text-domify-dark">3. Votre projet</legend>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <input type="number" min="0" placeholder="Valeur souhaitée (MAD, facultatif)" value={form.desiredPrice} onChange={(event) => setForm({ ...form, desiredPrice: event.target.value })} className="domify-select sm:col-span-2" />
+                  <select value={form.timeline} onChange={(event) => setForm({ ...form, timeline: event.target.value })} className="domify-select sm:col-span-2">{TIMELINES.map((timeline) => <option key={timeline.value} value={timeline.value}>{timeline.label}</option>)}</select>
+                  <textarea rows={3} placeholder="Décrivez votre bien ou vos attentes (facultatif)" value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="rounded-xl border border-domify-dark/10 px-4 py-3 text-sm sm:col-span-2" />
                 </div>
-                <textarea rows={3} placeholder="Détails complémentaires (optionnel)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm" />
-                {error && <p className="text-sm text-red-600">{error}</p>}
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className="w-full rounded-xl bg-domify-gold py-3 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark disabled:opacity-60"
-                >
-                  {sending ? "Envoi..." : "Obtenir mon estimation gratuite"}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      </div>
+              </fieldset>
+
+              <Turnstile action="valuation" onTokenChange={setTurnstileToken} />
+              {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+              <button type="submit" disabled={sending || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken)} className="pressable w-full rounded-xl bg-domify-gold px-5 py-3.5 text-sm font-semibold text-white shadow-[0_16px_30px_-20px_rgba(199,157,64,0.9)] transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark disabled:cursor-wait disabled:opacity-60">
+                {sending ? "Ouverture de votre dossier..." : "Obtenir mon estimation personnalisée"}
+              </button>
+              <p className="text-center text-xs leading-5 text-domify-dark/48">Vos informations sont utilisées uniquement pour étudier votre demande et vous accompagner dans votre projet immobilier.</p>
+            </form>
+          )}
+        </section>
+      </main>
     </div>
   );
 }
 
 function Benefit({ icon: Icon, title, desc }: { icon: typeof TrendingUp; title: string; desc: string }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-domify-warm-white text-domify-gold">
-        <Icon size={18} />
-      </span>
-      <div>
-        <p className="font-display text-base font-semibold text-domify-dark">{title}</p>
-        <p className="mt-0.5 text-sm text-domify-dark/60">{desc}</p>
-      </div>
-    </div>
-  );
+  return <article className="flex gap-4 rounded-2xl border border-domify-dark/7 bg-white/75 p-4"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-domify-warm-white text-domify-gold"><Icon size={18} /></span><div><h3 className="font-semibold text-domify-dark">{title}</h3><p className="mt-1 text-sm leading-6 text-domify-dark/60">{desc}</p></div></article>;
 }

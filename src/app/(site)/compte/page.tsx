@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Heart, Inbox, CalendarClock, Shield, BellRing } from "lucide-react";
+import { Heart, Inbox, CalendarClock, Shield, BellRing, BriefcaseBusiness } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { SavedSearchForm } from "@/components/account/SavedSearchForm";
@@ -79,6 +79,8 @@ export default async function AccountPage() {
           </div>
         </div>
       </div>
+
+      <Link href="/espace-vendeur" className="mt-6 flex items-center justify-between gap-4 rounded-2xl bg-domify-primary-dark p-5 text-white shadow-luxury transition-luxury hover:bg-domify-primary"><span className="flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-domify-soft-gold"><BriefcaseBusiness size={19}/></span><span><span className="block font-display text-lg font-semibold">Mon espace vendeur</span><span className="mt-0.5 block text-xs text-white/66">Estimation, suivi de vos biens et offres reçues</span></span></span><span className="text-xl">→</span></Link>
 
       <section className="mt-10 rounded-2xl bg-white p-6 shadow-luxury"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-domify-warm-white text-domify-gold"><BellRing size={18}/></span><div><h2 className="font-display text-xl font-semibold text-domify-dark">Mes alertes de recherche</h2><p className="mt-1 text-sm text-domify-dark/55">Recevez les nouveaux biens correspondant à vos critères.</p></div></div><SavedSearchForm cities={cities} propertyTypes={propertyTypes}/>{savedSearches.length>0&&<div className="mt-5 space-y-2">{savedSearches.map((search)=><div key={search.id} className="rounded-xl bg-domify-warm-white px-4 py-3 text-sm text-domify-dark"><b>{search.name}</b><p className="mt-1 text-xs text-domify-dark/55">{search.city?.name||"Toutes villes"} · {search.propertyType?.name||"Tous types"} · {search.channel}</p></div>)}</div>}</section>
 

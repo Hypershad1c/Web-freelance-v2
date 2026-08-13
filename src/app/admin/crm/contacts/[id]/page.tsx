@@ -15,11 +15,17 @@ export default async function CrmContactPage({ params }: { params: Promise<{ id:
   const role = session?.user?.role;
   if (!session?.user?.id || (role !== "ADMIN" && role !== "EDITOR" && role !== "AGENT")) redirect(`/connexion?callbackUrl=/admin/crm/contacts/${id}`);
   const access = { userId: session.user.id, role } as const;
-  const [contact, properties] = await Promise.all([
+  const [contact, properties, sellerCases] = await Promise.all([
     getCrmContactById(id, access),
     prisma.property.findMany({
       where: role === "AGENT" ? { agent: { userId: session.user.id } } : {},
       select: { id: true, title: true, reference: true },
+      orderBy: { updatedAt: "desc" },
+      take: 100,
+    }),
+    prisma.crmSellerCase.findMany({
+      where: role === "AGENT" ? { OR: [{ ownerId: session.user.id }, { property: { agent: { userId: session.user.id } } }] } : {},
+      select: { id: true, title: true },
       orderBy: { updatedAt: "desc" },
       take: 100,
     }),
@@ -35,7 +41,7 @@ export default async function CrmContactPage({ params }: { params: Promise<{ id:
 
         <section className="mt-7 grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_430px]">
           <div className="space-y-6"><CrmTimeline activities={contact.activities} /><section className="rounded-[1.35rem] border border-domify-dark/8 bg-white p-5 shadow-[0_18px_38px_-30px_rgba(16,47,66,0.34)]"><p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-domify-gold">Sources d&apos;origine</p><h2 className="mt-1 font-display text-xl font-semibold text-domify-dark">Demandes associées</h2><div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-3"><InboundCard icon={MessageSquareText} title="Leads" items={contact.leads.map((lead) => ({ id: lead.id, title: lead.property?.title || "Demande générale", detail: lead.message || lead.status, date: lead.createdAt }))} /><InboundCard icon={CalendarDays} title="Visites" items={contact.appointments.map((appointment) => ({ id: appointment.id, title: appointment.property?.title || "Visite", detail: `${appointment.status} · ${appointment.agent?.name || "Sans agent"}`, date: appointment.date }))} /><InboundCard icon={Mail} title="Messages" items={contact.messages.map((message) => ({ id: message.id, title: message.subject || "Sans sujet", detail: message.body, date: message.createdAt }))} /></div></section></div>
-          <aside className="space-y-6"><section className="rounded-[1.35rem] border border-domify-dark/8 bg-white p-5 shadow-[0_18px_38px_-30px_rgba(16,47,66,0.34)]"><p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-domify-gold">Profil</p><h2 className="mt-1 font-display text-xl font-semibold text-domify-dark">Informations du contact</h2><div className="mt-5"><CrmContactForm contact={contact} /></div></section><CrmDealForm contactId={contact.id} properties={properties} /><CrmActivityForm contactId={contact.id} deals={contact.deals.map((deal) => ({ id: deal.id, title: deal.title }))} /><CrmSalesTools contactId={contact.id} deals={contact.deals.map((deal) => ({ id: deal.id, title: deal.title }))} properties={properties} /></aside>
+          <aside className="space-y-6"><section className="rounded-[1.35rem] border border-domify-dark/8 bg-white p-5 shadow-[0_18px_38px_-30px_rgba(16,47,66,0.34)]"><p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-domify-gold">Profil</p><h2 className="mt-1 font-display text-xl font-semibold text-domify-dark">Informations du contact</h2><div className="mt-5"><CrmContactForm contact={contact} /></div></section><CrmDealForm contactId={contact.id} properties={properties} /><CrmActivityForm contactId={contact.id} deals={contact.deals.map((deal) => ({ id: deal.id, title: deal.title }))} /><CrmSalesTools contactId={contact.id} deals={contact.deals.map((deal) => ({ id: deal.id, title: deal.title }))} properties={properties} sellerCases={sellerCases} offers={contact.sellerCases.flatMap((item) => item.offers)} /></aside>
         </section>
       </main>
     </>

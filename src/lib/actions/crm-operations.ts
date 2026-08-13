@@ -1,6 +1,6 @@
 "use server";
 
-import { CrmCommunicationChannel, CrmCommunicationDirection, CrmCommunicationStatus, CrmDocumentType, CrmSellerCaseStage } from "@prisma/client";
+import { CrmCommunicationChannel, CrmCommunicationDirection, CrmCommunicationStatus, CrmDocumentType, CrmOfferStatus, CrmSellerCaseStage } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
@@ -24,7 +24,7 @@ async function assertContact(contactId: string, userId: string, role: string) {
   if (!contact || (role === "AGENT" && contact.ownerId !== userId)) throw new Error("Contact introuvable ou non autorisé");
   return contact;
 }
-function refresh(contactId?: string) { revalidatePath("/admin/crm"); revalidatePath("/admin/crm/operations"); if (contactId) revalidatePath(`/admin/crm/contacts/${contactId}`); }
+function refresh(contactId?: string) { revalidatePath("/admin/crm"); revalidatePath("/admin/crm/operations"); revalidatePath("/compte"); revalidatePath("/espace-vendeur"); if (contactId) revalidatePath(`/admin/crm/contacts/${contactId}`); }
 
 const CommunicationSchema = z.object({ channel: z.nativeEnum(CrmCommunicationChannel), direction: z.nativeEnum(CrmCommunicationDirection), subject: z.string().max(180).optional(), body: z.string().min(2).max(4000), dealId: z.string().optional() });
 export async function logCrmCommunication(contactId: string, formData: FormData) {
@@ -57,6 +57,51 @@ export async function updateCrmSellerStage(caseId: string, stage: string) {
   if (!item || (session.user.role === "AGENT" && item.ownerId !== session.user.id && item.contact.ownerId !== session.user.id)) throw new Error("Non autorisé");
   await prisma.crmSellerCase.update({ where: { id: caseId }, data: { stage: parsed.data } });
   await recordAudit({ actorId: session.user.id, action: "CRM_SELLER_CASE_STAGE_UPDATED", entityType: "CrmSellerCase", entityId: caseId, summary: `${item.title} → ${parsed.data}` });
+  refresh(item.contactId);
+}
+
+const OfferSchema = z.object({ amount: z.coerce.number().int().positive(), dealId: z.string().min(1), propertyId: z.string().min(1), sellerCaseId: z.string().optional(), expiresAt: z.string().optional(), message: z.string().max(4000).optional(), conditions: z.string().max(4000).optional() });
+export async function createCrmOffer(contactId: string, formData: FormData) {
+  const session = await requireStaff();
+  await assertContact(contactId, session.user.id, session.user.role);
+  const data = OfferSchema.parse(Object.fromEntries(formData));
+  const [deal, property] = await Promise.all([
+    prisma.crmDeal.findFirst({ where: { id: data.dealId, contactId } }),
+    prisma.property.findFirst({ where: { id: data.propertyId, ...(session.user.role === "AGENT" ? { agent: { userId: session.user.id } } : {}) } }),
+  ]);
+  if (!deal || !property || (deal.propertyId && deal.propertyId !== property.id)) throw new Error("Bien ou opportunité invalide");
+  if (data.sellerCaseId) {
+    const sellerCase = await prisma.crmSellerCase.findFirst({
+      where: {
+        id: data.sellerCaseId,
+        ...(session.user.role === "AGENT" ? { OR: [{ ownerId: session.user.id }, { property: { agent: { userId: session.user.id } } }] } : {}),
+      },
+    });
+    if (!sellerCase) throw new Error("Dossier vendeur invalide");
+  }
+  const item = await prisma.crmOffer.create({ data: { amount: data.amount, dealId: deal.id, propertyId: property.id, sellerCaseId: data.sellerCaseId || null, contactId, expiresAt: data.expiresAt ? new Date(data.expiresAt) : null, message: data.message || null, conditions: data.conditions || null, ownerId: session.user.id } });
+  await prisma.$transaction([
+    prisma.crmDeal.update({ where: { id: deal.id }, data: { stage: "OFFER", probability: Math.max(deal.probability, 60) } }),
+    ...(data.sellerCaseId ? [prisma.crmSellerCase.update({ where: { id: data.sellerCaseId }, data: { stage: "OFFER_RECEIVED" } })] : []),
+    prisma.crmActivity.create({ data: { type: "SYSTEM", body: `Offre reçue : ${new Intl.NumberFormat("fr-MA").format(data.amount)} MAD`, contactId, dealId: deal.id, actorId: session.user.id } }),
+  ]);
+  await recordAudit({ actorId: session.user.id, action: "CRM_OFFER_CREATED", entityType: "CrmOffer", entityId: item.id, summary: `Offre de ${new Intl.NumberFormat("fr-MA").format(data.amount)} MAD` });
+  refresh(contactId);
+}
+
+export async function updateCrmOfferStatus(offerId: string, status: string) {
+  const session = await requireStaff();
+  const parsed = z.nativeEnum(CrmOfferStatus).safeParse(status); if (!parsed.success) throw new Error("Statut d’offre invalide");
+  const item = await prisma.crmOffer.findUnique({ where: { id: offerId }, include: { contact: true, deal: true } });
+  if (!item || (session.user.role === "AGENT" && item.contact.ownerId !== session.user.id && item.ownerId !== session.user.id)) throw new Error("Non autorisé");
+  const isNegotiating = parsed.data === "COUNTERED" || parsed.data === "ACCEPTED";
+  await prisma.$transaction([
+    prisma.crmOffer.update({ where: { id: offerId }, data: { status: parsed.data, respondedAt: parsed.data === "SUBMITTED" ? null : new Date() } }),
+    ...(isNegotiating ? [prisma.crmDeal.update({ where: { id: item.dealId }, data: { stage: "NEGOTIATION", probability: parsed.data === "ACCEPTED" ? 85 : 70 } })] : []),
+    ...(item.sellerCaseId && isNegotiating ? [prisma.crmSellerCase.update({ where: { id: item.sellerCaseId }, data: { stage: "NEGOTIATION" } })] : []),
+    prisma.crmActivity.create({ data: { type: "SYSTEM", body: `Offre mise à jour : ${parsed.data}`, contactId: item.contactId, dealId: item.dealId, actorId: session.user.id } }),
+  ]);
+  await recordAudit({ actorId: session.user.id, action: "CRM_OFFER_STATUS_UPDATED", entityType: "CrmOffer", entityId: offerId, summary: `Offre → ${parsed.data}` });
   refresh(item.contactId);
 }
 

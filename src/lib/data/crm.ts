@@ -99,7 +99,7 @@ export async function getCrmContactById(id: string, access: CrmAccess) {
       messages: { orderBy: { createdAt: "desc" } },
       communications: { include: { owner: { select: { name: true, email: true } }, deal: { select: { id: true, title: true } } }, orderBy: { createdAt: "desc" }, take: 50 },
       documents: { include: { deal: { select: { id: true, title: true } }, property: { select: { id: true, title: true } } }, orderBy: { createdAt: "desc" }, take: 50 },
-      sellerCases: { include: { property: { select: { id: true, title: true } } }, orderBy: { updatedAt: "desc" } },
+      sellerCases: { include: { property: { select: { id: true, title: true } }, offers: { include: { property: { select: { title: true } }, sellerCase: { select: { title: true } } }, orderBy: { updatedAt: "desc" } } }, orderBy: { updatedAt: "desc" } },
       activities: {
         include: {
           actor: { select: { name: true, email: true } },
