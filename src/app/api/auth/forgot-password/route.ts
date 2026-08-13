@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
   const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reinitialiser-mot-de-passe/${token}`;
 
-  await sendEmail({
+  const delivery = await sendEmail({
     to: user.email,
     subject: "Réinitialisez votre mot de passe — Domify",
     html: emailLayout(
@@ -53,6 +53,15 @@ export async function POST(request: Request) {
        <p style="margin-top:16px; font-size:12px; color:#1F293766;">Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet email.</p>`
     ),
   });
+
+  if (delivery.skipped) {
+    // Keep the public response indistinguishable to prevent account enumeration,
+    // but leave a structured server-side signal for production diagnostics.
+    console.error("[auth] Password-reset email was not accepted by the mail provider", {
+      reason: delivery.reason,
+      userId: user.id,
+    });
+  }
 
   return NextResponse.json({ ok: true });
 }
