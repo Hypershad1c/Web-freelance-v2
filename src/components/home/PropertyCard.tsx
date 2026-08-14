@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { Heart, Bed, Bath, Square, Phone, Scale, Eye } from "lucide-react";
+import { Heart, Bed, Bath, Square, Phone, Scale, Eye, BadgeCheck, Video } from "lucide-react";
 import { formatMAD, cn, telLink } from "@/lib/utils";
 import { useFavorites } from "@/lib/favorites-context";
 import { useCompare } from "@/lib/compare-context";
@@ -20,6 +20,7 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
   const comparing = isComparing(property.id);
   const image = property.media[0]?.url ?? FALLBACK_IMAGE;
   const contactPhone = property.agent?.phone ?? property.agency?.phone;
+  const hasVideo = property.media.some((media) => media.type === "video");
   const reduceMotion = useReducedMotion();
 
   return (
@@ -45,12 +46,10 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
             <span className="rounded-full bg-domify-gold px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.09em] text-white shadow-sm">
               {property.listingType === "LOCATION" ? "À louer" : property.propertyType.name}
             </span>
-            {property.featured && (
-              <span className="rounded-full border border-white/25 bg-domify-primary-dark/80 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-domify-soft-gold shadow-sm backdrop-blur-sm">
-                Sélection Domify
-              </span>
-            )}
+            {property.featured && <span className="rounded-full border border-white/25 bg-domify-primary-dark/80 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-domify-soft-gold shadow-sm backdrop-blur-sm">Sélection Domify</span>}
+            {property.agency?.verified && <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/40 bg-emerald-950/60 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-emerald-100 backdrop-blur-sm"><BadgeCheck size={12} /> Agence vérifiée</span>}
           </div>
+          <div className="absolute bottom-4 left-4 flex items-center gap-2">{hasVideo && <span className="inline-flex items-center gap-1 rounded-full bg-black/35 px-2.5 py-1.5 text-[0.62rem] font-semibold text-white backdrop-blur-sm"><Video size={12} /> Visite vidéo</span>}</div>
           <div className="absolute right-4 top-4 flex gap-2">
             <button
               aria-label={comparing ? "Retirer de la comparaison" : "Ajouter à la comparaison"}

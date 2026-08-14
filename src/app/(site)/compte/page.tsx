@@ -4,6 +4,8 @@ import { ArrowUpRight, BellRing, BriefcaseBusiness, CalendarClock, ChevronRight,
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { SavedSearchForm } from "@/components/account/SavedSearchForm";
+import { BuyerOnboarding } from "@/components/account/BuyerOnboarding";
+import { NotificationCenter } from "@/components/account/NotificationCenter";
 
 const LEAD_STATUS_LABELS: Record<string, string> = { NEW: "Nouveau", CONTACTED: "Contacté", QUALIFIED: "Qualifié", CONVERTED: "Converti", LOST: "Clôturé" };
 const APPOINTMENT_STATUS_LABELS: Record<string, string> = { PENDING: "En attente", CONFIRMED: "Confirmé", CANCELLED: "Annulé", COMPLETED: "Terminé" };
@@ -34,6 +36,8 @@ export default async function AccountPage() {
           <div className="rounded-2xl border border-white/12 bg-white/8 p-5 backdrop-blur-md"><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-domify-soft-gold"><Sparkles size={15} /> Votre suivi</div><p className="mt-4 font-display text-2xl font-semibold">{activeLeads > 0 ? "Projet en cours" : "Prêt à commencer"}</p><p className="mt-2 text-sm leading-6 text-white/62">{activeLeads > 0 ? "Votre équipe suit vos demandes et reviendra vers vous rapidement." : "Enregistrez une recherche ou un favori pour personnaliser votre expérience."}</p><div className="mt-5 h-1.5 overflow-hidden rounded-full bg-white/12"><div className="h-full w-2/3 rounded-full bg-domify-soft-gold" /></div><p className="mt-2 text-xs text-white/48">Profil actif · accompagnement premium</p></div>
         </div>
       </section>
+
+      <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]"><BuyerOnboarding cities={cities} propertyTypes={propertyTypes} /><div className="rounded-[1.5rem] border border-domify-dark/8 bg-white p-5 shadow-[0_18px_38px_-30px_rgba(16,47,66,0.35)] sm:p-7"><div className="flex items-center justify-between"><div><p className="luxury-eyebrow text-domify-gold">Restez informé</p><h2 className="mt-2 font-display text-2xl font-semibold text-domify-dark">Votre centre d&apos;activité</h2></div><NotificationCenter /></div><p className="mt-4 text-sm leading-6 text-domify-dark/55">Retrouvez ici les alertes, changements de rendez-vous et prochaines actions qui comptent pour votre projet.</p></div></div>
 
       <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Kpi href="/favoris" icon={Heart} value={favoritesCount} label="Biens favoris" accent="gold" />

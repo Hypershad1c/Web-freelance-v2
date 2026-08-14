@@ -72,6 +72,7 @@ export async function getAgentBySlug(slug: string) {
     where: { slug },
     include: {
       agency: true,
+      availability: { where: { active: true, startsAt: { gte: new Date() } }, orderBy: { startsAt: "asc" }, take: 3 },
       properties: { where: { status: "PUBLISHED" }, include: propertyCardInclude, orderBy: { createdAt: "desc" } },
     },
   });

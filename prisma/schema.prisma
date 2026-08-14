@@ -30,6 +30,7 @@ model User {
   accounts     Account[]
   sessions     Session[]
   favorites    Favorite[]
+  favoriteCollections FavoriteCollection[]
   leads        Lead[]
   appointments Appointment[]
   agent        Agent?
@@ -282,14 +283,31 @@ model Media {
 }
 
 model Favorite {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  id           String             @id @default(cuid())
+  userId       String
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId   String
+  property     Property            @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  collectionId String?
+  collection   FavoriteCollection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  createdAt    DateTime            @default(now())
 
   @@unique([userId, propertyId])
+  @@index([userId, collectionId])
+}
+
+model FavoriteCollection {
+  id        String     @id @default(cuid())
+  name      String
+  color     String?
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  favorites Favorite[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId, updatedAt])
 }
 
 // ---------- LEADS / APPOINTMENTS / MESSAGES ----------

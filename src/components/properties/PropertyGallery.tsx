@@ -1,113 +1,41 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Images, Maximize2, Share2, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, FileImage, Images, Maximize2, PlayCircle, Share2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-export function PropertyGallery({ images, title }: { images: string[]; title: string }) {
-  const gallery = images.length > 0 ? images : ["/brand/domify-logo-horizontal.png"];
+type GalleryMedia = { url: string; type?: string; alt?: string | null };
+
+export function PropertyGallery({ media, title }: { media: GalleryMedia[]; title: string }) {
+  const gallery = useMemo(() => media.length > 0 ? media : [{ url: "/brand/domify-logo-horizontal.png", type: "image", alt: title }], [media, title]);
   const [active, setActive] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [shareLabel, setShareLabel] = useState("Partager");
+  const [filter, setFilter] = useState<"all" | "image" | "video" | "floorplan">("all");
+  const filteredGallery = useMemo(() => filter === "all" ? gallery : gallery.filter((item) => item.type === filter), [filter, gallery]);
+  const currentIndex = Math.min(active, Math.max(filteredGallery.length - 1, 0));
+  const current = filteredGallery[currentIndex] ?? gallery[0];
 
-  const goTo = (index: number) => setActive((index + gallery.length) % gallery.length);
-  const goNext = () => goTo(active + 1);
-  const goPrevious = () => goTo(active - 1);
+  const goTo = useCallback((index: number) => setActive((index + filteredGallery.length) % filteredGallery.length), [filteredGallery.length]);
+  const goNext = useCallback(() => goTo(currentIndex + 1), [currentIndex, goTo]);
+  const goPrevious = useCallback(() => goTo(currentIndex - 1), [currentIndex, goTo]);
 
   useEffect(() => {
     if (!lightboxOpen) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setLightboxOpen(false);
-      if (event.key === "ArrowRight") goNext();
-      if (event.key === "ArrowLeft") goPrevious();
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [lightboxOpen, active]);
+    const handleKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setLightboxOpen(false); if (event.key === "ArrowRight") goNext(); if (event.key === "ArrowLeft") goPrevious(); };
+    document.addEventListener("keydown", handleKeyDown); document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", handleKeyDown); document.body.style.overflow = ""; };
+  }, [lightboxOpen, currentIndex, filteredGallery.length, goNext, goPrevious]);
 
-  const share = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({ title, url: window.location.href });
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        setShareLabel("Lien copié");
-        window.setTimeout(() => setShareLabel("Partager"), 1800);
-      }
-    } catch {
-      // Sharing can be cancelled by the user; the gallery should remain usable.
-    }
-  };
+  const share = async () => { try { if (navigator.share) await navigator.share({ title, url: window.location.href }); else { await navigator.clipboard.writeText(window.location.href); setShareLabel("Lien copié"); window.setTimeout(() => setShareLabel("Partager"), 1800); } } catch { /* user cancelled */ } };
+  const handleTouchEnd = (endX: number) => { if (touchStart === null) return; const distance = endX - touchStart;     if (Math.abs(distance) > 45) { if (distance < 0) goNext(); else goPrevious(); } setTouchStart(null); };
+  const renderMedia = (item: GalleryMedia, fullscreen = false) => item.type === "video" ? <video src={item.url} controls playsInline className={fullscreen ? "h-full w-full object-contain" : "h-full w-full object-cover"} aria-label={item.alt || title} /> : <Image src={item.url} alt={item.alt || `${title} — média ${currentIndex + 1}`} fill sizes={fullscreen ? "100vw" : "(max-width: 1024px) 100vw, 850px"} className={item.type === "floorplan" ? "object-contain p-5" : "object-cover"} priority={currentIndex === 0 && !fullscreen} />;
 
-  const handleTouchEnd = (endX: number) => {
-    if (touchStart === null) return;
-    const distance = endX - touchStart;
-    if (Math.abs(distance) > 45) distance < 0 ? goNext() : goPrevious();
-    setTouchStart(null);
-  };
-
-  return (
-    <>
-      <div className="group relative overflow-hidden rounded-[1.6rem] bg-domify-primary-dark shadow-[0_24px_55px_-34px_rgba(16,47,66,0.72)]">
-        <div
-          className="relative h-[320px] w-full sm:h-[460px] lg:h-[540px]"
-          onTouchStart={(event) => setTouchStart(event.touches[0]?.clientX ?? null)}
-          onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)}
-        >
-          <Image src={gallery[active]} alt={`${title} — image ${active + 1}`} fill priority={active === 0} sizes="(max-width: 1024px) 100vw, 850px" className="object-cover transition-transform duration-700 group-hover:scale-[1.015]" />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-domify-primary-dark/60 via-transparent to-domify-primary-dark/10" />
-          <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-white/20 bg-domify-primary-dark/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
-            <Images size={14} className="text-domify-soft-gold" />
-            <span>{active + 1} / {gallery.length}</span>
-          </div>
-          <div className="absolute right-4 top-4 flex items-center gap-2">
-            <button type="button" onClick={share} className="pressable inline-flex h-10 items-center gap-2 rounded-full border border-white/20 bg-domify-primary-dark/60 px-3 text-xs font-semibold text-white backdrop-blur-md transition-luxury hover:bg-domify-primary" aria-label="Partager ce bien">
-              <Share2 size={15} /> <span className="hidden sm:inline">{shareLabel}</span>
-            </button>
-            <button type="button" onClick={() => setLightboxOpen(true)} className="pressable inline-flex h-10 items-center gap-2 rounded-full border border-white/20 bg-domify-primary-dark/60 px-3 text-xs font-semibold text-white backdrop-blur-md transition-luxury hover:bg-domify-primary" aria-label="Ouvrir la galerie en plein écran">
-              <Maximize2 size={15} /> <span className="hidden sm:inline">Plein écran</span>
-            </button>
-          </div>
-          {gallery.length > 1 && (
-            <>
-              <button type="button" onClick={goPrevious} className="pressable absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-domify-primary-dark/55 text-white backdrop-blur-md transition-luxury hover:bg-domify-primary" aria-label="Image précédente"><ChevronLeft size={20} /></button>
-              <button type="button" onClick={goNext} className="pressable absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-domify-primary-dark/55 text-white backdrop-blur-md transition-luxury hover:bg-domify-primary" aria-label="Image suivante"><ChevronRight size={20} /></button>
-            </>
-          )}
-          <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-4">
-            <p className="max-w-[75%] truncate text-sm font-medium text-white/90">{title}</p>
-            <div className="flex gap-1.5" aria-label="Position dans la galerie">
-              {gallery.slice(0, 8).map((_, index) => <button type="button" key={index} onClick={() => goTo(index)} aria-label={`Voir l'image ${index + 1}`} className={`h-1.5 rounded-full transition-all ${index === active ? "w-7 bg-domify-soft-gold" : "w-1.5 bg-white/55 hover:bg-white"}`} />)}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {gallery.length > 1 && (
-        <div className="mt-3 grid grid-cols-5 gap-2 sm:grid-cols-6 sm:gap-3">
-          {gallery.map((image, index) => (
-            <button type="button" key={`${image}-${index}`} onClick={() => goTo(index)} aria-label={`Voir l'image ${index + 1}`} className={`relative h-16 overflow-hidden rounded-xl transition-luxury sm:h-20 ${active === index ? "ring-2 ring-domify-gold ring-offset-2 ring-offset-white" : "opacity-65 hover:opacity-100"}`}>
-              <Image src={image} alt="" fill sizes="120px" className="object-cover" />
-            </button>
-          ))}
-        </div>
-      )}
-
-      {lightboxOpen && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-domify-primary-dark/95 p-4 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label={`Galerie de ${title}`} onClick={() => setLightboxOpen(false)}>
-          <button type="button" onClick={() => setLightboxOpen(false)} className="pressable absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20" aria-label="Fermer la galerie"><X size={21} /></button>
-          <div className="relative h-[76vh] w-full max-w-6xl" onClick={(event) => event.stopPropagation()} onTouchStart={(event) => setTouchStart(event.touches[0]?.clientX ?? null)} onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)}>
-            <Image src={gallery[active]} alt={`${title} — image ${active + 1}`} fill sizes="100vw" className="object-contain" />
-            <div className="absolute bottom-[-3.5rem] inset-x-0 flex items-center justify-center gap-3 text-sm text-white/80"><span>{active + 1} / {gallery.length}</span><span className="text-white/35">•</span><span className="hidden sm:inline">Utilisez ← → ou balayez pour naviguer</span></div>
-            {gallery.length > 1 && <><button type="button" onClick={goPrevious} className="pressable absolute left-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 sm:-left-16" aria-label="Image précédente"><ChevronLeft size={25} /></button><button type="button" onClick={goNext} className="pressable absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 sm:-right-16" aria-label="Image suivante"><ChevronRight size={25} /></button></>}
-          </div>
-        </div>
-      )}
-    </>
-  );
+  return <>
+    <div className="mb-3 flex flex-wrap gap-2">{[{ value: "all", label: "Tout", icon: Images }, { value: "image", label: "Photos", icon: Images }, { value: "video", label: "Visite vidéo", icon: PlayCircle }, { value: "floorplan", label: "Plans", icon: FileImage }].filter((tab) => tab.value === "all" || gallery.some((item) => item.type === tab.value)).map(({ value, label, icon: Icon }) => <button key={value} type="button" onClick={() => { setFilter(value as typeof filter); setActive(0); }} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-luxury ${filter === value ? "bg-domify-primary text-white" : "border border-domify-dark/10 bg-white text-domify-dark/55 hover:border-domify-gold/40"}`}><Icon size={13} /> {label}</button>)}</div>
+    <div className="group relative overflow-hidden rounded-[1.6rem] bg-domify-primary-dark shadow-[0_24px_55px_-34px_rgba(16,47,66,0.72)]"><div className="relative h-[320px] w-full sm:h-[460px] lg:h-[540px]" onTouchStart={(event) => setTouchStart(event.touches[0]?.clientX ?? null)} onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)}>{renderMedia(current)}<div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-domify-primary-dark/60 via-transparent to-domify-primary-dark/10" /><div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-white/20 bg-domify-primary-dark/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md"><Images size={14} className="text-domify-soft-gold" /><span>{currentIndex + 1} / {filteredGallery.length}</span></div><div className="absolute right-4 top-4 flex items-center gap-2"><button type="button" onClick={share} className="pressable inline-flex h-10 items-center gap-2 rounded-full border border-white/20 bg-domify-primary-dark/60 px-3 text-xs font-semibold text-white backdrop-blur-md"><Share2 size={15} /><span className="hidden sm:inline">{shareLabel}</span></button><button type="button" onClick={() => setLightboxOpen(true)} className="pressable inline-flex h-10 items-center gap-2 rounded-full border border-white/20 bg-domify-primary-dark/60 px-3 text-xs font-semibold text-white backdrop-blur-md"><Maximize2 size={15} /><span className="hidden sm:inline">Plein écran</span></button></div>{filteredGallery.length > 1 && <><button type="button" onClick={goPrevious} className="pressable absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-domify-primary-dark/55 text-white backdrop-blur-md" aria-label="Média précédent"><ChevronLeft size={20} /></button><button type="button" onClick={goNext} className="pressable absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-domify-primary-dark/55 text-white backdrop-blur-md" aria-label="Média suivant"><ChevronRight size={20} /></button></>}<div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-4"><p className="max-w-[75%] truncate text-sm font-medium text-white/90">{current.type === "video" ? "Visite vidéo" : current.type === "floorplan" ? "Plan du bien" : title}</p><div className="flex gap-1.5">{filteredGallery.slice(0, 8).map((_, index) => <button type="button" key={index} onClick={() => goTo(index)} aria-label={`Voir le média ${index + 1}`} className={`h-1.5 rounded-full transition-all ${index === currentIndex ? "w-7 bg-domify-soft-gold" : "w-1.5 bg-white/55"}`} />)}</div></div></div></div>
+    {filteredGallery.length > 1 && <div className="mt-3 grid grid-cols-5 gap-2 sm:grid-cols-6 sm:gap-3">{filteredGallery.map((item, index) => <button type="button" key={`${item.url}-${index}`} onClick={() => goTo(index)} aria-label={`Voir le média ${index + 1}`} className={`relative h-16 overflow-hidden rounded-xl bg-domify-warm-white transition-luxury sm:h-20 ${currentIndex === index ? "ring-2 ring-domify-gold ring-offset-2 ring-offset-white" : "opacity-65 hover:opacity-100"}`}>{item.type === "video" ? <span className="flex h-full items-center justify-center text-domify-primary"><PlayCircle size={24} /></span> : item.type === "floorplan" ? <span className="flex h-full items-center justify-center text-domify-primary"><FileImage size={24} /></span> : <Image src={item.url} alt="" fill sizes="120px" className="object-cover" />}</button>)}</div>}
+    {lightboxOpen && <div className="fixed inset-0 z-[80] flex items-center justify-center bg-domify-primary-dark/95 p-4 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label={`Galerie de ${title}`} onClick={() => setLightboxOpen(false)}><button type="button" onClick={() => setLightboxOpen(false)} className="pressable absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white" aria-label="Fermer la galerie"><X size={21} /></button><div className="relative h-[76vh] w-full max-w-6xl" onClick={(event) => event.stopPropagation()} onTouchStart={(event) => setTouchStart(event.touches[0]?.clientX ?? null)} onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)}>{renderMedia(current, true)}<div className="absolute bottom-[-3.5rem] inset-x-0 flex items-center justify-center gap-3 text-sm text-white/80"><span>{currentIndex + 1} / {filteredGallery.length}</span><span className="text-white/35">•</span><span className="hidden sm:inline">Utilisez ← → ou balayez pour naviguer</span></div></div></div>}
+  </>;
 }

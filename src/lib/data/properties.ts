@@ -72,7 +72,11 @@ export type PropertyFilters = {
   neighborhood?: string; // neighborhood slug
   listingType?: "VENTE" | "LOCATION";
   propertyType?: string; // property type slug
+  priceMin?: number;
   priceMax?: number;
+  bedrooms?: number;
+  surfaceMin?: number;
+  amenity?: string;
   reference?: string;
   sort?: "recent" | "price-asc" | "price-desc";
 };
@@ -84,7 +88,11 @@ export async function getProperties(filters: PropertyFilters = {}) {
     ...(filters.neighborhood ? { neighborhood: { slug: filters.neighborhood } } : {}),
     ...(filters.listingType ? { listingType: filters.listingType } : {}),
     ...(filters.propertyType ? { propertyType: { slug: filters.propertyType } } : {}),
+    ...(typeof filters.priceMin === "number" && filters.priceMin > 0 ? { price: { gte: filters.priceMin } } : {}),
     ...(typeof filters.priceMax === "number" && filters.priceMax > 0 ? { price: { lte: filters.priceMax } } : {}),
+    ...(typeof filters.bedrooms === "number" && filters.bedrooms > 0 ? { bedrooms: { gte: filters.bedrooms } } : {}),
+    ...(typeof filters.surfaceMin === "number" && filters.surfaceMin > 0 ? { surfaceArea: { gte: filters.surfaceMin } } : {}),
+    ...(filters.amenity ? { amenities: { some: { slug: filters.amenity } } } : {}),
     ...(filters.reference ? { reference: { contains: filters.reference, mode: "insensitive" } } : {}),
   };
 
@@ -147,6 +155,31 @@ export async function getPropertyTypes() {
 
   try {
     return await prisma.propertyType.findMany({ orderBy: { name: "asc" } });
+  } catch (error) {
+    if ((error as Prisma.PrismaClientKnownRequestError)?.code === "P2021") return [];
+    throw error;
+  }
+}
+
+export async function getNeighborhoods() {
+  if (!(await isPrismaReady())) return [];
+
+  try {
+    return await prisma.neighborhood.findMany({
+      select: { slug: true, name: true, city: { select: { name: true } } },
+      orderBy: [{ city: { name: "asc" } }, { name: "asc" }],
+    });
+  } catch (error) {
+    if ((error as Prisma.PrismaClientKnownRequestError)?.code === "P2021") return [];
+    throw error;
+  }
+}
+
+export async function getAmenities() {
+  if (!(await isPrismaReady())) return [];
+
+  try {
+    return await prisma.amenity.findMany({ select: { slug: true, name: true }, orderBy: { name: "asc" } });
   } catch (error) {
     if ((error as Prisma.PrismaClientKnownRequestError)?.code === "P2021") return [];
     throw error;

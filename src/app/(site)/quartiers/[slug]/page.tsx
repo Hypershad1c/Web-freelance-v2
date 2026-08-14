@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, MapPinned } from "lucide-react";
+import { ArrowLeft, Building2, MapPinned, ShieldCheck, TrendingUp } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getNeighborhoodBySlug } from "@/lib/data/network";
 import { getProperties } from "@/lib/data/properties";
@@ -27,6 +27,9 @@ export default async function NeighborhoodDetailPage({ params }: { params: Promi
   if (!neighborhood) notFound();
 
   const properties = await getProperties({ neighborhood: slug });
+  const averagePrice = properties.length ? Math.round(properties.reduce((sum, property) => sum + property.price, 0) / properties.length) : 0;
+  const averageSurface = properties.length ? Math.round(properties.reduce((sum, property) => sum + property.surfaceArea, 0) / properties.length) : 0;
+  const saleCount = properties.filter((property) => property.listingType === "VENTE").length;
 
   return (
     <>
@@ -45,7 +48,8 @@ export default async function NeighborhoodDetailPage({ params }: { params: Promi
       </section>
 
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div className="mb-8 flex flex-col gap-3 border-b border-domify-dark/8 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><LocalSignal icon={Building2} label="Inventaire actif" value={`${properties.length} biens`} /><LocalSignal icon={TrendingUp} label="Prix moyen observé" value={averagePrice ? `${new Intl.NumberFormat("fr-MA").format(averagePrice)} MAD` : "Sur demande"} /><LocalSignal icon={MapPinned} label="Surface moyenne" value={averageSurface ? `${averageSurface} m²` : "À découvrir"} /><LocalSignal icon={ShieldCheck} label="Lecture Domify" value={`${saleCount} opportunités à l'achat`} /></div>
+        <div className="mb-8 mt-10 flex flex-col gap-3 border-b border-domify-dark/8 pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-domify-gold">Collection locale</p>
             <h2 className="mt-2 font-display text-3xl font-semibold text-domify-dark">Biens à {neighborhood.name}</h2>
@@ -71,4 +75,8 @@ export default async function NeighborhoodDetailPage({ params }: { params: Promi
       </main>
     </>
   );
+}
+
+function LocalSignal({ icon: Icon, label, value }: { icon: typeof Building2; label: string; value: string }) {
+  return <div className="rounded-2xl border border-domify-dark/8 bg-white p-4 shadow-[0_16px_30px_-28px_rgba(16,47,66,0.4)]"><div className="flex items-center gap-2 text-domify-gold"><Icon size={16} /><span className="text-[0.62rem] font-bold uppercase tracking-[0.13em] text-domify-dark/45">{label}</span></div><p className="mt-3 font-display text-xl font-semibold text-domify-dark">{value}</p></div>;
 }

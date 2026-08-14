@@ -36,6 +36,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
   const similar = await getSimilarProperties(property);
   const images = property.media.length > 0 ? property.media.map((m) => m.url) : [FALLBACK_IMAGE];
+  const galleryMedia = property.media.length > 0 ? property.media.map((m) => ({ url: m.url, type: m.type, alt: m.alt })) : [{ url: FALLBACK_IMAGE, type: "image", alt: property.title }];
 
   const baseUrl = process.env.NEXTAUTH_URL || "https://domify.ma";
   const propertyUrl = `${baseUrl}/proprietes/${property.id}`;
@@ -90,7 +91,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <div>
-          <FadeIn><PropertyGallery images={images} title={property.title} /></FadeIn>
+          <FadeIn><PropertyGallery media={galleryMedia} title={property.title} /></FadeIn>
 
           {/* Header */}
           <div className="mt-8 flex flex-col justify-between gap-5 border-b border-black/5 pb-8 sm:flex-row sm:items-start">

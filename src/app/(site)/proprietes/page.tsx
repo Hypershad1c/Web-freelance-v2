@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ArrowUpRight, Home } from "lucide-react";
-import { getProperties, getCitiesWithCounts, getPropertyTypes, type PropertyFilters } from "@/lib/data/properties";
+import { getProperties, getCitiesWithCounts, getPropertyTypes, getNeighborhoods, getAmenities, type PropertyFilters } from "@/lib/data/properties";
 import { getSeoOverride } from "@/lib/data/seo";
 import { PropertyFiltersForm } from "@/components/properties/PropertyFiltersForm";
 import { PropertyCard } from "@/components/home/PropertyCard";
@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-type SearchParams = { city?: string; listingType?: string; propertyType?: string; priceMax?: string; reference?: string; sort?: string };
+type SearchParams = { city?: string; neighborhood?: string; listingType?: string; propertyType?: string; priceMin?: string; priceMax?: string; bedrooms?: string; surfaceMin?: string; amenity?: string; reference?: string; sort?: string };
 
 export default async function PropertiesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
@@ -33,15 +33,22 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
     city: params.city || undefined,
     listingType: params.listingType === "VENTE" || params.listingType === "LOCATION" ? params.listingType : undefined,
     propertyType: params.propertyType || undefined,
+    neighborhood: params.neighborhood || undefined,
+    priceMin: Number(params.priceMin) > 0 ? Number(params.priceMin) : undefined,
     priceMax: Number(params.priceMax) > 0 ? Number(params.priceMax) : undefined,
+    bedrooms: Number(params.bedrooms) > 0 ? Number(params.bedrooms) : undefined,
+    surfaceMin: Number(params.surfaceMin) > 0 ? Number(params.surfaceMin) : undefined,
+    amenity: params.amenity || undefined,
     reference: params.reference?.trim() || undefined,
     sort: params.sort === "price-asc" || params.sort === "price-desc" ? params.sort : "recent",
   };
 
-  const [properties, cities, propertyTypes] = await Promise.all([
+  const [properties, cities, propertyTypes, neighborhoods, amenities] = await Promise.all([
     getProperties(filters),
     getCitiesWithCounts(),
     getPropertyTypes(),
+    getNeighborhoods(),
+    getAmenities(),
   ]);
 
   return (
@@ -66,7 +73,7 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
 
         <div className="grid grid-cols-1 gap-9 lg:grid-cols-[292px_1fr]">
           <aside>
-            <PropertyFiltersForm cities={cities} propertyTypes={propertyTypes} current={params} />
+            <PropertyFiltersForm cities={cities} propertyTypes={propertyTypes} neighborhoods={neighborhoods} amenities={amenities} current={params} />
           </aside>
 
           <div>
