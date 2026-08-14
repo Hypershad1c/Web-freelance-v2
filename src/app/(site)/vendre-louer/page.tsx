@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle2, Home, Users, ShieldCheck } from "lucide-react";
 import { HoneypotField } from "@/components/HoneypotField";
+import { Turnstile } from "@/components/Turnstile";
 
 const PROPERTY_TYPES = ["Appartement", "Villa", "Duplex", "Terrain", "Riad", "Bureau"];
 
@@ -11,6 +12,7 @@ export default function SellOrRentPage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [honeypot, setHoneypot] = useState(""); // anti-bot — real users never fill this
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -50,6 +52,7 @@ export default function SellOrRentPage() {
           message,
           source: "sell_or_rent",
           website: honeypot,
+          turnstileToken,
         }),
       });
       if (!res.ok) throw new Error();
@@ -118,10 +121,11 @@ export default function SellOrRentPage() {
                   <input placeholder="Prix souhaité (MAD)" value={form.desiredPrice} onChange={(e) => setForm({ ...form, desiredPrice: e.target.value })} className="rounded-xl border border-black/10 px-4 py-3 text-sm" />
                 </div>
                 <textarea rows={3} placeholder="Décrivez votre bien (optionnel)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm" />
+                <Turnstile action="lead" onTokenChange={setTurnstileToken} />
                 {error && <p className="text-sm text-red-600">{error}</p>}
                 <button
                   type="submit"
-                  disabled={sending}
+                  disabled={sending || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken)}
                   className="w-full rounded-xl bg-domify-gold py-3 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark disabled:opacity-60"
                 >
                   {sending ? "Envoi..." : "Soumettre mon bien"}
