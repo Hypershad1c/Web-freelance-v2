@@ -9,6 +9,7 @@ import { SellRentFloatingButton } from "@/components/SellRentFloatingButton";
 import { AnalyticsRecorder } from "@/components/AnalyticsRecorder";
 import { RuntimeLocaleTranslator } from "@/components/RuntimeLocaleTranslator";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { IosInstallPrompt } from "@/components/IosInstallPrompt";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { isRtl } from "@/i18n/locales";
@@ -43,6 +44,7 @@ export default async function RootLayout({
           <main>{children}</main>
           <Footer locale={locale} dict={dict} />
           <CookieConsentBanner />
+          <IosInstallPrompt />
           <CompareBar />
           <SellRentFloatingButton />
         </Providers>
