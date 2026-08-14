@@ -36,7 +36,7 @@ describe("verifyTurnstile", () => {
   it("accepts a valid verification returned for the expected form action", async () => {
     process.env.NODE_ENV = "production";
     process.env.TURNSTILE_SECRET_KEY = "secret";
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ success: true, action: "contact" }), { status: 200 })));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ success: true, action: "contact", hostname: "domify.ma" }), { status: 200 })));
 
     await expect(verifyTurnstile({ token: "token", remoteIp: "127.0.0.1", expectedAction: "contact" })).resolves.toEqual({ ok: true, bypassed: false });
   });

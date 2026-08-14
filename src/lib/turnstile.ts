@@ -17,6 +17,7 @@ export async function verifyTurnstile({
   expectedAction: TurnstileAction;
 }) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
+  const expectedHostnames = new Set((process.env.TURNSTILE_HOSTNAMES ?? "domify.ma").split(",").map((hostname) => hostname.trim()).filter(Boolean));
   if (!secret) {
     if (process.env.NODE_ENV === "production") {
       return { ok: false, reason: "captcha_not_configured" as const };
@@ -24,7 +25,7 @@ export async function verifyTurnstile({
     return { ok: true, bypassed: true as const };
   }
 
-  if (!token || token.length > 2048) {
+  if (!token || token.length > 2048 || expectedHostnames.size === 0) {
     return { ok: false, reason: "missing_token" as const };
   }
 
@@ -47,8 +48,11 @@ export async function verifyTurnstile({
     if (!response.ok || !result.success) {
       return { ok: false, reason: "verification_failed" as const, errors: result["error-codes"] ?? [] };
     }
-    if (result.action && result.action !== expectedAction) {
+    if (result.action !== expectedAction) {
       return { ok: false, reason: "action_mismatch" as const };
+    }
+    if (!result.hostname || !expectedHostnames.has(result.hostname)) {
+      return { ok: false, reason: "hostname_mismatch" as const };
     }
     return { ok: true, bypassed: false as const };
   } catch {
