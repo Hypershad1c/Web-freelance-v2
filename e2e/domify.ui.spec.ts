@@ -36,7 +36,7 @@ test.describe("buyer dashboard", () => {
   });
 
   test("signs in and renders buyer dashboard sections", async ({ page }, testInfo) => {
-    test.skip(!process.env.E2E_BUYER_EMAIL && process.env.E2E_USE_SEED !== "true", "Set E2E_USE_SEED=true to run the credential-backed dashboard flow.");
+    test.skip(process.env.E2E_LIVE_AUTH !== "true", "Set E2E_LIVE_AUTH=true with controlled credentials to run the credential-backed dashboard flow.");
     test.skip(testInfo.project.name === "iphone-chromium" && process.env.E2E_LIVE_MOBILE_AUTH !== "true", "Run mobile credential authentication only against a controlled staging/local environment with independent seed credentials.");
     await page.goto("/connexion?callbackUrl=/compte", { waitUntil: "domcontentloaded" });
     await page.getByPlaceholder("Email").fill(seedEmail);
