@@ -37,6 +37,7 @@ export const pwaMetadata: Partial<Metadata> = {
       { url: "/icon-1024.png", sizes: "1024x1024", type: "image/png" },
     ],
     apple: [
+      { url: "/apple-touch-icon.png", type: "image/png" },
       { url: "/apple-touch-icon-120x120.png", sizes: "120x120", type: "image/png" },
       { url: "/apple-touch-icon-152x152.png", sizes: "152x152", type: "image/png" },
       { url: "/apple-touch-icon-167x167.png", sizes: "167x167", type: "image/png" },
