@@ -53,7 +53,7 @@ export function CrmPipeline({ deals, columns }: { deals: Deal[]; columns: Column
           const columnDeals = grouped[column.value] || [];
           const total = columnDeals.reduce((sum, deal) => sum + (deal.value || 0), 0);
           return (
-            <section key={column.value} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedId) moveDeal(draggedId, column.value); setDraggedId(null); }} className={`min-h-[24rem] rounded-[1.3rem] border p-3 ${column.tone}`}>
+            <section key={column.value} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedId) moveDeal(draggedId, column.value); setDraggedId(null); }} className={`min-h-[24rem] rounded-[1.3rem] border p-3 shadow-[0_16px_34px_-28px_rgba(16,47,66,0.55)] transition-colors ${column.tone}`}>
               <header className="mb-3 flex items-start justify-between gap-2 px-1">
                 <div>
                   <h3 className="font-display text-base font-semibold text-domify-dark">{column.label}</h3>
@@ -63,7 +63,7 @@ export function CrmPipeline({ deals, columns }: { deals: Deal[]; columns: Column
               </header>
               <div className="space-y-3">
                 {columnDeals.map((deal) => (
-                  <article key={deal.id} draggable={!isPending} onDragStart={() => setDraggedId(deal.id)} onDragEnd={() => setDraggedId(null)} className="cursor-grab rounded-xl border border-black/7 bg-white p-3 shadow-[0_10px_22px_-18px_rgba(16,47,66,0.5)] transition-luxury hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing">
+                  <article key={deal.id} draggable={!isPending} onDragStart={() => setDraggedId(deal.id)} onDragEnd={() => setDraggedId(null)} aria-label={`Déplacer l'opportunité ${deal.title}`} className="group cursor-grab rounded-xl border border-black/7 bg-white p-3 shadow-[0_10px_22px_-18px_rgba(16,47,66,0.5)] transition-luxury hover:-translate-y-0.5 hover:border-domify-gold/30 hover:shadow-md active:cursor-grabbing">
                     <div className="flex items-start justify-between gap-2">
                       <p className="line-clamp-2 text-sm font-semibold leading-5 text-domify-dark">{deal.title}</p>
                       <GripVertical size={15} className="shrink-0 text-domify-dark/28" />
@@ -75,6 +75,7 @@ export function CrmPipeline({ deals, columns }: { deals: Deal[]; columns: Column
                       <span className="font-display text-base font-semibold text-domify-dark">{formatMad(deal.value || 0)}</span>
                       <span className="inline-flex items-center gap-1 text-[0.68rem] font-bold text-domify-primary"><TrendingUp size={11} /> {deal.probability}%</span>
                     </div>
+                    <div className="mt-2 h-1 overflow-hidden rounded-full bg-domify-dark/8"><div className="h-full rounded-full bg-domify-gold transition-all duration-300" style={{ width: `${deal.probability}%` }} /></div>
                   </article>
                 ))}
                 {columnDeals.length === 0 && <p className="rounded-xl border border-dashed border-black/10 px-3 py-6 text-center text-xs leading-5 text-domify-dark/42">Déposez une opportunité ici</p>}

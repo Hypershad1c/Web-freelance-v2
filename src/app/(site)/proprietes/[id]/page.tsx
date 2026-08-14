@@ -88,17 +88,17 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         <span className="text-domify-dark/80">{property.title}</span>
       </nav>
 
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <div>
           <FadeIn><PropertyGallery images={images} title={property.title} /></FadeIn>
 
           {/* Header */}
-          <div className="mt-8 flex flex-col justify-between gap-4 border-b border-black/5 pb-8 sm:flex-row sm:items-start">
+          <div className="mt-8 flex flex-col justify-between gap-5 border-b border-black/5 pb-8 sm:flex-row sm:items-start">
             <div>
               <span className="mb-2 inline-block rounded-full bg-domify-gold/10 px-3 py-1 text-xs font-semibold text-domify-gold">
                 {property.propertyType.name}
               </span>
-              <h1 className="font-display text-3xl font-bold text-domify-dark">{property.title}</h1>
+              <h1 className="max-w-2xl font-display text-3xl font-bold leading-tight text-domify-dark sm:text-4xl">{property.title}</h1>
               <p className="mt-2 flex items-center gap-1.5 text-sm text-domify-dark/60">
                 <MapPin size={15} /> {property.neighborhood ? `${property.neighborhood.name}, ` : ""}{property.city.name}
               </p>
@@ -121,7 +121,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           </div>
 
           {/* Key facts */}
-          <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             <Fact icon={Bed} label="Chambres" value={property.bedrooms} />
             <Fact icon={Bath} label="Salles de bain" value={property.bathrooms} />
             <Fact icon={Square} label="Surface" value={`${property.surfaceArea} m²`} />
@@ -181,7 +181,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         </div>
 
         {/* Sidebar */}
-        <div>
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <div className="mb-4 hidden rounded-2xl border border-domify-gold/15 bg-domify-warm-white/70 p-4 lg:block">
+            <p className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-domify-gold">L&apos;accompagnement Domify</p>
+            <p className="mt-2 font-display text-lg font-semibold leading-6 text-domify-dark">Un conseiller dédié pour vous guider à chaque étape.</p>
+            <p className="mt-2 text-xs leading-5 text-domify-dark/56">Réponse rapide, visite privée et suivi personnalisé.</p>
+          </div>
           <ContactAgentCard property={property} />
         </div>
       </div>
