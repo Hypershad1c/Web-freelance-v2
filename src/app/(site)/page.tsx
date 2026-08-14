@@ -74,7 +74,7 @@ export default async function HomePage() {
     name: settings.site_name,
     description: settings.site_tagline,
     url: baseUrl,
-    logo: `${baseUrl}/Logo.jpeg`,
+    logo: `${baseUrl}/brand/domify-logo-horizontal.png`,
     telephone: settings.contact_phone,
     email: settings.contact_email,
     address: { "@type": "PostalAddress", streetAddress: settings.contact_address, addressCountry: "MA" },

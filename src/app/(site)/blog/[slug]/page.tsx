@@ -36,7 +36,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     datePublished: post.createdAt,
     dateModified: post.updatedAt,
     author: { "@type": "Organization", name: "Domify" },
-    publisher: { "@type": "Organization", name: "Domify", logo: { "@type": "ImageObject", url: `${baseUrl}/Logo.jpeg` } },
+    publisher: { "@type": "Organization", name: "Domify", logo: { "@type": "ImageObject", url: `${baseUrl}/brand/domify-logo-horizontal.png` } },
     mainEntityOfPage: `${baseUrl}/blog/${post.slug}`,
   };
 

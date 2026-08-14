@@ -32,12 +32,16 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-domify-dark/10 bg-[#fcfbf8]/88 shadow-[0_8px_30px_-26px_rgba(16,47,66,0.65)] backdrop-blur-xl">
       <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="group pressable flex items-center gap-2.5 rounded-full">
-          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-domify-gold/35 transition-luxury group-hover:ring-domify-gold">
-            <Image src="/Logo.jpeg" alt="Domify" fill className="object-cover" />
-          </span>
-          <span className="font-display text-lg font-semibold tracking-[0.16em] text-domify-dark">
-            DOMIFY
+        <Link href="/" className="group pressable rounded-xl" aria-label="Domify — accueil">
+          <span className="relative block h-10 w-[112px] overflow-hidden rounded-lg bg-[#132c45] ring-1 ring-domify-gold/35 transition-luxury group-hover:ring-domify-gold">
+            <Image
+              src="/brand/domify-logo-horizontal.png"
+              alt="Domify"
+              fill
+              sizes="112px"
+              className="object-contain"
+              priority
+            />
           </span>
         </Link>
 

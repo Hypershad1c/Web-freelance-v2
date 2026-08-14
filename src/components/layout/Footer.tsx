@@ -39,11 +39,16 @@ export async function Footer({ dict }: { locale: Locale; dict: Dictionary }) {
 
       <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.25fr_0.75fr_1fr_1fr] lg:gap-12 lg:px-8 lg:py-20">
         <div className="max-w-sm">
-          <Link href="/" className="group pressable flex items-center gap-3 rounded-full">
-            <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-domify-soft-gold/60 transition-luxury group-hover:ring-2">
-              <Image src="/Logo.jpeg" alt="Domify" fill className="object-cover" />
+          <Link href="/" className="group pressable rounded-xl" aria-label="Domify — accueil">
+            <span className="relative block h-11 w-[124px] overflow-hidden rounded-lg bg-[#132c45] ring-1 ring-domify-soft-gold/60 transition-luxury group-hover:ring-2">
+              <Image
+                src="/brand/domify-logo-horizontal.png"
+                alt="Domify"
+                fill
+                sizes="124px"
+                className="object-contain"
+              />
             </span>
-            <span className="font-display text-lg font-semibold tracking-[0.18em] text-white">DOMIFY</span>
           </Link>
           <p className="mt-5 text-sm leading-7 text-white/62">{dict.footer.tagline}</p>
           <div className="mt-6 flex gap-2.5">
