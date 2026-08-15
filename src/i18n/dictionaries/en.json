@@ -39,6 +39,15 @@
     "privacy": "Privacy policy",
     "rights": "All rights reserved."
   },
+  "notFound": {
+    "eyebrow": "Page not found",
+    "title": "This address has disappeared from the landscape.",
+    "description": "The page you are looking for no longer exists or the address is incorrect. Let us take you back to a place that feels right.",
+    "homeCta": "Back to home",
+    "searchCta": "Explore properties",
+    "contactCta": "Talk to an advisor",
+    "code": "Error 404"
+  },
   "home": {
     "heroTitle1": "Find your",
     "heroTitleHighlight": "exceptional property",

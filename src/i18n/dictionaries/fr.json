@@ -39,6 +39,15 @@
     "privacy": "Politique de confidentialité",
     "rights": "Tous droits réservés."
   },
+  "notFound": {
+    "eyebrow": "Page introuvable",
+    "title": "Cette adresse a disparu dans le paysage.",
+    "description": "La page que vous recherchez n’existe plus ou l’adresse saisie est incorrecte. Revenons vers une propriété qui vous ressemble.",
+    "homeCta": "Retour à l’accueil",
+    "searchCta": "Explorer les biens",
+    "contactCta": "Parler à un conseiller",
+    "code": "Erreur 404"
+  },
   "home": {
     "heroTitle1": "Trouvez votre",
     "heroTitleHighlight": "bien d'exception",
