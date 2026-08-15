@@ -32,7 +32,7 @@ export async function notifyUsers({
   href,
 }: {
   userIds: string[];
-  type: "APPROVAL_REQUEST" | "APPROVAL_DECISION" | "LEAD_STATUS" | "SYSTEM";
+  type: "APPROVAL_REQUEST" | "APPROVAL_DECISION" | "LEAD_STATUS" | "MESSAGE" | "SYSTEM";
   title: string;
   body?: string;
   href?: string;

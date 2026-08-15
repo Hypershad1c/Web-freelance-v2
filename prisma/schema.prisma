@@ -27,30 +27,33 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts     Account[]
-  sessions     Session[]
-  favorites    Favorite[]
-  favoriteCollections FavoriteCollection[]
-  leads        Lead[]
-  appointments Appointment[]
-  agent        Agent?
-  messages     Message[]
-  permissions  UserPermission[]
-  notifications Notification[]
-  auditLogs     AuditLog[]
-  submittedProperties Property[] @relation("PropertySubmittedBy")
-  approvedProperties  Property[] @relation("PropertyApprovedBy")
-  crmContactsOwned    CrmContact[] @relation("CrmContactOwner")
-  crmDealsOwned       CrmDeal[]    @relation("CrmDealOwner")
-  crmActivities       CrmActivity[] @relation("CrmActivityActor")
-  crmCommunications   CrmCommunication[] @relation("CrmCommunicationOwner")
-  crmDocumentsUploaded CrmDocument[] @relation("CrmDocumentUploadedBy")
-  crmSellerCasesOwned CrmSellerCase[] @relation("CrmSellerCaseOwner")
-  crmOffersOwned      CrmOffer[]      @relation("CrmOfferOwner")
-  crmAssignmentRules  CrmAssignmentRule[] @relation("CrmAssignmentAssignee")
-  crmSavedSearches    CrmSavedSearch[]
-  crmAutomationTemplates CrmAutomationTemplate[] @relation("CrmAutomationOwner")
-  financingProfiles    FinancingProfile[]
+  accounts                    Account[]
+  sessions                    Session[]
+  favorites                   Favorite[]
+  favoriteCollections         FavoriteCollection[]
+  leads                       Lead[]
+  appointments                Appointment[]
+  agent                       Agent?
+  messages                    Message[]
+  permissions                 UserPermission[]
+  notifications               Notification[]
+  auditLogs                   AuditLog[]
+  submittedProperties         Property[]              @relation("PropertySubmittedBy")
+  approvedProperties          Property[]              @relation("PropertyApprovedBy")
+  crmContactsOwned            CrmContact[]            @relation("CrmContactOwner")
+  crmDealsOwned               CrmDeal[]               @relation("CrmDealOwner")
+  crmActivities               CrmActivity[]           @relation("CrmActivityActor")
+  crmCommunications           CrmCommunication[]      @relation("CrmCommunicationOwner")
+  crmDocumentsUploaded        CrmDocument[]           @relation("CrmDocumentUploadedBy")
+  crmSellerCasesOwned         CrmSellerCase[]         @relation("CrmSellerCaseOwner")
+  crmOffersOwned              CrmOffer[]              @relation("CrmOfferOwner")
+  crmAssignmentRules          CrmAssignmentRule[]     @relation("CrmAssignmentAssignee")
+  crmSavedSearches            CrmSavedSearch[]
+  crmAutomationTemplates      CrmAutomationTemplate[] @relation("CrmAutomationOwner")
+  financingProfiles           FinancingProfile[]
+  portalConversationsOwned    PortalConversation[]    @relation("PortalConversationsOwned")
+  portalConversationsAssigned PortalConversation[]    @relation("PortalConversationsAssigned")
+  portalMessagesSent          PortalMessage[]         @relation("PortalMessagesSent")
 }
 
 model PasswordResetToken {
@@ -108,15 +111,15 @@ model UserPermission {
 // ---------- LOCATIONS ----------
 
 model City {
-  id            String         @id @default(cuid())
-  name          String
-  slug          String         @unique
-  image         String?
-  description   String?
-  order         Int            @default(0)
-  neighborhoods Neighborhood[]
-  properties    Property[]
-  crmSavedSearches CrmSavedSearch[]
+  id                 String              @id @default(cuid())
+  name               String
+  slug               String              @unique
+  image              String?
+  description        String?
+  order              Int                 @default(0)
+  neighborhoods      Neighborhood[]
+  properties         Property[]
+  crmSavedSearches   CrmSavedSearch[]
   crmAssignmentRules CrmAssignmentRule[]
 }
 
@@ -191,12 +194,12 @@ enum ApprovalStatus {
 }
 
 model PropertyType {
-  id         String     @id @default(cuid())
-  name       String
-  slug       String     @unique
-  icon       String?
-  properties Property[]
-  crmSavedSearches CrmSavedSearch[]
+  id                 String              @id @default(cuid())
+  name               String
+  slug               String              @unique
+  icon               String?
+  properties         Property[]
+  crmSavedSearches   CrmSavedSearch[]
   crmAssignmentRules CrmAssignmentRule[]
 }
 
@@ -209,54 +212,55 @@ model Amenity {
 }
 
 model Property {
-  id             String         @id @default(cuid())
-  reference      String         @unique
-  title          String
-  slug           String         @unique
-  description    String
-  listingType    ListingType
-  status         PropertyStatus @default(DRAFT)
-  approvalStatus ApprovalStatus @default(DRAFT)
-  submittedAt    DateTime?
-  submittedById  String?
-  submittedBy    User?          @relation("PropertySubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
-  approvedAt     DateTime?
-  approvedById   String?
-  approvedBy     User?          @relation("PropertyApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  id              String         @id @default(cuid())
+  reference       String         @unique
+  title           String
+  slug            String         @unique
+  description     String
+  listingType     ListingType
+  status          PropertyStatus @default(DRAFT)
+  approvalStatus  ApprovalStatus @default(DRAFT)
+  submittedAt     DateTime?
+  submittedById   String?
+  submittedBy     User?          @relation("PropertySubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  approvedAt      DateTime?
+  approvedById    String?
+  approvedBy      User?          @relation("PropertyApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
   rejectionReason String?
-  price          Int
-  surfaceArea    Float
-  bedrooms       Int            @default(0)
-  bathrooms      Int            @default(0)
-  floors         Int?
-  yearBuilt      Int?
-  latitude       Float?
-  longitude      Float?
-  address        String?
-  featured       Boolean        @default(false)
-  viewsCount     Int            @default(0)
+  price           Int
+  surfaceArea     Float
+  bedrooms        Int            @default(0)
+  bathrooms       Int            @default(0)
+  floors          Int?
+  yearBuilt       Int?
+  latitude        Float?
+  longitude       Float?
+  address         String?
+  featured        Boolean        @default(false)
+  viewsCount      Int            @default(0)
 
   cityId         String
-  city           City           @relation(fields: [cityId], references: [id])
+  city           City          @relation(fields: [cityId], references: [id])
   neighborhoodId String?
-  neighborhood   Neighborhood?  @relation(fields: [neighborhoodId], references: [id])
+  neighborhood   Neighborhood? @relation(fields: [neighborhoodId], references: [id])
   propertyTypeId String
-  propertyType   PropertyType   @relation(fields: [propertyTypeId], references: [id])
+  propertyType   PropertyType  @relation(fields: [propertyTypeId], references: [id])
   agencyId       String?
-  agency         Agency?        @relation(fields: [agencyId], references: [id])
+  agency         Agency?       @relation(fields: [agencyId], references: [id])
   agentId        String?
-  agent          Agent?         @relation(fields: [agentId], references: [id])
+  agent          Agent?        @relation(fields: [agentId], references: [id])
 
-  amenities Amenity[]
-  media     Media[]
-  ownerReports OwnerReport[]
-  leads     Lead[]
-  favorites Favorite[]
-  appointments Appointment[]
-  crmDeals     CrmDeal[]
-  crmDocuments CrmDocument[]
-  crmSellerCases CrmSellerCase[]
-  crmOffers      CrmOffer[]
+  amenities           Amenity[]
+  media               Media[]
+  ownerReports        OwnerReport[]
+  leads               Lead[]
+  favorites           Favorite[]
+  appointments        Appointment[]
+  crmDeals            CrmDeal[]
+  crmDocuments        CrmDocument[]
+  crmSellerCases      CrmSellerCase[]
+  crmOffers           CrmOffer[]
+  portalConversations PortalConversation[]
 
   seoTitle       String?
   seoDescription String?
@@ -266,26 +270,26 @@ model Property {
 }
 
 model Media {
-  id            String    @id @default(cuid())
-  url           String
-  cloudinaryId  String?
-  type          String    @default("image") // image | video | floorplan
-  alt           String?
-  order         Int       @default(0)
+  id             String              @id @default(cuid())
+  url            String
+  cloudinaryId   String?
+  type           String              @default("image") // image | video | floorplan
+  alt            String?
+  order          Int                 @default(0)
   workflowStatus MediaWorkflowStatus @default(UPLOADED)
-  reviewNote    String?
-  processedAt   DateTime?
-  propertyId    String?
-  property      Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  blogPostId    String?
-  blogPost      BlogPost? @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
-  createdAt     DateTime  @default(now())
+  reviewNote     String?
+  processedAt    DateTime?
+  propertyId     String?
+  property       Property?           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  blogPostId     String?
+  blogPost       BlogPost?           @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  createdAt      DateTime            @default(now())
 }
 
 model Favorite {
-  id           String             @id @default(cuid())
+  id           String              @id @default(cuid())
   userId       String
-  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   propertyId   String
   property     Property            @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   collectionId String?
@@ -310,6 +314,47 @@ model FavoriteCollection {
   @@index([userId, updatedAt])
 }
 
+// ---------- PORTAL MESSAGING ----------
+
+enum PortalConversationStatus {
+  OPEN
+  CLOSED
+}
+
+model PortalConversation {
+  id              String                   @id @default(cuid())
+  propertyId      String
+  property        Property                 @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  ownerId         String
+  owner           User                     @relation("PortalConversationsOwned", fields: [ownerId], references: [id], onDelete: Cascade)
+  assignedAgentId String?
+  assignedAgent   User?                    @relation("PortalConversationsAssigned", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  subject         String?
+  status          PortalConversationStatus @default(OPEN)
+  lastMessageAt   DateTime                 @default(now())
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  messages        PortalMessage[]
+
+  @@unique([propertyId, ownerId])
+  @@index([ownerId, status, lastMessageAt])
+  @@index([assignedAgentId, status, lastMessageAt])
+}
+
+model PortalMessage {
+  id             String             @id @default(cuid())
+  conversationId String
+  conversation   PortalConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User               @relation("PortalMessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime           @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderId, readAt])
+}
+
 // ---------- LEADS / APPOINTMENTS / MESSAGES ----------
 
 enum LeadStatus {
@@ -321,25 +366,25 @@ enum LeadStatus {
 }
 
 model Lead {
-  id         String     @id @default(cuid())
-  name       String
-  email      String
-  phone      String?
-  message    String?
-  status     LeadStatus @default(NEW)
-  position   Int        @default(0)
-  source     String?
-  utmSource  String?
-  utmMedium  String?
-  utmCampaign String?
-  referrer   String?
-  userId     String?
-  user       User?      @relation(fields: [userId], references: [id])
+  id           String      @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  message      String?
+  status       LeadStatus  @default(NEW)
+  position     Int         @default(0)
+  source       String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  referrer     String?
+  userId       String?
+  user         User?       @relation(fields: [userId], references: [id])
   propertyId   String?
-  property     Property?  @relation(fields: [propertyId], references: [id])
+  property     Property?   @relation(fields: [propertyId], references: [id])
   crmContactId String?
   crmContact   CrmContact? @relation(fields: [crmContactId], references: [id], onDelete: SetNull)
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime    @default(now())
 
   @@index([crmContactId])
 }
@@ -396,34 +441,34 @@ enum OwnerReportStatus {
 }
 
 model Appointment {
-  id         String            @id @default(cuid())
-  name       String
-  email      String
-  phone      String?
-  date       DateTime
-  durationMinutes Int @default(45)
-  status     AppointmentStatus @default(PENDING)
-  notes      String?
-  location   String?
-  meetingUrl String?
-  confirmedAt DateTime?
-  cancelledAt DateTime?
-  source     String?
-  utmSource  String?
-  utmMedium  String?
-  utmCampaign String?
-  userId     String?
-  user       User?             @relation(fields: [userId], references: [id])
-  propertyId String?
-  property   Property?         @relation(fields: [propertyId], references: [id])
-  agentId      String?
-  agent        Agent?            @relation(fields: [agentId], references: [id])
+  id                 String             @id @default(cuid())
+  name               String
+  email              String
+  phone              String?
+  date               DateTime
+  durationMinutes    Int                @default(45)
+  status             AppointmentStatus  @default(PENDING)
+  notes              String?
+  location           String?
+  meetingUrl         String?
+  confirmedAt        DateTime?
+  cancelledAt        DateTime?
+  source             String?
+  utmSource          String?
+  utmMedium          String?
+  utmCampaign        String?
+  userId             String?
+  user               User?              @relation(fields: [userId], references: [id])
+  propertyId         String?
+  property           Property?          @relation(fields: [propertyId], references: [id])
+  agentId            String?
+  agent              Agent?             @relation(fields: [agentId], references: [id])
   availabilitySlotId String?
-  availabilitySlot AgentAvailability? @relation(fields: [availabilitySlotId], references: [id], onDelete: SetNull)
-  crmContactId String?
-  crmContact   CrmContact?       @relation(fields: [crmContactId], references: [id], onDelete: SetNull)
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  availabilitySlot   AgentAvailability? @relation(fields: [availabilitySlotId], references: [id], onDelete: SetNull)
+  crmContactId       String?
+  crmContact         CrmContact?        @relation(fields: [crmContactId], references: [id], onDelete: SetNull)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   @@index([crmContactId])
   @@index([agentId, date])
@@ -431,33 +476,33 @@ model Appointment {
 }
 
 model AgentAvailability {
-  id        String   @id @default(cuid())
-  agentId   String
-  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  startsAt  DateTime
-  endsAt    DateTime
-  capacity  Int      @default(1)
-  active    Boolean  @default(true)
-  location  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(cuid())
+  agentId      String
+  agent        Agent         @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  startsAt     DateTime
+  endsAt       DateTime
+  capacity     Int           @default(1)
+  active       Boolean       @default(true)
+  location     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   appointments Appointment[]
 
   @@index([agentId, startsAt, active])
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String?
-  body      String
-  read      Boolean  @default(false)
+  id           String      @id @default(cuid())
+  name         String
+  email        String
+  subject      String?
+  body         String
+  read         Boolean     @default(false)
   userId       String?
-  user         User?      @relation(fields: [userId], references: [id])
+  user         User?       @relation(fields: [userId], references: [id])
   crmContactId String?
   crmContact   CrmContact? @relation(fields: [crmContactId], references: [id], onDelete: SetNull)
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime    @default(now())
 
   @@index([crmContactId])
 }
@@ -550,25 +595,25 @@ enum CrmActivityType {
 }
 
 model CrmContact {
-  id                String   @id @default(cuid())
+  id                String                @id @default(cuid())
   name              String
-  email             String   @unique
+  email             String                @unique
   phone             String?
   source            String?
   notes             String?
   budgetMin         Int?
   budgetMax         Int?
   preferredLocation String?
-  lifecycle         CrmContactLifecycle @default(BUYER)
-  leadScore         Int      @default(0)
+  lifecycle         CrmContactLifecycle   @default(BUYER)
+  leadScore         Int                   @default(0)
   scoreReason       String?
   lastContactedAt   DateTime?
   firstRespondedAt  DateTime?
   slaDueAt          DateTime?
-  emailOptIn        Boolean  @default(true)
-  whatsappOptIn     Boolean  @default(false)
+  emailOptIn        Boolean               @default(true)
+  whatsappOptIn     Boolean               @default(false)
   ownerId           String?
-  owner             User?    @relation("CrmContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  owner             User?                 @relation("CrmContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   leads             Lead[]
   appointments      Appointment[]
   messages          Message[]
@@ -581,85 +626,85 @@ model CrmContact {
   signatureRequests CrmSignatureRequest[]
   financingProfiles FinancingProfile[]
   ownerReports      OwnerReport[]
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
 
   @@index([ownerId, updatedAt])
 }
 
 model CrmDeal {
-  id               String       @id @default(cuid())
-  title            String
-  stage            CrmDealStage @default(NEW)
-  value            Int?
-  source           String?
-  probability      Int          @default(10)
-  nextFollowUpAt   DateTime?
-  expectedCloseAt  DateTime?
-  wonAt            DateTime?
-  lostReason       String?
-  contactId        String
-  contact          CrmContact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  propertyId       String?
-  property         Property?    @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  ownerId          String?
-  owner            User?        @relation("CrmDealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  activities       CrmActivity[]
-  communications   CrmCommunication[]
-  documents        CrmDocument[]
-  offers           CrmOffer[]
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  id              String             @id @default(cuid())
+  title           String
+  stage           CrmDealStage       @default(NEW)
+  value           Int?
+  source          String?
+  probability     Int                @default(10)
+  nextFollowUpAt  DateTime?
+  expectedCloseAt DateTime?
+  wonAt           DateTime?
+  lostReason      String?
+  contactId       String
+  contact         CrmContact         @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  propertyId      String?
+  property        Property?          @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  ownerId         String?
+  owner           User?              @relation("CrmDealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  activities      CrmActivity[]
+  communications  CrmCommunication[]
+  documents       CrmDocument[]
+  offers          CrmOffer[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
   @@index([stage, ownerId, updatedAt])
   @@index([contactId, createdAt])
 }
 
 model CrmCommunication {
-  id          String                    @id @default(cuid())
-  channel     CrmCommunicationChannel
-  direction   CrmCommunicationDirection
-  status      CrmCommunicationStatus    @default(LOGGED)
-  subject     String?
-  body        String
-  externalId  String?
-  sentAt      DateTime?
-  contactId   String
-  contact     CrmContact                @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  dealId      String?
-  deal        CrmDeal?                  @relation(fields: [dealId], references: [id], onDelete: SetNull)
-  ownerId     String?
-  owner       User?                     @relation("CrmCommunicationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  createdAt   DateTime                  @default(now())
+  id         String                    @id @default(cuid())
+  channel    CrmCommunicationChannel
+  direction  CrmCommunicationDirection
+  status     CrmCommunicationStatus    @default(LOGGED)
+  subject    String?
+  body       String
+  externalId String?
+  sentAt     DateTime?
+  contactId  String
+  contact    CrmContact                @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  dealId     String?
+  deal       CrmDeal?                  @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  ownerId    String?
+  owner      User?                     @relation("CrmCommunicationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt  DateTime                  @default(now())
 
   @@index([contactId, createdAt])
   @@index([status, channel, createdAt])
 }
 
 model CrmDocument {
-  id           String          @id @default(cuid())
-  name         String
-  url          String
-  type         CrmDocumentType @default(OTHER)
-  mimeType     String?
-  sizeBytes    Int?
-  visibility   CrmDocumentVisibility @default(INTERNAL)
-  status       CrmDocumentStatus @default(UPLOADED)
-  requestedAt  DateTime?
-  verifiedAt   DateTime?
-  rejectedReason String?
+  id                 String                @id @default(cuid())
+  name               String
+  url                String
+  type               CrmDocumentType       @default(OTHER)
+  mimeType           String?
+  sizeBytes          Int?
+  visibility         CrmDocumentVisibility @default(INTERNAL)
+  status             CrmDocumentStatus     @default(UPLOADED)
+  requestedAt        DateTime?
+  verifiedAt         DateTime?
+  rejectedReason     String?
   externalStorageKey String?
-  notes        String?
-  contactId    String?
-  contact      CrmContact?     @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  dealId       String?
-  deal         CrmDeal?        @relation(fields: [dealId], references: [id], onDelete: Cascade)
-  propertyId   String?
-  property     Property?       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  uploadedById String?
-  uploadedBy   User?           @relation("CrmDocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
-  signatureRequests CrmSignatureRequest[]
-  createdAt    DateTime        @default(now())
+  notes              String?
+  contactId          String?
+  contact            CrmContact?           @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  dealId             String?
+  deal               CrmDeal?              @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  propertyId         String?
+  property           Property?             @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  uploadedById       String?
+  uploadedBy         User?                 @relation("CrmDocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+  signatureRequests  CrmSignatureRequest[]
+  createdAt          DateTime              @default(now())
 
   @@index([contactId, createdAt])
   @@index([dealId, createdAt])
@@ -667,51 +712,51 @@ model CrmDocument {
 }
 
 model CrmSellerCase {
-  id             String             @id @default(cuid())
-  title          String
-  stage          CrmSellerCaseStage @default(VALUATION_REQUESTED)
-  estimatedValue Int?
-  mandateSigned  Boolean            @default(false)
-  nextActionAt   DateTime?
-  notes          String?
-  contactId      String
-  contact        CrmContact         @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  propertyId     String?
-  property       Property?          @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  ownerId        String?
-  owner          User?              @relation("CrmSellerCaseOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  offers         CrmOffer[]
+  id                String                @id @default(cuid())
+  title             String
+  stage             CrmSellerCaseStage    @default(VALUATION_REQUESTED)
+  estimatedValue    Int?
+  mandateSigned     Boolean               @default(false)
+  nextActionAt      DateTime?
+  notes             String?
+  contactId         String
+  contact           CrmContact            @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  propertyId        String?
+  property          Property?             @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  ownerId           String?
+  owner             User?                 @relation("CrmSellerCaseOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  offers            CrmOffer[]
   signatureRequests CrmSignatureRequest[]
-  ownerReports   OwnerReport[]
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  ownerReports      OwnerReport[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
 
   @@index([stage, ownerId, updatedAt])
   @@index([contactId, createdAt])
 }
 
 model CrmOffer {
-  id            String         @id @default(cuid())
-  amount        Int
-  status        CrmOfferStatus @default(SUBMITTED)
-  message       String?
-  conditions    String?
-  expiresAt     DateTime?
-  submittedAt   DateTime       @default(now())
-  respondedAt   DateTime?
-  contactId     String
-  contact       CrmContact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  dealId        String
-  deal          CrmDeal        @relation(fields: [dealId], references: [id], onDelete: Cascade)
-  propertyId    String
-  property      Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  sellerCaseId  String?
-  sellerCase    CrmSellerCase? @relation(fields: [sellerCaseId], references: [id], onDelete: SetNull)
-  ownerId       String?
-  owner         User?          @relation("CrmOfferOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  id                String                @id @default(cuid())
+  amount            Int
+  status            CrmOfferStatus        @default(SUBMITTED)
+  message           String?
+  conditions        String?
+  expiresAt         DateTime?
+  submittedAt       DateTime              @default(now())
+  respondedAt       DateTime?
+  contactId         String
+  contact           CrmContact            @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  dealId            String
+  deal              CrmDeal               @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  propertyId        String
+  property          Property              @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  sellerCaseId      String?
+  sellerCase        CrmSellerCase?        @relation(fields: [sellerCaseId], references: [id], onDelete: SetNull)
+  ownerId           String?
+  owner             User?                 @relation("CrmOfferOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   signatureRequests CrmSignatureRequest[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
 
   @@index([propertyId, status, updatedAt])
   @@index([contactId, createdAt])
@@ -719,50 +764,50 @@ model CrmOffer {
 }
 
 model CrmSignatureRequest {
-  id          String             @id @default(cuid())
-  title       String
-  provider    String?
-  status      CrmSignatureStatus @default(DRAFT)
-  externalId  String?
-  signingUrl  String?
-  sentAt      DateTime?
-  signedAt    DateTime?
-  expiresAt   DateTime?
-  error       String?
-  contactId   String
-  contact     CrmContact         @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  id           String             @id @default(cuid())
+  title        String
+  provider     String?
+  status       CrmSignatureStatus @default(DRAFT)
+  externalId   String?
+  signingUrl   String?
+  sentAt       DateTime?
+  signedAt     DateTime?
+  expiresAt    DateTime?
+  error        String?
+  contactId    String
+  contact      CrmContact         @relation(fields: [contactId], references: [id], onDelete: Cascade)
   sellerCaseId String?
-  sellerCase  CrmSellerCase?     @relation(fields: [sellerCaseId], references: [id], onDelete: SetNull)
-  offerId     String?
-  offer       CrmOffer?          @relation(fields: [offerId], references: [id], onDelete: SetNull)
-  documentId  String?
-  document    CrmDocument?       @relation(fields: [documentId], references: [id], onDelete: SetNull)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  sellerCase   CrmSellerCase?     @relation(fields: [sellerCaseId], references: [id], onDelete: SetNull)
+  offerId      String?
+  offer        CrmOffer?          @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  documentId   String?
+  document     CrmDocument?       @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
 
   @@index([contactId, status, updatedAt])
   @@index([sellerCaseId, status])
 }
 
 model FinancingProfile {
-  id                String                    @id @default(cuid())
-  status            FinancingReadinessStatus  @default(NEW)
-  monthlyIncome     Int?
-  monthlyDebt       Int?
-  savings           Int?
-  estimatedBudget   Int?
-  downPayment       Int?
-  employmentType    String?
-  preferredBank     String?
-  bankPreApproved   Boolean                   @default(false)
-  consent           Boolean                   @default(false)
-  notes             String?
-  contactId         String
-  contact           CrmContact                @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  userId            String?
-  user              User?                     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  createdAt         DateTime                  @default(now())
-  updatedAt         DateTime                  @updatedAt
+  id              String                   @id @default(cuid())
+  status          FinancingReadinessStatus @default(NEW)
+  monthlyIncome   Int?
+  monthlyDebt     Int?
+  savings         Int?
+  estimatedBudget Int?
+  downPayment     Int?
+  employmentType  String?
+  preferredBank   String?
+  bankPreApproved Boolean                  @default(false)
+  consent         Boolean                  @default(false)
+  notes           String?
+  contactId       String
+  contact         CrmContact               @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?                    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
 
   @@index([contactId, status, updatedAt])
   @@index([userId, createdAt])
@@ -807,18 +852,18 @@ model CrmAssignmentRule {
 }
 
 model CrmAutomationTemplate {
-  id          String                  @id @default(cuid())
-  name        String
-  active      Boolean                 @default(true)
-  trigger     String
-  delayHours  Int                     @default(0)
-  channel     CrmCommunicationChannel
-  subject     String?
-  body        String
-  ownerId     String?
-  owner       User?                   @relation("CrmAutomationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  createdAt   DateTime                @default(now())
-  updatedAt   DateTime                @updatedAt
+  id         String                  @id @default(cuid())
+  name       String
+  active     Boolean                 @default(true)
+  trigger    String
+  delayHours Int                     @default(0)
+  channel    CrmCommunicationChannel
+  subject    String?
+  body       String
+  ownerId    String?
+  owner      User?                   @relation("CrmAutomationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt  DateTime                @default(now())
+  updatedAt  DateTime                @updatedAt
 
   @@index([active, trigger])
 }
@@ -869,6 +914,7 @@ enum NotificationType {
   APPROVAL_REQUEST
   APPROVAL_DECISION
   LEAD_STATUS
+  MESSAGE
   SYSTEM
 }
 
@@ -913,13 +959,13 @@ model BlogCategory {
 }
 
 model BlogPost {
-  id         String       @id @default(cuid())
+  id         String        @id @default(cuid())
   title      String
-  slug       String       @unique
+  slug       String        @unique
   excerpt    String?
   content    String
   coverImage String?
-  published  Boolean      @default(false)
+  published  Boolean       @default(false)
   categoryId String?
   category   BlogCategory? @relation(fields: [categoryId], references: [id])
   media      Media[]
@@ -951,15 +997,15 @@ model SiteSetting {
 }
 
 model SeoEntry {
-  id          String @id @default(cuid())
-  path        String @unique
-  title       String
-  description String
-  ogImage     String?
-  focusKeyword String?
-  content     String?
+  id             String    @id @default(cuid())
+  path           String    @unique
+  title          String
+  description    String
+  ogImage        String?
+  focusKeyword   String?
+  content        String?
   structuredData Json?
-  publishedAt DateTime?
+  publishedAt    DateTime?
 }
 
 model AnalyticsEvent {

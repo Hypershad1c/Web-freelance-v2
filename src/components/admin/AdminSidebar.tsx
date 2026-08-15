@@ -13,6 +13,7 @@ import {
   Image as ImageIcon,
   Newspaper,
   MessageSquareQuote,
+  MessageCircle,
   CalendarClock,
   Inbox,
   Mail,
@@ -78,6 +79,7 @@ const STAFF_SECTIONS: NavSection[] = [
       { label: "Leads", href: "/admin/leads", icon: Inbox },
       { label: "Validations", href: "/admin/approvals", icon: ClipboardCheck },
       { label: "Messages", href: "/admin/messages", icon: Mail },
+      { label: "Messagerie portails", href: "/admin/messagerie", icon: MessageCircle },
     ],
   },
   {
@@ -107,6 +109,7 @@ const AGENT_SECTIONS: NavSection[] = [
       { label: "Mon CRM", href: "/admin/crm", icon: Handshake },
       { label: "Mes rendez-vous", href: "/admin/appointments", icon: CalendarClock },
       { label: "Mes leads", href: "/admin/leads", icon: Inbox },
+      { label: "Messagerie propriétaires", href: "/admin/messagerie", icon: MessageCircle },
     ],
   },
 ];
