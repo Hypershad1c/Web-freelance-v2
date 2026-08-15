@@ -71,3 +71,67 @@ export function emailLayout(title: string, bodyHtml: string) {
     </p>
   </div>`;
 }
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[character] ?? character);
+}
+
+export async function sendPropertyApprovalDecisionEmail({
+  to,
+  ownerName,
+  propertyId,
+  propertyTitle,
+  reference,
+  approved,
+  rejectionReason,
+}: {
+  to: string;
+  ownerName?: string | null;
+  propertyId: string;
+  propertyTitle: string;
+  reference: string;
+  approved: boolean;
+  rejectionReason?: string | null;
+}) {
+  const baseUrl = (process.env.NEXTAUTH_URL || "https://domify.ma").replace(/\/$/, "");
+  const safeName = escapeHtml(ownerName?.trim() || "propriétaire");
+  const safeTitle = escapeHtml(propertyTitle);
+  const safeReference = escapeHtml(reference);
+  const portalUrl = `${baseUrl}/espace-vendeur`;
+  const propertyUrl = `${baseUrl}/proprietes/${encodeURIComponent(propertyId)}`;
+  const safeReason = escapeHtml(rejectionReason?.trim() || "Notre équipe a demandé quelques corrections avant publication.");
+
+  if (approved) {
+    return sendEmail({
+      to,
+      subject: `Votre bien est approuvé — ${propertyTitle} | Domify`,
+      html: emailLayout(
+        "Votre bien est approuvé",
+        `<p>Bonjour ${safeName},</p>
+         <p>Bonne nouvelle : votre annonce <strong>${safeTitle}</strong> (${safeReference}) a été vérifiée et approuvée par l'équipe Domify.</p>
+         <p>Elle est maintenant publiée sur notre plateforme et peut être consultée par les acheteurs et locataires intéressés.</p>
+         <p style="margin: 24px 0;"><a href="${propertyUrl}" style="display: inline-block; background: #336699; color: #ffffff; padding: 12px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">Voir mon bien publié</a></p>
+         <p>Vous pouvez également suivre les demandes et les prochaines étapes depuis votre <a href="${portalUrl}" style="color: #336699;">espace vendeur</a>.</p>`
+      ),
+    });
+  }
+
+  return sendEmail({
+    to,
+    subject: `Action requise pour votre annonce — ${propertyTitle} | Domify`,
+    html: emailLayout(
+      "Des corrections sont nécessaires",
+      `<p>Bonjour ${safeName},</p>
+       <p>Votre annonce <strong>${safeTitle}</strong> (${safeReference}) a été examinée par l'équipe Domify.</p>
+       <p>Avant sa publication, veuillez prendre en compte le retour suivant :</p>
+       <div style="margin: 16px 0; padding: 14px 16px; border-left: 3px solid #C58B43; background: #FBF7EF; color: #4B5563;">${safeReason}</div>
+       <p>Connectez-vous à votre <a href="${portalUrl}" style="color: #336699;">espace vendeur</a> pour consulter le statut de votre dépôt et contacter un conseiller si nécessaire.</p>`
+    ),
+  });
+}

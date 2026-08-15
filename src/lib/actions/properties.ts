@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
 import { notifyAdministrators, notifyUsers, recordAudit } from "@/lib/workflow";
+import { sendPropertyApprovalDecisionEmail } from "@/lib/email";
 
 const PropertySchema = z.object({
   reference: z.string().min(2, "Référence requise"),
@@ -474,7 +475,16 @@ export async function reviewPropertyApproval(id: string, decision: "approve" | "
   if (!parsed.success) throw new Error("Décision invalide");
   if (parsed.data === "reject" && !rejectionReason?.trim()) throw new Error("Veuillez indiquer le motif du refus.");
 
-  const property = await prisma.property.findUnique({ where: { id }, select: { id: true, title: true, submittedById: true } });
+  const property = await prisma.property.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      reference: true,
+      submittedById: true,
+      submittedBy: { select: { name: true, email: true } },
+    },
+  });
   if (!property) throw new Error("Propriété introuvable");
   if (reviewerRole === "AGENT" && property.submittedById === session.user.id) throw new Error("Un agent ne peut pas valider sa propre soumission.");
 
@@ -496,6 +506,17 @@ export async function reviewPropertyApproval(id: string, decision: "approve" | "
     body: approved ? `« ${property.title} » est désormais publiée.` : rejectionReason!.trim(),
     href: `/admin/properties/${id}`,
   });
+  if (property.submittedBy?.email) {
+    await sendPropertyApprovalDecisionEmail({
+      to: property.submittedBy.email,
+      ownerName: property.submittedBy.name,
+      propertyId: property.id,
+      propertyTitle: property.title,
+      reference: property.reference,
+      approved,
+      rejectionReason,
+    });
+  }
   await recordAudit({ actorId: session.user.id, action: approved ? "PROPERTY_APPROVED" : "PROPERTY_REJECTED", entityType: "Property", entityId: id, summary: approved ? `Validation de « ${property.title} »` : `Refus de « ${property.title} »` });
   revalidatePropertyViews(id);
   revalidatePath("/admin/approvals");

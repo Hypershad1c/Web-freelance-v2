@@ -8,7 +8,7 @@ vi.mock("resend", () => ({
   }),
 }));
 
-import { sendEmail } from "@/lib/email";
+import { sendEmail, sendPropertyApprovalDecisionEmail } from "@/lib/email";
 
 const originalApiKey = process.env.RESEND_API_KEY;
 const originalFromAddress = process.env.EMAIL_FROM;
@@ -58,5 +58,48 @@ describe("sendEmail", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await expect(sendEmail(email)).resolves.toEqual({ skipped: true, reason: "delivery_exception" });
+  });
+});
+
+
+describe("sendPropertyApprovalDecisionEmail", () => {
+  it("sends an approval email with the published property link", async () => {
+    process.env.RESEND_API_KEY = "re_test";
+    mockSend.mockResolvedValue({ data: { id: "approval_email_123" }, error: null });
+
+    await expect(sendPropertyApprovalDecisionEmail({
+      to: "owner@example.com",
+      ownerName: "Nadia",
+      propertyId: "property-123",
+      propertyTitle: "Villa Atlas",
+      reference: "OWN-ATLAS-123",
+      approved: true,
+    })).resolves.toEqual({ skipped: false, messageId: "approval_email_123" });
+
+    expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({
+      to: "owner@example.com",
+      subject: "Votre bien est approuvé — Villa Atlas | Domify",
+      html: expect.stringContaining("https://domify.ma/proprietes/property-123"),
+    }));
+  });
+
+  it("sends a rejection email and escapes the reviewer reason", async () => {
+    process.env.RESEND_API_KEY = "re_test";
+    mockSend.mockResolvedValue({ data: { id: "rejection_email_123" }, error: null });
+
+    await sendPropertyApprovalDecisionEmail({
+      to: "owner@example.com",
+      ownerName: "Nadia",
+      propertyId: "property-123",
+      propertyTitle: "Villa Atlas",
+      reference: "OWN-ATLAS-123",
+      approved: false,
+      rejectionReason: "Ajoutez <strong>le titre</strong> & une photo.",
+    });
+
+    const payload = mockSend.mock.calls.at(-1)?.[0] as { subject: string; html: string };
+    expect(payload.subject).toContain("Action requise pour votre annonce");
+    expect(payload.html).toContain("Ajoutez &lt;strong&gt;le titre&lt;/strong&gt; &amp; une photo.");
+    expect(payload.html).not.toContain("Ajoutez <strong>le titre</strong>");
   });
 });
