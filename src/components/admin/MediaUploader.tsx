@@ -1,27 +1,57 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Upload, X, Link2, Loader2 } from "lucide-react";
 
 type UploadedImage = { url: string; uploading?: boolean };
 
-export function MediaUploader({ name, defaultUrls = [] }: { name: string; defaultUrls?: string[] }) {
+export function MediaUploader({
+  name,
+  defaultUrls = [],
+  signEndpoint = "/api/cloudinary/sign",
+  maxImages = 20,
+  maxFileSizeMb = 10,
+  onUrlsChange,
+}: {
+  name: string;
+  defaultUrls?: string[];
+  signEndpoint?: string;
+  maxImages?: number;
+  maxFileSizeMb?: number;
+  onUrlsChange?: (urls: string[]) => void;
+}) {
   const [images, setImages] = useState<UploadedImage[]>(defaultUrls.map((url) => ({ url })));
   const [error, setError] = useState<string | null>(null);
   const [manualUrl, setManualUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    onUrlsChange?.(images.filter((image) => !image.uploading).map((image) => image.url));
+  }, [images, onUrlsChange]);
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     setError(null);
 
     for (const file of Array.from(files)) {
+      if (images.filter((image) => !image.uploading).length >= maxImages) {
+        setError(`Vous pouvez ajouter au maximum ${maxImages} images.`);
+        break;
+      }
+      if (!file.type.startsWith("image/")) {
+        setError("Seuls les fichiers image sont acceptés.");
+        continue;
+      }
+      if (file.size > maxFileSizeMb * 1024 * 1024) {
+        setError(`Chaque image doit faire moins de ${maxFileSizeMb} Mo.`);
+        continue;
+      }
       const placeholder: UploadedImage = { url: URL.createObjectURL(file), uploading: true };
       setImages((prev) => [...prev, placeholder]);
 
       try {
-        const signRes = await fetch("/api/cloudinary/sign", { method: "POST" });
+        const signRes = await fetch(signEndpoint, { method: "POST" });
         const signData = await signRes.json();
 
         if (!signRes.ok) {
@@ -99,7 +129,8 @@ export function MediaUploader({ name, defaultUrls = [] }: { name: string; defaul
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-domify-primary/30 text-domify-primary/70 transition-luxury hover:border-domify-primary hover:text-domify-primary"
+          disabled={images.filter((image) => !image.uploading).length >= maxImages}
+          className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-domify-primary/30 text-domify-primary/70 transition-luxury hover:border-domify-primary hover:text-domify-primary disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Upload size={18} />
           <span className="text-[11px] font-medium">Ajouter</span>

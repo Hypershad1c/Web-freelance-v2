@@ -7,7 +7,7 @@ import { ApprovalActions } from "@/components/admin/ApprovalActions";
 
 export default async function AdminApprovalsPage() {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") redirect("/admin");
+  if (!session?.user || !["ADMIN", "EDITOR", "AGENT"].includes(session.user.role)) redirect("/admin");
 
   const properties = await prisma.property.findMany({
     where: { approvalStatus: "PENDING" },
@@ -28,7 +28,7 @@ export default async function AdminApprovalsPage() {
           <div>
             <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-domify-gold"><ClipboardCheck size={15} /> Gouvernance éditoriale</p>
             <h2 className="mt-2 font-display text-3xl font-semibold text-domify-dark">Propriétés en attente</h2>
-            <p className="mt-2 text-sm text-domify-dark/60">Les brouillons des éditeurs doivent être approuvés avant publication.</p>
+            <p className="mt-2 text-sm text-domify-dark/60">Chaque dépôt vendeur ou bailleur doit être vérifié par un administrateur, un éditeur ou un agent avant publication.</p>
           </div>
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-domify-warm-white font-display text-lg font-semibold text-domify-primary">{properties.length}</span>
         </div>

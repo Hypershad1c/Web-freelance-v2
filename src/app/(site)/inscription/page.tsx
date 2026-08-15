@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { Turnstile } from "@/components/Turnstile";
 
 export default function InscriptionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ export default function InscriptionPage() {
 
     await signIn("credentials", { email: form.email, password: form.password, redirect: false });
     setLoading(false);
-    router.push("/");
+    router.push(callbackUrl);
     router.refresh();
   }
 
@@ -44,7 +46,7 @@ export default function InscriptionPage() {
       <p className="mt-2 text-sm text-domify-dark/60">Sauvegardez vos favoris et suivez vos demandes en un seul endroit.</p>
 
       <div className="mt-8">
-        <GoogleSignInButton />
+          <GoogleSignInButton callbackUrl={callbackUrl} />
       </div>
 
       <div className="my-6 flex items-center gap-3 text-xs text-domify-dark/40">
@@ -96,7 +98,7 @@ export default function InscriptionPage() {
 
       <p className="mt-6 text-center text-sm text-domify-dark/60">
         Déjà inscrit ?{" "}
-        <Link href="/connexion" className="font-semibold text-domify-primary hover:text-domify-gold">
+                  <Link href={callbackUrl === "/" ? "/connexion" : `/connexion?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="font-semibold text-domify-primary hover:text-domify-gold">
           Se connecter
         </Link>
       </p>

@@ -91,7 +91,7 @@ const STAFF_SECTIONS: NavSection[] = [
   },
 ];
 
-const EDITOR_HIDDEN_HREFS = new Set(["/admin/users", "/admin/roles", "/admin/approvals", "/admin/audit-log", "/admin/agent-performance"]);
+const EDITOR_HIDDEN_HREFS = new Set(["/admin/users", "/admin/roles", "/admin/audit-log", "/admin/agent-performance"]);
 const ADMIN_ONLY_SECTIONS = new Set(["Système"]);
 
 const AGENT_SECTIONS: NavSection[] = [
@@ -103,6 +103,7 @@ const AGENT_SECTIONS: NavSection[] = [
     title: "Mon activité",
     items: [
       { label: "Mes propriétés", href: "/admin/properties", icon: Building2 },
+      { label: "Validations", href: "/admin/approvals", icon: ClipboardCheck },
       { label: "Mon CRM", href: "/admin/crm", icon: Handshake },
       { label: "Mes rendez-vous", href: "/admin/appointments", icon: CalendarClock },
       { label: "Mes leads", href: "/admin/leads", icon: Inbox },

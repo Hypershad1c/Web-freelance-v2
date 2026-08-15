@@ -1,4 +1,4 @@
-type TurnstileAction = "lead" | "contact" | "appointment" | "registration" | "valuation" | "financing";
+type TurnstileAction = "lead" | "contact" | "appointment" | "registration" | "valuation" | "financing" | "seller_property";
 
 type TurnstileResult = {
   success: boolean;

@@ -468,13 +468,15 @@ export async function submitPropertyForApproval(id: string) {
 
 export async function reviewPropertyApproval(id: string, decision: "approve" | "reject", rejectionReason?: string) {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") throw new Error("Non autorisé");
+  const reviewerRole = session?.user?.role;
+  if (!session || !reviewerRole || !["ADMIN", "EDITOR", "AGENT"].includes(reviewerRole)) throw new Error("Non autorisé");
   const parsed = ApprovalDecisionSchema.safeParse(decision);
   if (!parsed.success) throw new Error("Décision invalide");
   if (parsed.data === "reject" && !rejectionReason?.trim()) throw new Error("Veuillez indiquer le motif du refus.");
 
   const property = await prisma.property.findUnique({ where: { id }, select: { id: true, title: true, submittedById: true } });
   if (!property) throw new Error("Propriété introuvable");
+  if (reviewerRole === "AGENT" && property.submittedById === session.user.id) throw new Error("Un agent ne peut pas valider sa propre soumission.");
 
   const approved = parsed.data === "approve";
   await prisma.property.update({

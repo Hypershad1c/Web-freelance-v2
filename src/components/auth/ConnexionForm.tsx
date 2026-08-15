@@ -90,7 +90,7 @@ export default function ConnexionForm() {
 
       <p className="mt-6 text-center text-sm text-domify-dark/60">
         Pas encore de compte ?{" "}
-        <Link href="/inscription" className="font-semibold text-domify-primary hover:text-domify-gold">
+          <Link href={explicitCallbackUrl ? `/inscription?callbackUrl=${encodeURIComponent(explicitCallbackUrl)}` : "/inscription"} className="font-semibold text-domify-primary hover:text-domify-gold">
           Créer un compte
         </Link>
       </p>

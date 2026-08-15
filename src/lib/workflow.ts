@@ -57,3 +57,16 @@ export async function notifyAdministrators({
   });
   await notifyUsers({ userIds: administrators.map((administrator) => administrator.id), type, title, body, href });
 }
+
+export async function notifyReviewers({
+  type,
+  title,
+  body,
+  href,
+}: Omit<Parameters<typeof notifyUsers>[0], "userIds">) {
+  const reviewers = await prisma.user.findMany({
+    where: { role: { in: ["ADMIN", "EDITOR", "AGENT"] } },
+    select: { id: true },
+  });
+  await notifyUsers({ userIds: reviewers.map((reviewer) => reviewer.id), type, title, body, href });
+}
