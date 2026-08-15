@@ -12,6 +12,7 @@ import { sendEmail, sendPropertyApprovalDecisionEmail } from "@/lib/email";
 
 const originalApiKey = process.env.RESEND_API_KEY;
 const originalFromAddress = process.env.EMAIL_FROM;
+const originalNextAuthUrl = process.env.NEXTAUTH_URL;
 const email = {
   to: "client@example.com",
   subject: "Réinitialisez votre mot de passe — Domify",
@@ -24,6 +25,8 @@ afterEach(() => {
 
   if (originalFromAddress === undefined) delete process.env.EMAIL_FROM;
   else process.env.EMAIL_FROM = originalFromAddress;
+  if (originalNextAuthUrl === undefined) delete process.env.NEXTAUTH_URL;
+  else process.env.NEXTAUTH_URL = originalNextAuthUrl;
 
   mockSend.mockReset();
   vi.restoreAllMocks();
@@ -65,6 +68,7 @@ describe("sendEmail", () => {
 describe("sendPropertyApprovalDecisionEmail", () => {
   it("sends an approval email with the published property link", async () => {
     process.env.RESEND_API_KEY = "re_test";
+    process.env.NEXTAUTH_URL = "https://domify.ma";
     mockSend.mockResolvedValue({ data: { id: "approval_email_123" }, error: null });
 
     await expect(sendPropertyApprovalDecisionEmail({
