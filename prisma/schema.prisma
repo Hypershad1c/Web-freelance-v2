@@ -54,6 +54,8 @@ model User {
   portalConversationsOwned    PortalConversation[]    @relation("PortalConversationsOwned")
   portalConversationsAssigned PortalConversation[]    @relation("PortalConversationsAssigned")
   portalMessagesSent          PortalMessage[]         @relation("PortalMessagesSent")
+  agencySubscriptions         AgencySubscription[]
+  agencyPayments              AgencyPayment[]
 }
 
 model PasswordResetToken {
@@ -1021,4 +1023,71 @@ model AnalyticsEvent {
 
   @@index([type, source, createdAt])
   @@index([campaign, createdAt])
+}
+
+// ---------- AGENCY BILLING ----------
+
+enum AgencyPlan {
+  STARTER
+  PRO
+  PREMIUM
+  ENTERPRISE
+}
+
+enum AgencySubscriptionStatus {
+  PENDING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum AgencyPaymentStatus {
+  INITIATED
+  PAID
+  FAILED
+  CANCELED
+}
+
+model AgencySubscription {
+  id                 String                   @id @default(cuid())
+  userId             String
+  user               User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan               AgencyPlan
+  status             AgencySubscriptionStatus @default(PENDING)
+  amount             Int
+  currency           String                   @default("MAD")
+  provider           String                   @default("PAYTABS")
+  providerProfileId  String?
+  providerToken      String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  canceledAt         DateTime?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  payments           AgencyPayment[]
+
+  @@index([userId, status])
+  @@index([status, currentPeriodEnd])
+}
+
+model AgencyPayment {
+  id                     String              @id @default(cuid())
+  userId                 String
+  user                   User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptionId         String
+  subscription           AgencySubscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  plan                   AgencyPlan
+  amount                 Int
+  currency               String              @default("MAD")
+  provider               String              @default("PAYTABS")
+  cartId                 String              @unique
+  providerTransactionRef String?
+  status                 AgencyPaymentStatus @default(INITIATED)
+  providerResponse       Json?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  @@index([userId, status, createdAt])
+  @@index([providerTransactionRef])
 }

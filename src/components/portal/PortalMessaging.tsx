@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import PusherClient from "pusher-js";
 import { CheckCheck, Loader2, Mail, MessageCircle, RefreshCw, Send, ShieldCheck } from "lucide-react";
 
 type PropertyOption = { id: string; title: string; reference: string };
@@ -62,9 +63,26 @@ export function PortalMessaging({ mode, properties = [] }: { mode: "owner" | "st
 
   useEffect(() => {
     void loadConversations();
-    const timer = window.setInterval(() => void loadConversations(), 15000);
-    return () => window.clearInterval(timer);
   }, [loadConversations]);
+
+  useEffect(() => {
+    const key = process.env.NEXT_PUBLIC_PUSHER_KEY;
+    const cluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER;
+    if (!active?.id || !key || !cluster) return;
+    const client = new PusherClient(key, { cluster, authEndpoint: "/api/realtime/auth" });
+    const channel = client.subscribe(`private-portal-conversation-${active.id}`);
+    const onMessage = (payload: { message?: PortalMessage }) => {
+      if (!payload.message) return;
+      setActive((current) => current && current.messages.some((message) => message.id === payload.message!.id) ? current : current ? { ...current, messages: [...current.messages, payload.message!] } : current);
+      setConversations((current) => current.map((conversation) => conversation.id === active.id ? { ...conversation, lastMessageAt: payload.message!.createdAt, unreadCount: 0 } : conversation));
+    };
+    channel.bind("message:new", onMessage);
+    return () => {
+      channel.unbind("message:new", onMessage);
+      client.unsubscribe(`private-portal-conversation-${active.id}`);
+      client.disconnect();
+    };
+  }, [active?.id]);
 
   async function createConversation() {
     if (!selectedPropertyId) return;

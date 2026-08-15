@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { notifyUsers, recordAudit } from "@/lib/workflow";
 import { sendPortalMessageNotificationEmail } from "@/lib/email";
 import { sendTwilioWhatsApp } from "@/lib/twilio-whatsapp";
+import { publishPortalMessage } from "@/lib/realtime";
 
 const MessageSchema = z.object({
   body: z.string().trim().min(1, "Le message ne peut pas être vide.").max(4000, "Le message est trop long."),
@@ -67,6 +68,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await tx.portalConversation.update({ where: { id: conversation.id }, data: { lastMessageAt: created.createdAt } });
     return created;
   });
+
+  void publishPortalMessage({ conversationId: conversation.id, message }).catch((error) => console.error("[portal-messaging] Realtime publish failed", error));
 
   const recipients = [...new Set([conversation.ownerId, conversation.assignedAgentId, conversation.property.agent?.userId])]
     .filter((value): value is string => Boolean(value && value !== session.user.id));
