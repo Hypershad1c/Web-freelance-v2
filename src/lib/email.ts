@@ -167,7 +167,73 @@ export async function sendPortalMessageNotificationEmail({
       `<p>Bonjour ${safeRecipient},</p>
        <p><strong>${safeSender}</strong> vous a envoyé un message au sujet de <strong>${safeTitle}</strong> (${safeReference}).</p>
        <p style="margin: 24px 0;"><a href="${portalUrl}" style="display: inline-block; background: #336699; color: #ffffff; padding: 12px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">Ouvrir la messagerie</a></p>
-       <p>Connectez-vous à votre espace Domify pour consulter l’échange et répondre en toute sécurité.</p>`
+       <p>Connectez-vous à votre espace Domify pour consulter l’échange et répondre en toute sécurité.</p>
+      `
+    ),
+  });
+}
+
+export async function sendSubscriptionExpiringSoonEmail({
+  to,
+  recipientName,
+  plan,
+  amount,
+  currency,
+  periodEnd,
+}: {
+  to: string;
+  recipientName?: string | null;
+  plan: string;
+  amount: number;
+  currency: string;
+  periodEnd: Date;
+}) {
+  const baseUrl = (process.env.NEXTAUTH_URL || "https://domify.ma").replace(/\/$/, "");
+  const safeName = escapeHtml(recipientName?.trim() || "client");
+  const safePlan = escapeHtml(plan);
+  const safeAmount = `${amount.toLocaleString("fr-MA")} ${escapeHtml(currency)}`;
+  const safePeriodEnd = escapeHtml(new Intl.DateTimeFormat("fr-MA", { day: "2-digit", month: "long", year: "numeric" }).format(periodEnd));
+  return sendEmail({
+    to,
+    subject: `Votre abonnement ${plan} arrive à échéance — Domify`,
+    html: emailLayout(
+      "Votre abonnement arrive bientôt à échéance",
+      `<p>Bonjour ${safeName},</p>
+       <p>Votre abonnement <strong>${safePlan}</strong> de <strong>${safeAmount}</strong> arrive à échéance le <strong>${safePeriodEnd}</strong>.</p>
+       <p>Pour préserver l’accès à vos services Domify, vérifiez votre moyen de paiement et préparez le prochain renouvellement.</p>
+       <p style="margin: 24px 0;"><a href="${baseUrl}/tarifs" style="display: inline-block; background: #336699; color: #ffffff; padding: 12px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">Voir les offres Domify</a></p>
+       <p>Si votre abonnement est déjà renouvelé, aucune action n’est nécessaire.</p>`
+    ),
+  });
+}
+
+export async function sendSubscriptionPastDueEmail({
+  to,
+  recipientName,
+  plan,
+  amount,
+  currency,
+}: {
+  to: string;
+  recipientName?: string | null;
+  plan: string;
+  amount: number;
+  currency: string;
+}) {
+  const baseUrl = (process.env.NEXTAUTH_URL || "https://domify.ma").replace(/\/$/, "");
+  const safeName = escapeHtml(recipientName?.trim() || "client");
+  const safePlan = escapeHtml(plan);
+  const safeAmount = `${amount.toLocaleString("fr-MA")} ${escapeHtml(currency)}`;
+  return sendEmail({
+    to,
+    subject: `Action requise : paiement d’abonnement en retard — Domify`,
+    html: emailLayout(
+      "Votre paiement d’abonnement nécessite votre attention",
+      `<p>Bonjour ${safeName},</p>
+       <p>Le paiement de votre abonnement <strong>${safePlan}</strong> de <strong>${safeAmount}</strong> n’a pas pu être confirmé.</p>
+       <p>Votre abonnement est actuellement marqué comme <strong>impayé</strong>. Vérifiez votre moyen de paiement ou contactez Domify afin d’éviter une interruption de service.</p>
+       <p style="margin: 24px 0;"><a href="${baseUrl}/tarifs" style="display: inline-block; background: #336699; color: #ffffff; padding: 12px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">Gérer mon abonnement</a></p>
+       <p>Si vous avez déjà régularisé la situation, vous pouvez ignorer ce message.</p>`
     ),
   });
 }

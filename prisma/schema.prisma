@@ -1049,6 +1049,11 @@ enum AgencyPaymentStatus {
   CANCELED
 }
 
+enum SubscriptionAlertType {
+  EXPIRING_SOON
+  PAST_DUE
+}
+
 model AgencySubscription {
   id                 String                   @id @default(cuid())
   userId             String
@@ -1066,6 +1071,7 @@ model AgencySubscription {
   createdAt          DateTime                 @default(now())
   updatedAt          DateTime                 @updatedAt
   payments           AgencyPayment[]
+  alerts             SubscriptionAlert[]
 
   @@index([userId, status])
   @@index([status, currentPeriodEnd])
@@ -1090,4 +1096,17 @@ model AgencyPayment {
 
   @@index([userId, status, createdAt])
   @@index([providerTransactionRef])
+}
+
+model SubscriptionAlert {
+  id             String               @id @default(cuid())
+  subscriptionId String
+  subscription   AgencySubscription   @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  type           SubscriptionAlertType
+  periodKey      String
+  sentAt         DateTime             @default(now())
+  createdAt      DateTime             @default(now())
+
+  @@unique([subscriptionId, type, periodKey])
+  @@index([type, sentAt])
 }

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { ApprovalActions } from "@/components/admin/ApprovalActions";
+import { MonthlyRevenueChart } from "@/components/admin/MonthlyRevenueChart";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatMAD } from "@/lib/utils";
@@ -65,6 +66,21 @@ function formatDateTime(date: Date) {
 
 function getDisplayName(user: { name: string | null; email: string | null }) {
   return user.name || user.email || "Utilisateur sans nom";
+}
+
+function buildRevenueTrend(payments: { amount: number; createdAt: Date }[], now: Date) {
+  return Array.from({ length: 12 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - 11 + index, 1);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    const revenue = payments
+      .filter((payment) => `${payment.createdAt.getFullYear()}-${payment.createdAt.getMonth()}` === key)
+      .reduce((total, payment) => total + payment.amount, 0);
+    return {
+      month: key,
+      label: new Intl.DateTimeFormat("fr-MA", { month: "short" }).format(date).replace(".", ""),
+      revenue,
+    };
+  });
 }
 
 function MetricCard({
@@ -164,6 +180,7 @@ export default async function AdminBusinessPage() {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 86_400_000);
+  const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
   const [
     activeSubscriptions,
@@ -171,6 +188,7 @@ export default async function AdminBusinessPage() {
     planDistribution,
     totalPaidRevenue,
     monthlyRevenue,
+    revenuePayments,
     failedPayments,
     pendingPayments,
     expiringSubscriptions,
@@ -188,6 +206,7 @@ export default async function AdminBusinessPage() {
     }),
     prisma.agencyPayment.aggregate({ where: { status: "PAID" }, _sum: { amount: true } }),
     prisma.agencyPayment.aggregate({ where: { status: "PAID", createdAt: { gte: startOfMonth } }, _sum: { amount: true } }),
+    prisma.agencyPayment.findMany({ where: { status: "PAID", createdAt: { gte: twelveMonthsAgo } }, select: { amount: true, createdAt: true } }),
     prisma.agencyPayment.count({ where: { status: "FAILED" } }),
     prisma.agencyPayment.count({ where: { status: "INITIATED" } }),
     prisma.agencySubscription.count({
@@ -245,6 +264,7 @@ export default async function AdminBusinessPage() {
   const distribution = ["STARTER", "PRO", "PREMIUM", "ENTERPRISE"] as const;
   const maxPlanCount = Math.max(1, ...planDistribution.map((item) => item._count._all));
   const pendingVerificationCount = pendingProperties.length;
+  const revenueTrend = buildRevenueTrend(revenuePayments, now);
 
   return (
     <>
@@ -264,6 +284,11 @@ export default async function AdminBusinessPage() {
           <MetricCard label="Revenus ce mois" value={formatMAD(thisMonthRevenue)} detail={`Paiements PayTabs confirmés depuis le ${formatDate(startOfMonth)}.`} icon={TrendingUp} tone="gold" />
           <MetricCard label="Paiements en attente" value={pendingPayments} detail="Checkout initié, confirmation encore attendue." icon={Hourglass} tone="amber" />
           <MetricCard label="Paiements en échec" value={failedPayments} detail="Transactions à surveiller ou à relancer." icon={XCircle} tone="rose" />
+        </section>
+
+        <section className="mt-8 rounded-2xl border border-black/6 bg-white p-6 shadow-luxury">
+          <SectionHeading eyebrow="Évolution financière" title="Revenus mensuels" detail="Revenus confirmés sur les douze derniers mois, calculés à partir des paiements PayTabs marqués PAID." />
+          <MonthlyRevenueChart data={revenueTrend} />
         </section>
 
         <section className="mt-8 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">

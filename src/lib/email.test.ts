@@ -8,7 +8,7 @@ vi.mock("resend", () => ({
   }),
 }));
 
-import { sendEmail, sendPropertyApprovalDecisionEmail } from "@/lib/email";
+import { sendEmail, sendPropertyApprovalDecisionEmail, sendSubscriptionExpiringSoonEmail, sendSubscriptionPastDueEmail } from "@/lib/email";
 
 const originalApiKey = process.env.RESEND_API_KEY;
 const originalFromAddress = process.env.EMAIL_FROM;
@@ -105,5 +105,45 @@ describe("sendPropertyApprovalDecisionEmail", () => {
     expect(payload.subject).toContain("Action requise pour votre annonce");
     expect(payload.html).toContain("Ajoutez &lt;strong&gt;le titre&lt;/strong&gt; &amp; une photo.");
     expect(payload.html).not.toContain("Ajoutez <strong>le titre</strong>");
+  });
+});
+
+describe("subscription alert emails", () => {
+  it("sends a seven-day expiry alert with the period end and plan", async () => {
+    process.env.RESEND_API_KEY = "re_test";
+    mockSend.mockResolvedValue({ data: { id: "expiry_email_123" }, error: null });
+    const periodEnd = new Date("2026-08-21T00:00:00.000Z");
+
+    await expect(sendSubscriptionExpiringSoonEmail({
+      to: "agency@example.com",
+      recipientName: "Nadia",
+      plan: "PRO",
+      amount: 1500,
+      currency: "MAD",
+      periodEnd,
+    })).resolves.toEqual({ skipped: false, messageId: "expiry_email_123" });
+
+    expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({
+      to: "agency@example.com",
+      subject: "Votre abonnement PRO arrive à échéance — Domify",
+      html: expect.stringContaining("1.500 MAD"),
+    }));
+  });
+
+  it("sends a past-due alert with the payment action message", async () => {
+    process.env.RESEND_API_KEY = "re_test";
+    mockSend.mockResolvedValue({ data: { id: "past_due_email_123" }, error: null });
+
+    await expect(sendSubscriptionPastDueEmail({
+      to: "agency@example.com",
+      recipientName: "Nadia",
+      plan: "PREMIUM",
+      amount: 4000,
+      currency: "MAD",
+    })).resolves.toEqual({ skipped: false, messageId: "past_due_email_123" });
+
+    const payload = mockSend.mock.calls.at(-1)?.[0] as { subject: string; html: string };
+    expect(payload.subject).toContain("paiement d’abonnement en retard");
+    expect(payload.html).toContain("impayé");
   });
 });
