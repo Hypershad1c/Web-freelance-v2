@@ -30,6 +30,7 @@ import {
   X,
   Handshake,
   SlidersHorizontal,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,10 @@ const STAFF_SECTIONS: NavSection[] = [
   {
     title: "Vue d'ensemble",
     items: [{ label: "Tableau de bord", href: "/admin", icon: LayoutDashboard }],
+  },
+  {
+    title: "Facturation",
+    items: [{ label: "Tableau de bord business", href: "/admin/business", icon: TrendingUp }],
   },
   {
     title: "Catalogue",
@@ -93,8 +98,8 @@ const STAFF_SECTIONS: NavSection[] = [
   },
 ];
 
-const EDITOR_HIDDEN_HREFS = new Set(["/admin/users", "/admin/roles", "/admin/audit-log", "/admin/agent-performance"]);
-const ADMIN_ONLY_SECTIONS = new Set(["Système"]);
+const EDITOR_HIDDEN_HREFS = new Set(["/admin/users", "/admin/roles", "/admin/audit-log", "/admin/agent-performance", "/admin/business"]);
+const ADMIN_ONLY_SECTIONS = new Set(["Système", "Facturation"]);
 
 const AGENT_SECTIONS: NavSection[] = [
   {
