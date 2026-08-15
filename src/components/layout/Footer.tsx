@@ -25,7 +25,7 @@ export async function Footer({ dict }: { locale: Locale; dict: Dictionary }) {
     { label: dict.footer.compare, href: "/comparer" },
     { label: dict.footer.mortgageCalculator, href: "/calculateur-credit" },
     { label: dict.footer.investmentCalculator, href: "/calculateur-investissement" },
-    { label: dict.footer.partner, href: "/contact" },
+    { label: dict.footer.partner, href: "/tarifs" },
     { label: dict.footer.faq, href: "/faq" },
     { label: dict.footer.terms, href: "/conditions-generales" },
     { label: dict.footer.privacy, href: "/politique-de-confidentialite" },

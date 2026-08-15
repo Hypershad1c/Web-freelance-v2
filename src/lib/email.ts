@@ -135,3 +135,39 @@ export async function sendPropertyApprovalDecisionEmail({
     ),
   });
 }
+
+
+export async function sendPortalMessageNotificationEmail({
+  to,
+  recipientName,
+  propertyTitle,
+  propertyReference,
+  senderName,
+  portalPath,
+}: {
+  to: string;
+  recipientName?: string | null;
+  propertyTitle: string;
+  propertyReference: string;
+  senderName: string;
+  portalPath: string;
+}) {
+  const baseUrl = (process.env.NEXTAUTH_URL || "https://domify.ma").replace(/\/$/, "");
+  const safeRecipient = escapeHtml(recipientName?.trim() || "");
+  const safeTitle = escapeHtml(propertyTitle);
+  const safeReference = escapeHtml(propertyReference);
+  const safeSender = escapeHtml(senderName);
+  const portalUrl = `${baseUrl}${portalPath}`;
+
+  return sendEmail({
+    to,
+    subject: `Nouveau message concernant ${propertyTitle} — Domify`,
+    html: emailLayout(
+      "Nouveau message immobilier",
+      `<p>Bonjour ${safeRecipient},</p>
+       <p><strong>${safeSender}</strong> vous a envoyé un message au sujet de <strong>${safeTitle}</strong> (${safeReference}).</p>
+       <p style="margin: 24px 0;"><a href="${portalUrl}" style="display: inline-block; background: #336699; color: #ffffff; padding: 12px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">Ouvrir la messagerie</a></p>
+       <p>Connectez-vous à votre espace Domify pour consulter l’échange et répondre en toute sécurité.</p>`
+    ),
+  });
+}

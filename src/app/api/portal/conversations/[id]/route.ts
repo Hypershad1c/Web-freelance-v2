@@ -3,6 +3,8 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notifyUsers, recordAudit } from "@/lib/workflow";
+import { sendPortalMessageNotificationEmail } from "@/lib/email";
+import { sendTwilioWhatsApp } from "@/lib/twilio-whatsapp";
 
 const MessageSchema = z.object({
   body: z.string().trim().min(1, "Le message ne peut pas être vide.").max(4000, "Le message est trop long."),
@@ -12,9 +14,9 @@ async function getConversationForUser(id: string, userId: string, role: string) 
   const conversation = await prisma.portalConversation.findUnique({
     where: { id },
     include: {
-      property: { select: { id: true, title: true, reference: true, submittedById: true, agent: { select: { name: true, userId: true } } } },
-      owner: { select: { id: true, name: true, email: true } },
-      assignedAgent: { select: { id: true, name: true, email: true } },
+      property: { select: { id: true, title: true, reference: true, submittedById: true, agent: { select: { id: true, name: true, userId: true, email: true, phone: true } } } },
+      owner: { select: { id: true, name: true, email: true, phone: true } },
+      assignedAgent: { select: { id: true, name: true, email: true, phone: true } },
       messages: {
         include: { sender: { select: { id: true, name: true, role: true } } },
         orderBy: { createdAt: "asc" },
@@ -75,6 +77,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     body: `${conversation.property.title} — ${session.user.name || "Nouveau message"}`,
     href: session.user.role === "USER" ? "/espace-vendeur" : "/admin/messagerie",
   });
+
+  const recipientProfiles = [conversation.owner, conversation.assignedAgent, conversation.property.agent]
+    .filter((recipient): recipient is { id: string; name: string | null; email: string; phone: string | null } => Boolean(recipient && recipient.id !== session.user.id));
+  await Promise.all(recipientProfiles.map(async (recipient) => {
+    const recipientPath = recipient.id === conversation.owner.id ? "/espace-vendeur" : "/admin/messagerie";
+    const deliveries: Promise<unknown>[] = [
+      sendPortalMessageNotificationEmail({
+        to: recipient.email,
+        recipientName: recipient.name,
+        propertyTitle: conversation.property.title,
+        propertyReference: conversation.property.reference,
+        senderName: session.user.name || "Un membre de votre équipe Domify",
+        portalPath: recipientPath,
+      }),
+    ];
+    if (recipient.phone) {
+      deliveries.push(sendTwilioWhatsApp({
+        to: recipient.phone,
+        body: `Domify — Nouveau message de ${session.user.name || "votre interlocuteur"} concernant ${conversation.property.title} (${conversation.property.reference}). Consultez votre espace : ${(process.env.NEXTAUTH_URL || "https://domify.ma").replace(/\/$/, "")}${recipientPath}`,
+      }));
+    }
+    const results = await Promise.allSettled(deliveries);
+    results.filter((result): result is PromiseRejectedResult => result.status === "rejected").forEach((result) => console.error("[portal-messaging] External notification failed", result.reason));
+  }));
   await recordAudit({
     actorId: session.user.id,
     action: "PORTAL_MESSAGE_SENT",

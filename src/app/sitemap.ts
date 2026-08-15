@@ -17,6 +17,7 @@ const STATIC_ROUTES = [
   { path: "/faq", priority: 0.3, changeFrequency: "monthly" as const },
   { path: "/estimation", priority: 0.6, changeFrequency: "monthly" as const },
   { path: "/vendre-louer", priority: 0.6, changeFrequency: "monthly" as const },
+  { path: "/tarifs", priority: 0.7, changeFrequency: "monthly" as const },
   { path: "/calculateur-credit", priority: 0.3, changeFrequency: "monthly" as const },
   { path: "/calculateur-investissement", priority: 0.3, changeFrequency: "monthly" as const },
   { path: "/conditions-generales", priority: 0.1, changeFrequency: "yearly" as const },
