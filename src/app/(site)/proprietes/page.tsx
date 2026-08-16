@@ -40,11 +40,11 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
   };
 
   const [properties, cities, propertyTypes, neighborhoods, amenities] = await Promise.all([
-    getProperties(filters),
-    getCitiesWithCounts(),
-    getPropertyTypes(),
-    getNeighborhoods(),
-    getAmenities(),
+    readWithRetry(() => getProperties(filters), []),
+    readWithRetry(() => getCitiesWithCounts(), []),
+    readWithRetry(() => getPropertyTypes(), []),
+    readWithRetry(() => getNeighborhoods(), []),
+    readWithRetry(() => getAmenities(), []),
   ]);
 
   const hasFilters = Object.values(params).some(Boolean);
@@ -83,4 +83,15 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
       </main>
     </>
   );
+}
+
+async function readWithRetry<T>(read: () => Promise<T>, fallback: T): Promise<T> {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await read();
+    } catch {
+      if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+  }
+  return fallback;
 }
