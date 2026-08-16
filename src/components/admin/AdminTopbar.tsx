@@ -16,12 +16,12 @@ export async function AdminTopbar({ title }: { title: string }) {
     : [];
 
   return (
-    <header className="relative flex min-h-16 items-center justify-between border-b border-domify-dark/7 bg-white/88 px-4 backdrop-blur-xl lg:min-h-20 lg:px-10">
+    <header className="relative flex min-h-16 items-center justify-between border-b border-domify-dark/7 bg-[#fcfbf8]/92 px-4 shadow-[0_12px_30px_-28px_rgba(16,47,66,0.6)] backdrop-blur-xl lg:min-h-20 lg:px-10">
       <div className="min-w-0">
-        <p className="mb-1 hidden text-[10px] font-bold uppercase tracking-[0.18em] text-domify-gold sm:block">Espace de gestion</p>
-        <h1 className="truncate font-display text-lg font-semibold text-domify-dark sm:text-2xl">{title}</h1>
+        <div className="mb-1 hidden items-center gap-2 sm:flex"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-domify-gold">Espace de gestion</p></div>
+        <h1 className="truncate font-display text-lg font-semibold tracking-[-0.02em] text-domify-dark sm:text-2xl">{title}</h1>
       </div>
-      <div className="ml-4 flex shrink-0 items-center gap-2.5 sm:gap-4">
+      <div className="ml-4 flex shrink-0 items-center gap-2.5 sm:gap-4"><span className="hidden rounded-full border border-domify-gold/20 bg-domify-warm-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-domify-primary md:inline-flex">Live</span>
         <NotificationBell notifications={notifications} />
         <div className="hidden items-center gap-2.5 border-l border-domify-dark/8 pl-4 sm:flex">
           <span className="flex h-9 w-9 items-center justify-center rounded-full border border-domify-gold/25 bg-domify-warm-white font-display text-sm font-semibold text-domify-primary">
@@ -35,7 +35,7 @@ export async function AdminTopbar({ title }: { title: string }) {
         <form action={signOutAction}>
           <button
             type="submit"
-            className="pressable flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-domify-dark/8 bg-white text-domify-dark/60 shadow-[0_9px_18px_-16px_rgba(16,47,66,0.65)] hover:border-domify-gold/35 hover:text-domify-primary"
+            className="pressable flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-domify-dark/8 bg-white/90 text-domify-dark/60 shadow-[0_9px_18px_-16px_rgba(16,47,66,0.65)] hover:border-domify-gold/35 hover:text-domify-primary"
             aria-label="Se déconnecter"
           >
             <LogOut size={15} />
