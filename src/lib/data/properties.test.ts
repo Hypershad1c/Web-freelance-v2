@@ -18,36 +18,33 @@ afterEach(() => {
 });
 
 describe("getHomepageProperties", () => {
-  it("returns only admin-featured, published properties when the curated selection fills the grid", async () => {
-    const featured = [{ id: "feature-1" }, { id: "feature-2" }] as never[];
+  it("returns every published property marked as featured", async () => {
+    const featured = [{ id: "feature-1" }, { id: "feature-2" }, { id: "feature-3" }] as never[];
     mockIsPrismaReady.mockResolvedValue(true);
     mockFindMany.mockResolvedValueOnce(featured);
 
-    await expect(getHomepageProperties(2)).resolves.toEqual(featured);
+    await expect(getHomepageProperties()).resolves.toEqual(featured);
     expect(mockFindMany).toHaveBeenCalledTimes(1);
     expect(mockFindMany).toHaveBeenCalledWith(expect.objectContaining({
       where: { status: "PUBLISHED", featured: true },
-      take: 2,
+      orderBy: { updatedAt: "desc" },
     }));
+    expect(mockFindMany.mock.calls[0][0]).not.toHaveProperty("take");
   });
 
-  it("keeps marked properties first, then fills remaining cards from recent published inventory", async () => {
+  it("does not add unmarked published inventory to the homepage", async () => {
     const featured = [{ id: "feature-1" }] as never[];
-    const fallback = [{ id: "published-2" }, { id: "published-3" }] as never[];
     mockIsPrismaReady.mockResolvedValue(true);
-    mockFindMany.mockResolvedValueOnce(featured).mockResolvedValueOnce(fallback);
+    mockFindMany.mockResolvedValueOnce(featured);
 
-    await expect(getHomepageProperties(3)).resolves.toEqual([...featured, ...fallback]);
-    expect(mockFindMany).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      where: { status: "PUBLISHED", id: { notIn: ["feature-1"] } },
-      take: 2,
-    }));
+    await expect(getHomepageProperties()).resolves.toEqual(featured);
+    expect(mockFindMany).toHaveBeenCalledTimes(1);
   });
 
   it("never exposes listings when Prisma is unavailable", async () => {
     mockIsPrismaReady.mockResolvedValue(false);
 
-    await expect(getHomepageProperties(4)).resolves.toEqual([]);
+    await expect(getHomepageProperties()).resolves.toEqual([]);
     expect(mockFindMany).not.toHaveBeenCalled();
   });
 });

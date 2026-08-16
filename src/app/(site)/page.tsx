@@ -27,7 +27,7 @@ export default async function HomePage() {
   const locale = await getLocale();
   const dict = getDictionary(locale);
   const [featuredProperties, settings, cities, propertyTypes] = await Promise.all([
-    getHomepageProperties(4),
+    getHomepageProperties(),
     getSiteSettings(),
     getCitiesWithCounts(),
     getPropertyTypes(),
