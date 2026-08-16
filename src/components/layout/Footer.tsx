@@ -38,7 +38,7 @@ export async function Footer({ dict }: { locale: Locale; dict: Dictionary }) {
   ].filter((social) => social.url);
 
   return (
-    <footer className="relative overflow-hidden bg-domify-primary-dark text-white/80">
+    <footer className="pwa-safe-bottom relative overflow-hidden bg-domify-primary-dark text-white/80">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-domify-soft-gold/90 to-transparent" />
       <div className="pointer-events-none absolute -right-24 top-20 h-80 w-80 rounded-full border border-white/10" />
       <div className="pointer-events-none absolute -left-32 bottom-[-10rem] h-80 w-80 rounded-full bg-domify-primary/40 blur-3xl" />

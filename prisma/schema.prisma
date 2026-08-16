@@ -217,8 +217,12 @@ model Property {
   id              String         @id @default(cuid())
   reference       String         @unique
   title           String
+  titleEn         String?
+  titleAr         String?
   slug            String         @unique
   description     String
+  descriptionEn   String?
+  descriptionAr   String?
   listingType     ListingType
   status          PropertyStatus @default(DRAFT)
   approvalStatus  ApprovalStatus @default(DRAFT)
@@ -264,8 +268,12 @@ model Property {
   crmOffers           CrmOffer[]
   portalConversations PortalConversation[]
 
-  seoTitle       String?
-  seoDescription String?
+  seoTitle          String?
+  seoTitleEn        String?
+  seoTitleAr        String?
+  seoDescription    String?
+  seoDescriptionEn  String?
+  seoDescriptionAr  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

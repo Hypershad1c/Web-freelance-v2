@@ -5,8 +5,12 @@ import { prisma } from "@/lib/prisma";
 const COLUMNS = [
   "reference",
   "title",
+  "titleEn",
+  "titleAr",
   "slug",
   "description",
+  "descriptionEn",
+  "descriptionAr",
   "listingType",
   "status",
   "price",
@@ -26,7 +30,11 @@ const COLUMNS = [
   "amenities",
   "imageUrls",
   "seoTitle",
+  "seoTitleEn",
+  "seoTitleAr",
   "seoDescription",
+  "seoDescriptionEn",
+  "seoDescriptionAr",
 ] as const;
 
 export async function GET() {
@@ -50,8 +58,12 @@ export async function GET() {
   const rows = properties.map((property) => [
     property.reference,
     property.title,
+    property.titleEn ?? "",
+    property.titleAr ?? "",
     property.slug,
     property.description,
+    property.descriptionEn ?? "",
+    property.descriptionAr ?? "",
     property.listingType,
     property.status,
     property.price,
@@ -71,7 +83,11 @@ export async function GET() {
     property.amenities.map((amenity) => amenity.name).join("|"),
     property.media.map((media) => media.url).join("|"),
     property.seoTitle ?? "",
+    property.seoTitleEn ?? "",
+    property.seoTitleAr ?? "",
     property.seoDescription ?? "",
+    property.seoDescriptionEn ?? "",
+    property.seoDescriptionAr ?? "",
   ]);
 
   const csv = [COLUMNS, ...rows].map((row) => row.map(escapeCsv).join(",")).join("\r\n");

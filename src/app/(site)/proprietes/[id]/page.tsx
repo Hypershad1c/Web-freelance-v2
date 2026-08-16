@@ -13,6 +13,8 @@ import { JsonLd } from "@/components/JsonLd";
 import { FadeIn, StaggerReveal, staggerItem } from "@/components/motion/FadeIn";
 import { MotionDiv } from "@/components/motion/MotionPrimitives";
 import { formatMAD } from "@/lib/utils";
+import { getLocale } from "@/i18n/get-locale";
+import { getLocalizedPropertyContent } from "@/lib/data/property-localization";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1600&auto=format&fit=crop";
@@ -21,9 +23,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const property = await getPropertyById(id);
   if (!property) return {};
+  const locale = await getLocale();
+  const content = getLocalizedPropertyContent(property, locale);
   return {
-    title: property.seoTitle || `${property.title} — ${property.city.name} | Domify`,
-    description: property.seoDescription || property.description.slice(0, 155),
+    title: `${content.seoTitle} — ${property.city.name} | Domify`,
+    description: content.seoDescription.slice(0, 155),
   };
 }
 
@@ -31,12 +35,14 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
   const { id } = await params;
   const property = await getPropertyById(id);
   if (!property) notFound();
+  const locale = await getLocale();
+  const content = getLocalizedPropertyContent(property, locale);
 
   incrementPropertyViews(id).catch(() => {});
 
   const similar = await getSimilarProperties(property);
   const images = property.media.length > 0 ? property.media.map((m) => m.url) : [FALLBACK_IMAGE];
-  const galleryMedia = property.media.length > 0 ? property.media.map((m) => ({ url: m.url, type: m.type, alt: m.alt })) : [{ url: FALLBACK_IMAGE, type: "image", alt: property.title }];
+  const galleryMedia = property.media.length > 0 ? property.media.map((m) => ({ url: m.url, type: m.type, alt: m.alt || content.title })) : [{ url: FALLBACK_IMAGE, type: "image", alt: content.title }];
 
   const baseUrl = process.env.NEXTAUTH_URL || "https://domify.ma";
   const propertyUrl = `${baseUrl}/proprietes/${property.id}`;
@@ -45,8 +51,8 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     "@context": "https://schema.org",
     "@type": "RealEstateListing",
     url: propertyUrl,
-    name: property.title,
-    description: property.description,
+    name: content.title,
+    description: content.description,
     image: images,
     datePosted: property.createdAt,
     address: {
@@ -73,7 +79,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Accueil", item: baseUrl },
       { "@type": "ListItem", position: 2, name: "Propriétés", item: `${baseUrl}/proprietes` },
-      { "@type": "ListItem", position: 3, name: property.title, item: propertyUrl },
+      { "@type": "ListItem", position: 3, name: content.title, item: propertyUrl },
     ],
   };
 
@@ -86,12 +92,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
       <nav className="mb-7 flex items-center gap-2 text-xs text-domify-dark/50">
         <Link href="/" className="hover:text-domify-primary">Accueil</Link> /
         <Link href="/proprietes" className="hover:text-domify-primary">Propriétés</Link> /
-        <span className="text-domify-dark/80">{property.title}</span>
+        <span className="text-domify-dark/80">{content.title}</span>
       </nav>
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <div>
-          <FadeIn><PropertyGallery media={galleryMedia} title={property.title} /></FadeIn>
+          <FadeIn><PropertyGallery media={galleryMedia} title={content.title} /></FadeIn>
 
           {/* Header */}
           <div className="mt-8 flex flex-col justify-between gap-5 border-b border-black/5 pb-8 sm:flex-row sm:items-start">
@@ -99,7 +105,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
               <span className="mb-2 inline-block rounded-full bg-domify-gold/10 px-3 py-1 text-xs font-semibold text-domify-gold">
                 {property.propertyType.name}
               </span>
-              <h1 className="max-w-2xl font-display text-3xl font-semibold leading-[1.04] tracking-[-0.025em] text-domify-dark sm:text-5xl">{property.title}</h1>
+              <h1 className="max-w-2xl font-display text-3xl font-semibold leading-[1.04] tracking-[-0.025em] text-domify-dark sm:text-5xl">{content.title}</h1>
               <p className="mt-2 flex items-center gap-1.5 text-sm text-domify-dark/60">
                 <MapPin size={15} /> {property.neighborhood ? `${property.neighborhood.name}, ` : ""}{property.city.name}
               </p>
@@ -132,7 +138,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           {/* Description */}
           <div className="mt-10">
             <h2 className="font-display text-xl font-semibold text-domify-dark">Description</h2>
-            <p className="mt-3 whitespace-pre-line leading-relaxed text-domify-dark/70">{property.description}</p>
+            <p className="mt-3 whitespace-pre-line leading-relaxed text-domify-dark/70">{content.description}</p>
             <p className="mt-3 flex items-center gap-1.5 text-xs text-domify-dark/40">
               <Hash size={12} /> Référence {property.reference}
             </p>
@@ -161,7 +167,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                   properties={[
                     {
                       id: property.id,
-                      title: property.title,
+                      title: content.title,
                       price: property.price,
                       listingType: property.listingType,
                       latitude: property.latitude,
@@ -199,7 +205,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" stagger={0.08}>
             {similar.map((p) => (
               <MotionDiv key={p.id} variants={staggerItem}>
-                <PropertyCard property={p} />
+                <PropertyCard property={p} locale={locale} />
               </MotionDiv>
             ))}
           </StaggerReveal>

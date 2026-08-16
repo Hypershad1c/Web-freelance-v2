@@ -36,7 +36,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const closeMenu = () => setOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-domify-dark/8 bg-[#fcfbf8]/92 shadow-[0_12px_36px_-30px_rgba(16,47,66,0.7)] backdrop-blur-xl">
+    <header className="pwa-safe-top sticky top-0 z-50 w-full border-b border-domify-dark/8 bg-[#fcfbf8]/92 shadow-[0_12px_36px_-30px_rgba(16,47,66,0.7)] backdrop-blur-xl">
       <div className="hidden bg-domify-primary-dark text-white/70 lg:block">
         <div className="mx-auto flex h-8 max-w-7xl items-center justify-between px-4 text-[10px] font-semibold uppercase tracking-[0.16em] sm:px-6 lg:px-8">
           <span>Domify · Immobilier d’exception au Maroc</span>

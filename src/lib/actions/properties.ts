@@ -12,8 +12,12 @@ import { sendPropertyApprovalDecisionEmail } from "@/lib/email";
 const PropertySchema = z.object({
   reference: z.string().min(2, "Référence requise"),
   title: z.string().min(3, "Titre requis"),
+  titleEn: z.string().optional(),
+  titleAr: z.string().optional(),
   slug: z.string().min(3, "Slug requis"),
   description: z.string().min(10, "Description requise"),
+  descriptionEn: z.string().optional(),
+  descriptionAr: z.string().optional(),
   listingType: z.enum(["VENTE", "LOCATION"]),
   status: z.enum(["DRAFT", "PUBLISHED", "UNDER_OFFER", "SOLD", "ARCHIVED"]),
   price: z.coerce.number().int().positive("Le prix doit être positif"),
@@ -34,7 +38,11 @@ const PropertySchema = z.object({
   amenityIds: z.array(z.string()).default([]),
   imageUrls: z.string().optional(),
   seoTitle: z.string().optional(),
+  seoTitleEn: z.string().optional(),
+  seoTitleAr: z.string().optional(),
   seoDescription: z.string().optional(),
+  seoDescriptionEn: z.string().optional(),
+  seoDescriptionAr: z.string().optional(),
 });
 
 const BulkPropertyActionSchema = z.object({
@@ -45,8 +53,12 @@ const BulkPropertyActionSchema = z.object({
 const CsvPropertySchema = z.object({
   reference: z.string().min(2),
   title: z.string().min(3),
+  titleEn: z.string().nullable().optional(),
+  titleAr: z.string().nullable().optional(),
   slug: z.string().optional(),
   description: z.string().min(10),
+  descriptionEn: z.string().nullable().optional(),
+  descriptionAr: z.string().nullable().optional(),
   listingType: z.enum(["VENTE", "LOCATION"]),
   status: z.enum(["DRAFT", "PUBLISHED", "UNDER_OFFER", "SOLD", "ARCHIVED"]),
   price: z.number().int().positive(),
@@ -66,7 +78,11 @@ const CsvPropertySchema = z.object({
   amenities: z.array(z.string()),
   imageUrls: z.array(z.string()),
   seoTitle: z.string().nullable(),
+  seoTitleEn: z.string().nullable().optional(),
+  seoTitleAr: z.string().nullable().optional(),
   seoDescription: z.string().nullable(),
+  seoDescriptionEn: z.string().nullable().optional(),
+  seoDescriptionAr: z.string().nullable().optional(),
 });
 
 export type PropertyFormState = {
@@ -112,8 +128,12 @@ function parseFormData(formData: FormData) {
   return {
     reference: formData.get("reference"),
     title,
+    titleEn: formData.get("titleEn") || undefined,
+    titleAr: formData.get("titleAr") || undefined,
     slug: slugify(rawSlug || title),
     description: formData.get("description"),
+    descriptionEn: formData.get("descriptionEn") || undefined,
+    descriptionAr: formData.get("descriptionAr") || undefined,
     listingType: formData.get("listingType"),
     status: formData.get("status"),
     price: formData.get("price"),
@@ -134,7 +154,11 @@ function parseFormData(formData: FormData) {
     amenityIds: formData.getAll("amenityIds") as string[],
     imageUrls: formData.get("imageUrls") || undefined,
     seoTitle: formData.get("seoTitle") || undefined,
+    seoTitleEn: formData.get("seoTitleEn") || undefined,
+    seoTitleAr: formData.get("seoTitleAr") || undefined,
     seoDescription: formData.get("seoDescription") || undefined,
+    seoDescriptionEn: formData.get("seoDescriptionEn") || undefined,
+    seoDescriptionAr: formData.get("seoDescriptionAr") || undefined,
   };
 }
 
@@ -340,8 +364,12 @@ export async function importPropertiesFromCsv(_previous: CsvImportState, formDat
       const parsed = CsvPropertySchema.safeParse({
         reference: source.reference,
         title: source.title,
+        titleEn: source.titleen || null,
+        titleAr: source.titlear || null,
         slug: source.slug || undefined,
         description: source.description,
+        descriptionEn: source.descriptionen || null,
+        descriptionAr: source.descriptionar || null,
         listingType: source.listingtype || "VENTE",
         status: source.status || "DRAFT",
         price: parseNumber(source.price),
@@ -361,7 +389,11 @@ export async function importPropertiesFromCsv(_previous: CsvImportState, formDat
         amenities: splitList(source.amenities),
         imageUrls: splitList(source.imageurls),
         seoTitle: source.seotitle || null,
+        seoTitleEn: source.seotitleen || null,
+        seoTitleAr: source.seotitlear || null,
         seoDescription: source.seodescription || null,
+        seoDescriptionEn: source.seodescriptionen || null,
+        seoDescriptionAr: source.seodescriptionar || null,
       });
       if (!parsed.success) {
         throw new Error(parsed.error.issues.map((issue) => issue.message).join(" "));
@@ -372,8 +404,12 @@ export async function importPropertiesFromCsv(_previous: CsvImportState, formDat
       const propertyData = {
         reference: value.reference,
         title: value.title,
+        titleEn: value.titleEn || null,
+        titleAr: value.titleAr || null,
         slug: value.slug ? slugify(value.slug) : `${slugify(value.title)}-${slugify(value.reference)}`,
         description: value.description,
+        descriptionEn: value.descriptionEn || null,
+        descriptionAr: value.descriptionAr || null,
         listingType: value.listingType,
         status: value.status,
         price: value.price,
@@ -391,7 +427,11 @@ export async function importPropertiesFromCsv(_previous: CsvImportState, formDat
         agencyId: agency ?? null,
         agentId: agent ?? null,
         seoTitle: value.seoTitle,
+        seoTitleEn: value.seoTitleEn || null,
+        seoTitleAr: value.seoTitleAr || null,
         seoDescription: value.seoDescription,
+        seoDescriptionEn: value.seoDescriptionEn || null,
+        seoDescriptionAr: value.seoDescriptionAr || null,
       };
 
       if (existing) {

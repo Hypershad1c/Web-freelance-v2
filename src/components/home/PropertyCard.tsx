@@ -9,12 +9,15 @@ import { useFavorites } from "@/lib/favorites-context";
 import { useCompare } from "@/lib/compare-context";
 import { WhatsAppConciergeButton } from "@/components/properties/WhatsAppConciergeButton";
 import type { PropertyWithRelations } from "@/lib/data/properties";
+import { getLocalizedPropertyContent } from "@/lib/data/property-localization";
+import type { Locale } from "@/i18n/locales";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop";
 
-export function PropertyCard({ property }: { property: PropertyWithRelations }) {
+export function PropertyCard({ property, locale = "fr" }: { property: PropertyWithRelations; locale?: Locale }) {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const localized = getLocalizedPropertyContent(property, locale);
   const { isComparing, toggleCompare, maxReached } = useCompare();
   const favorited = isFavorite(property.id);
   const comparing = isComparing(property.id);
@@ -37,7 +40,7 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
         <div className="relative h-60 w-full overflow-hidden bg-domify-primary-dark">
           <Image
             src={image}
-            alt={property.title}
+            alt={localized.title}
             fill
             className="object-cover transition-transform duration-700 [transition-timing-function:var(--ease-snappy)] group-hover:scale-[1.045]"
           />
@@ -84,7 +87,7 @@ export function PropertyCard({ property }: { property: PropertyWithRelations }) 
 
         <div className="flex flex-1 flex-col p-5 sm:p-6">
           <p className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-domify-primary/70">{property.city.name}</p>
-          <h3 className="mt-2 line-clamp-2 font-display text-xl font-semibold leading-6 text-domify-dark transition-colors duration-300 group-hover:text-domify-primary">{property.title}</h3>
+          <h3 className="mt-2 line-clamp-2 font-display text-xl font-semibold leading-6 text-domify-dark transition-colors duration-300 group-hover:text-domify-primary">{localized.title}</h3>
           <div className="mt-4 flex items-end justify-between gap-3">
             <p className="font-display text-[1.35rem] font-bold leading-none text-domify-gold">
               {formatMAD(property.price)}

@@ -7,6 +7,7 @@ import { PropertyFiltersForm } from "@/components/properties/PropertyFiltersForm
 import { PropertyCard } from "@/components/home/PropertyCard";
 import { StaggerReveal, staggerItem } from "@/components/motion/FadeIn";
 import { MotionDiv } from "@/components/motion/MotionPrimitives";
+import { getLocale } from "@/i18n/get-locale";
 
 export const revalidate = 300;
 
@@ -25,6 +26,7 @@ type SearchParams = { city?: string; neighborhood?: string; listingType?: string
 
 export default async function PropertiesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
+  const locale = await getLocale();
   const filters: PropertyFilters = {
     city: params.city || undefined,
     listingType: params.listingType === "VENTE" || params.listingType === "LOCATION" ? params.listingType : undefined,
@@ -72,10 +74,10 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
         </div>
 
         <div className="grid grid-cols-1 gap-9 lg:grid-cols-[292px_1fr]">
-          <aside className="lg:sticky lg:top-28 lg:self-start"><div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-domify-primary/70 lg:hidden"><SlidersHorizontal size={14} /> Affiner la recherche</div><div className="rounded-[1.4rem] border border-domify-dark/8 bg-white p-4 shadow-luxury sm:p-5"><PropertyFiltersForm cities={cities} propertyTypes={propertyTypes} neighborhoods={neighborhoods} amenities={amenities} current={params} /></div></aside>
+          <aside className="lg:sticky lg:top-28 lg:self-start"><div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-domify-primary/70 lg:hidden"><SlidersHorizontal size={14} /> Affiner la recherche</div><div className="rounded-[1.4rem] border border-domify-dark/8 bg-white p-4 shadow-luxury sm:p-5"><PropertyFiltersForm cities={cities} propertyTypes={propertyTypes} neighborhoods={neighborhoods} amenities={amenities} current={params} locale={locale} /></div></aside>
 
           <div>
-            {properties.length === 0 ? <div className="relative overflow-hidden rounded-[1.5rem] border border-domify-dark/8 bg-domify-warm-white p-10 text-center sm:p-14"><div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full border border-domify-gold/25" /><p className="relative font-display text-2xl font-semibold text-domify-dark">Aucun bien ne correspond à vos critères.</p><p className="relative mx-auto mt-3 max-w-md text-sm leading-6 text-domify-dark/60">Essayez d&apos;élargir votre recherche ou de modifier vos filtres pour découvrir d&apos;autres opportunités.</p><Link href="/proprietes" className="relative mt-6 inline-flex rounded-full bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-domify-gold">Réinitialiser la recherche</Link></div> : <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3" stagger={0.06}>{properties.map((property) => <MotionDiv key={property.id} variants={staggerItem}><PropertyCard property={property} /></MotionDiv>)}</StaggerReveal>}
+            {properties.length === 0 ? <div className="relative overflow-hidden rounded-[1.5rem] border border-domify-dark/8 bg-domify-warm-white p-10 text-center sm:p-14"><div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full border border-domify-gold/25" /><p className="relative font-display text-2xl font-semibold text-domify-dark">Aucun bien ne correspond à vos critères.</p><p className="relative mx-auto mt-3 max-w-md text-sm leading-6 text-domify-dark/60">Essayez d&apos;élargir votre recherche ou de modifier vos filtres pour découvrir d&apos;autres opportunités.</p><Link href="/proprietes" className="relative mt-6 inline-flex rounded-full bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-domify-gold">Réinitialiser la recherche</Link></div> : <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3" stagger={0.06}>{properties.map((property) => <MotionDiv key={property.id} variants={staggerItem}><PropertyCard property={property} locale={locale} /></MotionDiv>)}</StaggerReveal>}
           </div>
         </div>
 

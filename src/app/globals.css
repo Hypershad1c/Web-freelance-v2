@@ -64,6 +64,20 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 6rem;
+  overflow-x: hidden;
+}
+
+.pwa-safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.pwa-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pwa-content-width {
+  width: min(100%, 100vw);
+  max-width: 100%;
 }
 
 body {
@@ -318,6 +332,14 @@ textarea:focus-visible {
 
 [dir="rtl"] .rtl-reverse {
   flex-direction: row-reverse;
+}
+
+[dir="rtl"] .nav-link::after {
+  transform-origin: right;
+}
+
+[dir="rtl"] .group-hover\\:translate-x-0\\.5:hover {
+  transform: translateX(-0.125rem);
 }
 
 [dir="rtl"] .sell-rent-floating {

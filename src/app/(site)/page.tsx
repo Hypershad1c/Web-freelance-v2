@@ -98,7 +98,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <div className="rounded-[1.5rem] border border-domify-dark/10 bg-white p-3 shadow-[0_24px_55px_-38px_rgba(16,47,66,0.55)] sm:p-4">
-              <SearchBar cities={cities.map((city) => ({ slug: city.slug, name: city.name }))} propertyTypes={propertyTypes.map((propertyType) => ({ slug: propertyType.slug, name: propertyType.name }))} />
+              <SearchBar cities={cities.map((city) => ({ slug: city.slug, name: city.name }))} propertyTypes={propertyTypes.map((propertyType) => ({ slug: propertyType.slug, name: propertyType.name }))} locale={locale} />
             </div>
           </FadeIn>
         </div>
@@ -136,7 +136,7 @@ export default async function HomePage() {
             </FadeIn>
           ) : (
             <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4" stagger={0.08}>
-              {featuredProperties.map((property) => <MotionDiv key={property.id} variants={staggerItem}><PropertyCard property={property} /></MotionDiv>)}
+              {featuredProperties.map((property) => <MotionDiv key={property.id} variants={staggerItem}><PropertyCard property={property} locale={locale} /></MotionDiv>)}
             </StaggerReveal>
           )}
         </div>

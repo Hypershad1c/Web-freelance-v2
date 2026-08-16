@@ -47,9 +47,13 @@ export const pwaMetadata: Partial<Metadata> = {
 };
 
 export const pwaViewport: Viewport = {
-  themeColor: "#132C45",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#132C45" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B1723" },
+  ],
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
   viewportFit: "cover",
   interactiveWidget: "resizes-content",
 };

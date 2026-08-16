@@ -4,6 +4,7 @@ import { ArrowRight, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import type { Locale } from "@/i18n/locales";
 
 type SearchValues = {
   city: string;
@@ -14,8 +15,9 @@ type SearchValues = {
 
 type SearchOption = { slug: string; name: string };
 
-export function SearchBar({ cities, propertyTypes }: { cities: SearchOption[]; propertyTypes: SearchOption[] }) {
+export function SearchBar({ cities, propertyTypes, locale = "fr" }: { cities: SearchOption[]; propertyTypes: SearchOption[]; locale?: Locale }) {
   const router = useRouter();
+  const labels = locale === "ar" ? { location: "الموقع", allCities: "جميع المدن", type: "نوع العقار", allTypes: "جميع الأنواع", maxPrice: "السعر الأقصى", reference: "المرجع", search: "بحث", referencePlaceholder: "مثال DOM-101" } : locale === "en" ? { location: "Location", allCities: "All cities", type: "Property type", allTypes: "All types", maxPrice: "Maximum price", reference: "Reference", search: "Search", referencePlaceholder: "e.g. DOM-101" } : { location: "Localisation", allCities: "Toutes les villes", type: "Type de bien", allTypes: "Tous les types", maxPrice: "Prix maximum", reference: "Référence", search: "Rechercher", referencePlaceholder: "Ex. DOM-101" };
   const { register, handleSubmit } = useForm<SearchValues>({
     defaultValues: { city: "", propertyType: "", priceMax: "", reference: "" },
   });
@@ -32,32 +34,32 @@ export function SearchBar({ cities, propertyTypes }: { cities: SearchOption[]; p
   }
 
   return (
-    <form onSubmit={handleSubmit(submitSearch)} className="luxury-surface luxury-surface-strong grid grid-cols-1 gap-3 rounded-[1.65rem] p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-[1.05fr_1.05fr_0.92fr_0.92fr_0.9fr] lg:items-end lg:gap-3 lg:p-4">
-      <Field label="Localisation">
-        <select {...register("city")} className="domify-select" aria-label="Ville">
-          <option value="">Toutes les villes</option>
+    <form onSubmit={handleSubmit(submitSearch)} dir={locale === "ar" ? "rtl" : "ltr"} className="luxury-surface luxury-surface-strong grid grid-cols-1 gap-3 rounded-[1.65rem] p-3 text-start sm:grid-cols-2 sm:p-4 lg:grid-cols-[1.05fr_1.05fr_0.92fr_0.92fr_0.9fr] lg:items-end lg:gap-3 lg:p-4">
+      <Field label={labels.location}>
+        <select {...register("city")} className="domify-select" aria-label={labels.location}>
+          <option value="">{labels.allCities}</option>
           {cities.map((city) => (
             <option key={city.slug} value={city.slug}>{city.name}</option>
           ))}
         </select>
       </Field>
-      <Field label="Type de bien">
-        <select {...register("propertyType")} className="domify-select" aria-label="Type de bien">
-          <option value="">Tous les types</option>
+      <Field label={labels.type}>
+        <select {...register("propertyType")} className="domify-select" aria-label={labels.type}>
+          <option value="">{labels.allTypes}</option>
           {propertyTypes.map((propertyType) => (
             <option key={propertyType.slug} value={propertyType.slug}>{propertyType.name}</option>
           ))}
         </select>
       </Field>
-      <Field label="Prix maximum">
-        <input {...register("priceMax")} type="number" min="0" inputMode="numeric" className="domify-select" placeholder="Ex. 2 500 000" aria-label="Prix maximum" />
+      <Field label={labels.maxPrice}>
+        <input {...register("priceMax")} type="number" min="0" inputMode="numeric" className="domify-select" placeholder="Ex. 2 500 000" aria-label={labels.maxPrice} />
       </Field>
-      <Field label="Référence">
-        <input {...register("reference")} className="domify-select" placeholder="Ex. DOM-101" aria-label="Référence du bien" />
+      <Field label={labels.reference}>
+        <input {...register("reference")} className="domify-select" placeholder={labels.referencePlaceholder} aria-label={labels.reference} />
       </Field>
       <Button type="submit" size="lg" className="group h-[52px] w-full rounded-[0.95rem] hover:-translate-y-0.5 hover:shadow-[0_19px_30px_-16px_rgba(16,47,66,0.9)]">
         <Search size={16} strokeWidth={2.4} />
-        <span>Rechercher</span>
+        <span>{labels.search}</span>
         <ArrowRight size={15} className="rtl-mirror transition-transform duration-300 group-hover:translate-x-0.5" />
       </Button>
     </form>
@@ -66,7 +68,7 @@ export function SearchBar({ cities, propertyTypes }: { cities: SearchOption[]; p
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="group block text-left">
+    <label className="group block text-start">
       <span className="mb-2 block text-[0.66rem] font-bold uppercase tracking-[0.15em] text-domify-dark/55 transition-colors duration-200 group-focus-within:text-domify-primary">{label}</span>
       {children}
     </label>

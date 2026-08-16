@@ -18,8 +18,12 @@ type PropertyFormProps = {
   defaultValues?: {
     reference?: string;
     title?: string;
+    titleEn?: string | null;
+    titleAr?: string | null;
     slug?: string;
     description?: string;
+    descriptionEn?: string | null;
+    descriptionAr?: string | null;
     listingType?: string;
     status?: string;
     price?: number;
@@ -40,7 +44,11 @@ type PropertyFormProps = {
     amenityIds?: string[];
     imageUrls?: string;
     seoTitle?: string | null;
+    seoTitleEn?: string | null;
+    seoTitleAr?: string | null;
     seoDescription?: string | null;
+    seoDescriptionEn?: string | null;
+    seoDescriptionAr?: string | null;
   };
   submitLabel: string;
 };
@@ -71,14 +79,27 @@ export function PropertyForm({
         <Field label="Référence" error={state.errors?.reference}>
           <input name="reference" defaultValue={defaultValues.reference} className="input" required />
         </Field>
-        <Field label="Titre" error={state.errors?.title}>
+        <Field label="Titre — français" error={state.errors?.title}>
           <input name="title" defaultValue={defaultValues.title} className="input" required />
         </Field>
+        <Field label="Titre — English">
+          <input name="titleEn" defaultValue={defaultValues.titleEn ?? ""} className="input" dir="ltr" placeholder="Optional English title" />
+        </Field>
+        <Field label="العنوان — العربية">
+          <input name="titleAr" defaultValue={defaultValues.titleAr ?? ""} className="input" dir="rtl" placeholder="عنوان العقار بالعربية" />
+        </Field>
         <Field label="Slug (URL)" error={state.errors?.slug}>
+
           <input name="slug" defaultValue={defaultValues.slug} className="input" placeholder="villa-contemporaine-bouskoura" required />
         </Field>
-        <Field label="Description" error={state.errors?.description} full>
+        <Field label="Description — français" error={state.errors?.description} full>
           <textarea name="description" defaultValue={defaultValues.description} rows={4} className="input" required />
+        </Field>
+        <Field label="Description — English" full>
+          <textarea name="descriptionEn" defaultValue={defaultValues.descriptionEn ?? ""} rows={4} className="input" dir="ltr" placeholder="Optional English description" />
+        </Field>
+        <Field label="الوصف — العربية" full>
+          <textarea name="descriptionAr" defaultValue={defaultValues.descriptionAr ?? ""} rows={4} className="input" dir="rtl" placeholder="وصف العقار بالعربية" />
         </Field>
       </Section>
 
@@ -220,11 +241,23 @@ export function PropertyForm({
       </Section>
 
       <Section title="SEO">
-        <Field label="Titre SEO" full>
+        <Field label="Titre SEO — français" full>
           <input name="seoTitle" defaultValue={defaultValues.seoTitle ?? ""} className="input" />
         </Field>
-        <Field label="Description SEO" full>
+        <Field label="Titre SEO — English" full>
+          <input name="seoTitleEn" defaultValue={defaultValues.seoTitleEn ?? ""} className="input" dir="ltr" />
+        </Field>
+        <Field label="عنوان SEO — العربية" full>
+          <input name="seoTitleAr" defaultValue={defaultValues.seoTitleAr ?? ""} className="input" dir="rtl" />
+        </Field>
+        <Field label="Description SEO — français" full>
           <textarea name="seoDescription" defaultValue={defaultValues.seoDescription ?? ""} rows={2} className="input" />
+        </Field>
+        <Field label="Description SEO — English" full>
+          <textarea name="seoDescriptionEn" defaultValue={defaultValues.seoDescriptionEn ?? ""} rows={2} className="input" dir="ltr" />
+        </Field>
+        <Field label="وصف SEO — العربية" full>
+          <textarea name="seoDescriptionAr" defaultValue={defaultValues.seoDescriptionAr ?? ""} rows={2} className="input" dir="rtl" />
         </Field>
       </Section>
 
@@ -252,7 +285,8 @@ export function PropertyForm({
           border: 1px solid rgba(31,41,55,0.12);
           padding: 0.65rem 0.9rem;
           font-size: 0.875rem;
-          background: white;
+          background: var(--background);
+          color: var(--foreground);
         }
         .input:focus { outline: 2px solid #6699CC; }
       `}</style>
