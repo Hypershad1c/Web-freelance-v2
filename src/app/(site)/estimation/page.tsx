@@ -66,18 +66,18 @@ export default function EstimationPage() {
   }
 
   return (
-    <div className="bg-[#fbfaf7]">
-      <section className="relative overflow-hidden bg-domify-primary-dark py-16 text-white sm:py-20">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_85%_0%,rgba(232,203,145,0.14),transparent_24rem)] bg-[#fbfaf7]">
+      <section className="relative overflow-hidden border-b border-white/10 bg-domify-primary-dark py-20 text-white sm:py-24">
         <div className="pointer-events-none absolute -right-16 top-0 h-64 w-64 rounded-full border border-domify-soft-gold/25" />
         <div className="pointer-events-none absolute bottom-0 left-[12%] h-40 w-40 rounded-full border border-white/10" />
         <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
           <p className="luxury-eyebrow text-domify-soft-gold">Parcours propriétaire</p>
-          <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Votre estimation, enfin actionnable.</h1>
+          <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.04] tracking-tight sm:text-6xl">Votre estimation, enfin actionnable.</h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-white/72">Partagez les informations essentielles. Un conseiller Domify étudie votre projet et ouvre un dossier vendeur suivi avec vous.</p>
         </div>
       </section>
 
-      <main className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8 lg:py-16">
+      <main className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8 lg:py-20">
         <aside className="space-y-5 lg:pt-6">
           <p className="luxury-eyebrow text-domify-gold">Ce que vous obtenez</p>
           <h2 className="font-display text-3xl font-semibold text-domify-dark">Un accompagnement, pas une estimation automatique.</h2>
@@ -87,7 +87,7 @@ export default function EstimationPage() {
           <Benefit icon={ShieldCheck} title="Sans engagement" desc="L’estimation est gratuite et confidentielle, sans obligation de mandat." />
         </aside>
 
-        <section className="rounded-[1.75rem] border border-domify-dark/8 bg-white p-5 shadow-[0_24px_55px_-38px_rgba(16,47,66,0.5)] sm:p-8">
+        <section className="rounded-[1.9rem] border border-domify-dark/8 bg-white/95 p-5 shadow-[0_28px_62px_-40px_rgba(16,47,66,0.52)] sm:p-9">
           {sent ? (
             <div className="flex min-h-96 flex-col items-center justify-center px-4 text-center">
               <span className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"><CheckCircle2 size={32} /></span>
