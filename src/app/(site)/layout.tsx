@@ -7,10 +7,12 @@ import { Providers } from "@/components/Providers";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { CompareBar } from "@/components/properties/CompareBar";
 import { SellRentFloatingButton } from "@/components/SellRentFloatingButton";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { AnalyticsRecorder } from "@/components/AnalyticsRecorder";
 import { RuntimeLocaleTranslator } from "@/components/RuntimeLocaleTranslator";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { IosInstallPrompt } from "@/components/IosInstallPrompt";
+import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { isRtl } from "@/i18n/locales";
@@ -43,12 +45,14 @@ export default async function RootLayout({
             </Suspense>
             <RuntimeLocaleTranslator locale={locale} />
             <Header locale={locale} dict={dict} />
-            <main>{children}</main>
+            <main className="pb-20 lg:pb-0">{children}</main>
             <Footer locale={locale} dict={dict} />
             <CookieConsentBanner />
             <IosInstallPrompt />
+            <PwaInstallPrompt />
             <CompareBar />
             <SellRentFloatingButton />
+            <MobileBottomNav />
           </Providers>
         </ThemeProvider>
       </body>

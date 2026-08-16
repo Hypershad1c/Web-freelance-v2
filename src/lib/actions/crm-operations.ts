@@ -168,3 +168,23 @@ export async function createCrmSavedSearch(formData: FormData) {
   await prisma.crmSavedSearch.create({ data: { ...data, listingType: data.listingType || null, minPrice: data.minPrice || null, maxPrice: data.maxPrice || null, bedrooms: data.bedrooms || null, cityId: data.cityId || null, propertyTypeId: data.propertyTypeId || null, userId: session.user.id } });
   revalidatePath("/compte");
 }
+
+export async function toggleCrmSavedSearch(searchId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Non autorisé");
+  const search = await prisma.crmSavedSearch.findFirst({ where: { id: searchId, userId: session.user.id }, select: { id: true, active: true, name: true } });
+  if (!search) throw new Error("Recherche enregistrée introuvable");
+  await prisma.crmSavedSearch.update({ where: { id: search.id }, data: { active: !search.active } });
+  await recordAudit({ actorId: session.user.id, action: "SAVED_SEARCH_TOGGLED", entityType: "CrmSavedSearch", entityId: search.id, summary: `${search.name} → ${search.active ? "pause" : "active"}` });
+  revalidatePath("/compte");
+}
+
+export async function deleteCrmSavedSearch(searchId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Non autorisé");
+  const search = await prisma.crmSavedSearch.findFirst({ where: { id: searchId, userId: session.user.id }, select: { id: true, name: true } });
+  if (!search) throw new Error("Recherche enregistrée introuvable");
+  await prisma.crmSavedSearch.delete({ where: { id: search.id } });
+  await recordAudit({ actorId: session.user.id, action: "SAVED_SEARCH_DELETED", entityType: "CrmSavedSearch", entityId: search.id, summary: search.name });
+  revalidatePath("/compte");
+}

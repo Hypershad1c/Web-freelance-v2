@@ -12,6 +12,43 @@ async function authorized(request: Request) {
   return session?.user?.role === "ADMIN" || session?.user?.role === "EDITOR";
 }
 
+async function processSavedSearchAlerts() {
+  const searches = await prisma.crmSavedSearch.findMany({ where: { active: true }, include: { user: { select: { id: true, email: true, name: true } }, city: { select: { name: true } }, propertyType: { select: { name: true } } }, orderBy: { updatedAt: "asc" } });
+  let sent = 0;
+  let matched = 0;
+  for (const search of searches) {
+    const properties = await prisma.property.findMany({
+      where: {
+        status: "PUBLISHED",
+        approvalStatus: "APPROVED",
+        createdAt: search.lastNotifiedAt ? { gt: search.lastNotifiedAt } : { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+        ...(search.listingType ? { listingType: search.listingType } : {}),
+        ...(search.minPrice !== null ? { price: { gte: search.minPrice } } : {}),
+        ...(search.maxPrice !== null ? { price: { lte: search.maxPrice } } : {}),
+        ...(search.bedrooms !== null ? { bedrooms: { gte: search.bedrooms } } : {}),
+        ...(search.cityId ? { cityId: search.cityId } : {}),
+        ...(search.propertyTypeId ? { propertyTypeId: search.propertyTypeId } : {}),
+      },
+      include: { city: { select: { name: true } }, propertyType: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+    if (properties.length === 0) continue;
+    matched += properties.length;
+    const subject = `${properties.length} nouvelle${properties.length > 1 ? "s" : ""} opportunité${properties.length > 1 ? "s" : ""} pour « ${search.name} »`;
+    const links = properties.map((property) => `<li><a href="https://domify.ma/proprietes/${property.id}">${property.title}</a> — ${new Intl.NumberFormat("fr-MA").format(property.price)} MAD · ${property.city.name}</li>`).join("");
+    if (search.channel === "EMAIL") {
+      const result = await sendEmail({ to: search.user.email, subject, html: emailLayout(subject, `<p>Bonjour ${search.user.name || ""},</p><p>Voici les nouvelles annonces correspondant à votre recherche :</p><ul>${links}</ul><p><a href="https://domify.ma/compte#alertes">Gérer mes alertes</a></p>`) });
+      if (!result.skipped) sent += 1;
+    } else if (search.channel === "IN_APP") {
+      await prisma.notification.create({ data: { userId: search.user.id, type: "SAVED_SEARCH_MATCH", title: subject, body: properties.map((property) => property.title).join(" · "), href: "/compte#alertes", meta: { searchId: search.id, propertyIds: properties.map((property) => property.id) } } });
+      sent += 1;
+    }
+    await prisma.crmSavedSearch.update({ where: { id: search.id }, data: { lastNotifiedAt: new Date() } });
+  }
+  return { searches: searches.length, matched, sent };
+}
+
 async function processQueuedFollowUps() {
   const queued = await prisma.crmCommunication.findMany({
     where: { status: "QUEUED" },
@@ -54,7 +91,8 @@ async function processQueuedFollowUps() {
 
 async function run(request: Request) {
   if (!(await authorized(request))) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-  return NextResponse.json(await processQueuedFollowUps());
+  const [followUps, savedSearchAlerts] = await Promise.all([processQueuedFollowUps(), processSavedSearchAlerts()]);
+  return NextResponse.json({ followUps, savedSearchAlerts });
 }
 
 // Vercel Cron invokes the configured production path with GET and attaches CRON_SECRET as a Bearer token.
