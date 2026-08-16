@@ -35,11 +35,26 @@ export async function getFeaturedProperties() {
   }
 }
 
-// The homepage is editorially led: every published listing selected in the admin
-// appears in the homepage collection. Unmarked inventory is intentionally excluded
-// so the admin `featured` checkbox is the single source of truth for this section.
+// The homepage always displays available published inventory so it cannot appear
+// empty. Listings selected with the admin `featured` checkbox are ordered first and
+// retain the "Sélection Domify" badge on their cards.
 export async function getHomepageProperties() {
-  return getFeaturedProperties();
+  if (!(await isPrismaReady())) {
+    return [];
+  }
+
+  try {
+    return await prisma.property.findMany({
+      where: { status: "PUBLISHED" },
+      include: publishedInclude,
+      orderBy: [{ featured: "desc" }, { updatedAt: "desc" }],
+    });
+  } catch (error) {
+    if ((error as Prisma.PrismaClientKnownRequestError)?.code === "P2021") {
+      return [];
+    }
+    throw error;
+  }
 }
 
 export type PropertyFilters = {

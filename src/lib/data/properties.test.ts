@@ -18,27 +18,17 @@ afterEach(() => {
 });
 
 describe("getHomepageProperties", () => {
-  it("returns every published property marked as featured", async () => {
-    const featured = [{ id: "feature-1" }, { id: "feature-2" }, { id: "feature-3" }] as never[];
+  it("returns all published properties with featured listings first", async () => {
+    const published = [{ id: "feature-1" }, { id: "published-2" }, { id: "feature-3" }] as never[];
     mockIsPrismaReady.mockResolvedValue(true);
-    mockFindMany.mockResolvedValueOnce(featured);
+    mockFindMany.mockResolvedValueOnce(published);
 
-    await expect(getHomepageProperties()).resolves.toEqual(featured);
+    await expect(getHomepageProperties()).resolves.toEqual(published);
     expect(mockFindMany).toHaveBeenCalledTimes(1);
     expect(mockFindMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { status: "PUBLISHED", featured: true },
-      orderBy: { updatedAt: "desc" },
+      where: { status: "PUBLISHED" },
+      orderBy: [{ featured: "desc" }, { updatedAt: "desc" }],
     }));
-    expect(mockFindMany.mock.calls[0][0]).not.toHaveProperty("take");
-  });
-
-  it("does not add unmarked published inventory to the homepage", async () => {
-    const featured = [{ id: "feature-1" }] as never[];
-    mockIsPrismaReady.mockResolvedValue(true);
-    mockFindMany.mockResolvedValueOnce(featured);
-
-    await expect(getHomepageProperties()).resolves.toEqual(featured);
-    expect(mockFindMany).toHaveBeenCalledTimes(1);
   });
 
   it("never exposes listings when Prisma is unavailable", async () => {
