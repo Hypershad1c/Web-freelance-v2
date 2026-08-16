@@ -1,12 +1,13 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { sanitizeCallbackUrl } from "@/lib/safe-redirect";
 
 export function GoogleSignInButton({ callbackUrl }: { callbackUrl?: string }) {
   return (
     <button
       type="button"
-      onClick={() => signIn("google", { callbackUrl: callbackUrl || "/" })}
+      onClick={() => signIn("google", { callbackUrl: sanitizeCallbackUrl(callbackUrl) })}
       className="flex w-full items-center justify-center gap-2 rounded-xl border border-black/10 bg-white py-3 text-sm font-medium text-domify-dark transition-luxury hover:bg-domify-warm-white"
     >
       <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">

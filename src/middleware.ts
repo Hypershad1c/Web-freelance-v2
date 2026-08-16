@@ -26,11 +26,10 @@ function buildCsp(nonce: string) {
 }
 
 function requestOrigin(request: NextRequest) {
-  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
-  const host = forwardedHost || request.headers.get("host") || request.nextUrl.host;
-  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
-  const protocol = forwardedProto || request.nextUrl.protocol.replace(":", "");
-  return `${protocol}://${host}`;
+  const configuredOrigin = process.env.NEXTAUTH_URL?.replace(/\/$/, "");
+  if (configuredOrigin) return configuredOrigin;
+  if (process.env.NODE_ENV === "production") return "https://domify.ma";
+  return request.nextUrl.origin;
 }
 
 function withSecurityHeaders(request: NextRequest, response: NextResponse, nonce: string) {
@@ -48,7 +47,7 @@ export default auth((request) => {
   const role = request.auth?.user?.role;
   if (isAdminRoute && (!request.auth || (role !== "ADMIN" && role !== "EDITOR" && role !== "AGENT"))) {
     const signInUrl = new URL("/connexion", requestOrigin(request));
-    signInUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
+    signInUrl.searchParams.set("callbackUrl", `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return withSecurityHeaders(request, NextResponse.redirect(signInUrl), nonce);
   }
 

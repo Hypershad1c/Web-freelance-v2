@@ -5,11 +5,12 @@ import { signIn, getSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { GoogleSignInButton } from "./GoogleSignInButton";
+import { sanitizeCallbackUrl } from "@/lib/safe-redirect";
 
 export default function ConnexionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const explicitCallbackUrl = searchParams.get("callbackUrl");
+  const explicitCallbackUrl = sanitizeCallbackUrl(searchParams.get("callbackUrl"));
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
