@@ -273,6 +273,47 @@ textarea:focus-visible {
   box-shadow: 0 25px 48px -32px rgba(16, 47, 66, 0.42);
 }
 
+.admin-page-shell {
+  min-width: 0;
+  width: 100%;
+  overflow-x: clip;
+}
+
+.admin-safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.admin-safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+}
+
+.admin-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-table-scroll table {
+  min-width: 700px;
+}
+
+@media (max-width: 640px) {
+  .admin-panel,
+  .admin-panel-interactive {
+    border-radius: 1.15rem;
+  }
+
+  .admin-page-shell {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+  }
+
+  .admin-table-scroll {
+    margin-inline: -0.25rem;
+    padding-inline: 0.25rem;
+  }
+}
+
 .domify-select {
   width: 100%;
   min-height: 52px;

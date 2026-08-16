@@ -269,7 +269,7 @@ export default async function AdminBusinessPage() {
   return (
     <>
       <AdminTopbar title="Tableau de bord business" />
-      <main className="p-5 sm:p-6 lg:p-10">
+      <main className="admin-page-shell p-4 sm:p-6 lg:p-10">
         <div className="mb-8 flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-domify-gold"><TrendingUp size={15} /> Pilotage commercial</p>
@@ -286,13 +286,13 @@ export default async function AdminBusinessPage() {
           <MetricCard label="Paiements en échec" value={failedPayments} detail="Transactions à surveiller ou à relancer." icon={XCircle} tone="rose" />
         </section>
 
-        <section className="mt-8 rounded-2xl border border-black/6 bg-white p-6 shadow-luxury">
+        <section className="mt-8 rounded-2xl border border-black/6 bg-white p-4 shadow-luxury sm:p-6">
           <SectionHeading eyebrow="Évolution financière" title="Revenus mensuels" detail="Revenus confirmés sur les douze derniers mois, calculés à partir des paiements PayTabs marqués PAID." />
           <MonthlyRevenueChart data={revenueTrend} />
         </section>
 
         <section className="mt-8 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-          <div className="rounded-2xl border border-black/6 bg-white p-6 shadow-luxury">
+          <div className="rounded-2xl border border-black/6 bg-white p-4 shadow-luxury sm:p-6">
             <SectionHeading eyebrow="Abonnements" title="Portefeuille actif" detail={`${activeSubscriptions} abonnement(s) actif(s) sur ${totalSubscriptions} abonnement(s) enregistré(s).`} href="#subscriptions" hrefLabel="Voir la liste" />
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl bg-domify-warm-white p-4"><div className="flex items-center justify-between"><span className="text-sm text-domify-dark/60">Actifs</span><Users size={16} className="text-domify-primary" /></div><p className="mt-2 font-display text-3xl font-semibold text-domify-primary">{activeSubscriptions}</p></div>
@@ -301,7 +301,7 @@ export default async function AdminBusinessPage() {
               <div className="rounded-xl bg-domify-warm-white p-4"><div className="flex items-center justify-between"><span className="text-sm text-domify-dark/60">Panier moyen confirmé</span><ReceiptText size={16} className="text-domify-gold" /></div><p className="mt-2 font-display text-3xl font-semibold text-domify-dark">{paidRevenue > 0 ? formatMAD(Math.round(paidRevenue / Math.max(1, recentPayments.filter((payment) => payment.status === "PAID").length))) : "0 MAD"}</p></div>
             </div>
           </div>
-          <div className="rounded-2xl border border-black/6 bg-white p-6 shadow-luxury">
+          <div className="rounded-2xl border border-black/6 bg-white p-4 shadow-luxury sm:p-6">
             <SectionHeading eyebrow="Mix commercial" title="Plans actifs" detail="Répartition des abonnements actuellement actifs." />
             <div className="space-y-4">
               {distribution.map((plan) => {
@@ -314,9 +314,9 @@ export default async function AdminBusinessPage() {
           </div>
         </section>
 
-        <section className="mt-8 rounded-2xl border border-black/6 bg-white p-6 shadow-luxury">
+        <section className="mt-8 rounded-2xl border border-black/6 bg-white p-4 shadow-luxury sm:p-6">
           <SectionHeading eyebrow="Contrôle financier" title="Transactions récentes" detail="Les 20 derniers paiements enregistrés, avec leur état de confirmation PayTabs." href="/admin/business#subscriptions" hrefLabel="Gérer les abonnements" />
-          <div className="overflow-x-auto">
+          <div className="admin-table-scroll">
             {recentPayments.length === 0 ? <EmptyState icon={CreditCard} title="Aucune transaction enregistrée" detail="Les paiements initiés depuis la page Tarifs apparaîtront ici." /> : <table className="w-full min-w-[850px] border-separate border-spacing-0 text-left"><thead><tr className="text-[10px] font-bold uppercase tracking-[0.13em] text-domify-dark/45"><th className="border-b border-black/7 px-3 py-3">Client</th><th className="border-b border-black/7 px-3 py-3">Plan</th><th className="border-b border-black/7 px-3 py-3">Montant</th><th className="border-b border-black/7 px-3 py-3">Statut</th><th className="border-b border-black/7 px-3 py-3">Référence</th><th className="border-b border-black/7 px-3 py-3">Date</th></tr></thead><tbody>{recentPayments.map((payment) => <tr key={payment.id} className="text-sm transition-colors hover:bg-domify-warm-white/60"><td className="border-b border-black/5 px-3 py-4"><p className="font-semibold text-domify-dark">{getDisplayName(payment.user)}</p><p className="mt-0.5 text-xs text-domify-dark/50">{payment.user.email ?? "—"}</p></td><td className="border-b border-black/5 px-3 py-4 font-medium text-domify-primary">{PLAN_LABELS[payment.plan]}</td><td className="border-b border-black/5 px-3 py-4 font-semibold text-domify-dark">{formatMAD(payment.amount)}</td><td className="border-b border-black/5 px-3 py-4"><StatusPill status={payment.status} /></td><td className="border-b border-black/5 px-3 py-4 font-mono text-xs text-domify-dark/50">{payment.providerTransactionRef ?? payment.cartId}</td><td className="border-b border-black/5 px-3 py-4 whitespace-nowrap text-xs text-domify-dark/55">{formatDateTime(payment.createdAt)}</td></tr>)}</tbody></table>}
           </div>
         </section>
@@ -328,7 +328,7 @@ export default async function AdminBusinessPage() {
 
         <section id="subscriptions" className="mt-8 rounded-2xl border border-black/6 bg-white p-6 shadow-luxury">
           <SectionHeading eyebrow="Portefeuille clients" title="Toutes les souscriptions" detail="Vue opérationnelle des contrats, de leur échéance et de leur risque de renouvellement." />
-          <div className="overflow-x-auto">
+          <div className="admin-table-scroll">
             {subscriptions.length === 0 ? <EmptyState icon={Users} title="Aucun abonnement" detail="Les abonnements créés depuis la page Tarifs seront listés ici." /> : <table className="w-full min-w-[920px] border-separate border-spacing-0 text-left"><thead><tr className="text-[10px] font-bold uppercase tracking-[0.13em] text-domify-dark/45"><th className="border-b border-black/7 px-3 py-3">Compte</th><th className="border-b border-black/7 px-3 py-3">Plan</th><th className="border-b border-black/7 px-3 py-3">Statut</th><th className="border-b border-black/7 px-3 py-3">Montant</th><th className="border-b border-black/7 px-3 py-3">Fin de période</th><th className="border-b border-black/7 px-3 py-3">Risque</th></tr></thead><tbody>{subscriptions.map((subscription) => <tr key={subscription.id} className="text-sm transition-colors hover:bg-domify-warm-white/60"><td className="border-b border-black/5 px-3 py-4"><p className="font-semibold text-domify-dark">{getDisplayName(subscription.user)}</p><p className="mt-0.5 text-xs text-domify-dark/50">{subscription.user.email ?? "—"}</p></td><td className="border-b border-black/5 px-3 py-4 font-medium text-domify-primary">{PLAN_LABELS[subscription.plan]}</td><td className="border-b border-black/5 px-3 py-4"><StatusPill status={subscription.status} /></td><td className="border-b border-black/5 px-3 py-4 font-semibold text-domify-dark">{formatMAD(subscription.amount)}</td><td className="border-b border-black/5 px-3 py-4 whitespace-nowrap text-xs text-domify-dark/55">{formatDate(subscription.currentPeriodEnd)}</td><td className="border-b border-black/5 px-3 py-4"><RenewalRisk status={subscription.status} periodEnd={subscription.currentPeriodEnd} now={now} /></td></tr>)}</tbody></table>}
           </div>
         </section>

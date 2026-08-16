@@ -38,7 +38,7 @@ async function StaffDashboard({ role }: { role: "ADMIN" | "EDITOR" }) {
   return (
     <>
       <AdminTopbar title={role === "ADMIN" ? "Tableau de bord" : "Tableau de bord — Éditeur"} />
-      <div className="p-4 sm:p-6 lg:p-10">
+      <div className="admin-page-shell p-4 sm:p-6 lg:p-10">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
           {stats.map((s) => (
             <div key={s.label} className="admin-panel-interactive relative overflow-hidden rounded-[1.35rem] p-5 sm:p-6">
@@ -63,14 +63,14 @@ async function StaffDashboard({ role }: { role: "ADMIN" | "EDITOR" }) {
           ) : (
             <div className="mt-4 divide-y divide-black/5">
               {recentLeads.map((lead) => (
-                <div key={lead.id} className="flex items-center justify-between gap-4 py-4 first:pt-5">
+                <div key={lead.id} className="flex flex-col items-start gap-2 py-4 first:pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm font-medium text-domify-dark">{lead.name}</p>
                     <p className="text-xs text-domify-dark/50">
                       {lead.email} {lead.property ? `— ${lead.property.title}` : ""}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full border border-domify-dark/8 bg-domify-warm-white px-3 py-1 text-[11px] font-semibold text-domify-dark/70">
+                  <span className="rounded-full border border-domify-dark/8 bg-domify-warm-white px-3 py-1 text-[11px] font-semibold text-domify-dark/70">
                     {lead.status}
                   </span>
                 </div>
@@ -92,7 +92,7 @@ async function AgentDashboard({ userId }: { userId: string }) {
     return (
       <>
         <AdminTopbar title="Mon tableau de bord" />
-        <div className="p-6 lg:p-10">
+        <div className="admin-page-shell p-4 sm:p-6 lg:p-10">
           <div className="rounded-2xl bg-domify-warm-white p-10 text-center">
             <p className="text-domify-dark/70">
               Votre compte n&apos;est pas encore relié à une fiche Agent. Demandez à un administrateur de vous associer
@@ -134,7 +134,7 @@ async function AgentDashboard({ userId }: { userId: string }) {
   return (
     <>
       <AdminTopbar title={`Bonjour, ${agent.name.split(" ")[0]}`} />
-      <div className="p-4 sm:p-6 lg:p-10">
+      <div className="admin-page-shell p-4 sm:p-6 lg:p-10">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((s) => (
             <div key={s.label} className="admin-panel-interactive relative overflow-hidden rounded-[1.35rem] p-5 sm:p-6">
@@ -156,7 +156,7 @@ async function AgentDashboard({ userId }: { userId: string }) {
             ) : (
               <div className="mt-4 divide-y divide-black/5">
                 {upcomingAppointments.map((appt) => (
-                  <div key={appt.id} className="py-3">
+                  <div key={appt.id} className="rounded-xl bg-domify-warm-white/55 px-3 py-3 sm:bg-transparent sm:px-0">
                     <p className="text-sm font-medium text-domify-dark">{appt.name}</p>
                     <p className="text-xs text-domify-dark/50">
                       {appt.property?.title ?? "—"} ·{" "}
@@ -179,7 +179,7 @@ async function AgentDashboard({ userId }: { userId: string }) {
             ) : (
               <div className="mt-4 divide-y divide-black/5">
                 {recentLeads.map((lead) => (
-                  <div key={lead.id} className="py-3">
+                  <div key={lead.id} className="rounded-xl bg-domify-warm-white/55 px-3 py-3 sm:bg-transparent sm:px-0">
                     <p className="text-sm font-medium text-domify-dark">{lead.name}</p>
                     <p className="text-xs text-domify-dark/50">{lead.property?.title ?? "—"}</p>
                   </div>

@@ -216,7 +216,7 @@ export function AdminSidebar({ role }: { role: Role }) {
         <ReturnToSite />
       </aside>
 
-      <div className="flex h-[70px] w-full items-center justify-between border-b border-domify-dark/8 bg-domify-primary-dark px-4 text-white shadow-[0_10px_28px_-24px_rgba(16,47,66,0.9)] lg:hidden">
+      <div className="pwa-safe-top flex min-h-[70px] w-full items-center justify-between border-b border-domify-dark/8 bg-domify-primary-dark px-4 pb-3 pt-3 text-white shadow-[0_10px_28px_-24px_rgba(16,47,66,0.9)] lg:hidden">
         <div className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-domify-gold text-white">
             <Building2 size={15} />
@@ -233,7 +233,7 @@ export function AdminSidebar({ role }: { role: Role }) {
 
       <AnimatePresence>
         {mobileOpen && (
-          <div className="fixed inset-0 z-[100] lg:hidden">
+          <div className="fixed inset-0 z-[100] pwa-safe-bottom lg:hidden">
             <motion.button
               type="button"
               initial={reduceMotion ? false : { opacity: 0 }}

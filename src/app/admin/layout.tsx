@@ -29,9 +29,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <body className="antialiased">
         <ThemeProvider>
           <Providers>
-            <div className="flex min-h-screen flex-col bg-domify-warm-white/40 lg:flex-row">
+            <div className="admin-page-shell admin-safe-bottom flex min-h-screen min-w-0 flex-col bg-domify-warm-white/40 lg:flex-row">
               <AdminSidebar role={role} />
-              <div className="flex-1">{children}</div>
+              <div className="min-w-0 flex-1">{children}</div>
             </div>
           </Providers>
         </ThemeProvider>
