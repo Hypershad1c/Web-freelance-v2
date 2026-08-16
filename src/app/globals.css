@@ -25,6 +25,22 @@
   --motion-slow: 420ms;
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-primary: #8eb7d9;
+  --color-primary-dark: #0d1d2c;
+  --color-secondary: #8bb8d8;
+  --color-gold: #e6bb58;
+  --color-soft-gold: #f5d887;
+  --color-warm-white: #162a3a;
+  --color-sand: #21394d;
+  --color-dark: #f1f4f5;
+  --color-muted: #a9bac7;
+  --color-white: #f7fafb;
+  --background: #0b1723;
+  --foreground: #f1f4f5;
+}
+
 @theme inline {
   --color-domify-primary: var(--color-primary);
   --color-domify-primary-dark: var(--color-primary-dark);
@@ -59,6 +75,55 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 82% -12%, rgba(91, 135, 171, 0.2), transparent 26rem),
+    var(--background);
+}
+
+:root[data-theme="dark"] [class*="bg-[#fcfbf8]"] {
+  background-color: #0f1f2d !important;
+}
+
+:root[data-theme="dark"] [class*="bg-[#f7f3eb]"] {
+  background-color: #122536 !important;
+}
+
+:root[data-theme="dark"] [class~="bg-white"] {
+  background-color: #142838 !important;
+}
+
+:root[data-theme="dark"] [class~="bg-white/70"],
+:root[data-theme="dark"] [class~="bg-white/75"],
+:root[data-theme="dark"] [class~="bg-white/80"],
+:root[data-theme="dark"] [class~="bg-white/90"],
+:root[data-theme="dark"] [class~="bg-white/95"],
+:root[data-theme="dark"] [class~="bg-white/98"] {
+  background-color: rgb(20 40 56 / 0.92) !important;
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea {
+  color: var(--color-dark);
+  background-color: #142838;
+  border-color: rgb(171 202 224 / 0.2);
+}
+
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+  color: rgb(203 218 229 / 0.55);
+}
+
+:root[data-theme="dark"] .luxury-surface,
+:root[data-theme="dark"] .luxury-surface-strong,
+:root[data-theme="dark"] .admin-panel,
+:root[data-theme="dark"] .admin-panel-interactive {
+  border-color: rgb(171 202 224 / 0.16);
+  background: rgb(20 40 56 / 0.94);
+  box-shadow: 0 18px 48px -30px rgb(0 0 0 / 0.55);
 }
 
 ::selection {

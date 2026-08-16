@@ -6,9 +6,10 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, Search, Heart, User, LogOut, LayoutDashboard, UserCircle, ArrowUpRight } from "lucide-react";
+import { Menu, X, Search, Heart, User, LogOut, LayoutDashboard, UserCircle, ArrowUpRight, Moon, Sun } from "lucide-react";
 import { useFavorites } from "@/lib/favorites-context";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useTheme } from "@/components/ThemeProvider";
 import type { Locale } from "@/i18n/locales";
 import type { Dictionary } from "@/i18n/get-dictionary";
 
@@ -19,6 +20,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { favoriteIds } = useFavorites();
+  const { resolvedTheme, toggleTheme } = useTheme();
 
   const nav = [
     { label: dict.nav.buy, href: "/proprietes?listingType=VENTE" },
@@ -63,7 +65,10 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
         <div className="hidden shrink-0 items-center gap-2.5 xl:flex">
           <LanguageSwitcher current={locale} />
-          <Link href="/proprietes" aria-label={dict.header.search} className="pressable rounded-full p-2 text-domify-dark/65 hover:bg-white hover:text-domify-primary">
+          <button type="button" onClick={toggleTheme} aria-label={resolvedTheme === "dark" ? "Activer le mode clair" : "Activer le mode sombre"} title={resolvedTheme === "dark" ? "Mode clair" : "Mode sombre"} className="pressable rounded-full p-2 text-domify-dark/65 hover:bg-domify-warm-white hover:text-domify-primary">
+            {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <Link href="/proprietes" aria-label={dict.header.search} className="pressable rounded-full p-2 text-domify-dark/65 hover:bg-domify-warm-white hover:text-domify-primary">
             <Search size={18} />
           </Link>
           <Link href="/favoris" aria-label={dict.header.favorites} className="pressable relative rounded-full p-2 text-domify-dark/65 hover:bg-white hover:text-domify-primary">
@@ -106,6 +111,9 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
         <div className="flex items-center gap-2.5 xl:hidden">
           <LanguageSwitcher current={locale} />
+          <button type="button" onClick={toggleTheme} aria-label={resolvedTheme === "dark" ? "Activer le mode clair" : "Activer le mode sombre"} title={resolvedTheme === "dark" ? "Mode clair" : "Mode sombre"} className="pressable rounded-full p-2 text-domify-dark/70 hover:bg-domify-warm-white hover:text-domify-primary">
+            {resolvedTheme === "dark" ? <Sun size={19} /> : <Moon size={19} />}
+          </button>
           <Link href="/favoris" aria-label={dict.header.favorites} className="relative rounded-full p-2 text-domify-dark/70"><Heart size={19} />{favoriteIds.length > 0 && <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-domify-gold text-[9px] font-bold text-white">{favoriteIds.length}</span>}</Link>
           <button onClick={() => setOpen((current) => !current)} aria-label="Menu" aria-expanded={open} className="pressable flex h-10 w-10 items-center justify-center rounded-full border border-domify-dark/10 bg-white/80 text-domify-dark shadow-[0_10px_18px_-16px_rgba(16,47,66,0.7)]">
             {open ? <X size={23} /> : <Menu size={23} />}

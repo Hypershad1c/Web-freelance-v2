@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { AdminSidebar, type Role } from "@/components/admin/AdminSidebar";
 import { Providers } from "@/components/Providers";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { auth } from "@/lib/auth";
 import { pwaMetadata, pwaViewport } from "@/lib/pwa-metadata";
 
@@ -26,12 +27,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <html lang="fr">
       <body className="antialiased">
-        <Providers>
-          <div className="flex min-h-screen flex-col bg-domify-warm-white/40 lg:flex-row">
-            <AdminSidebar role={role} />
-            <div className="flex-1">{children}</div>
-          </div>
-        </Providers>
+        <ThemeProvider>
+          <Providers>
+            <div className="flex min-h-screen flex-col bg-domify-warm-white/40 lg:flex-row">
+              <AdminSidebar role={role} />
+              <div className="flex-1">{children}</div>
+            </div>
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );

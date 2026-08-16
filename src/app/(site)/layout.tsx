@@ -4,6 +4,7 @@ import "../globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Providers } from "@/components/Providers";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { CompareBar } from "@/components/properties/CompareBar";
 import { SellRentFloatingButton } from "@/components/SellRentFloatingButton";
 import { AnalyticsRecorder } from "@/components/AnalyticsRecorder";
@@ -35,19 +36,21 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={isRtl(locale) ? "rtl" : "ltr"}>
       <body className="antialiased">
-        <Providers>
-          <Suspense fallback={null}>
-            <AnalyticsRecorder />
-          </Suspense>
-          <RuntimeLocaleTranslator locale={locale} />
-          <Header locale={locale} dict={dict} />
-          <main>{children}</main>
-          <Footer locale={locale} dict={dict} />
-          <CookieConsentBanner />
-          <IosInstallPrompt />
-          <CompareBar />
-          <SellRentFloatingButton />
-        </Providers>
+        <ThemeProvider>
+          <Providers>
+              <Suspense fallback={null}>
+              <AnalyticsRecorder />
+            </Suspense>
+            <RuntimeLocaleTranslator locale={locale} />
+            <Header locale={locale} dict={dict} />
+            <main>{children}</main>
+            <Footer locale={locale} dict={dict} />
+            <CookieConsentBanner />
+            <IosInstallPrompt />
+            <CompareBar />
+            <SellRentFloatingButton />
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );
