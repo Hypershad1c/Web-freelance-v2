@@ -40,8 +40,8 @@ async function processSavedSearchAlerts() {
     if (search.channel === "EMAIL") {
       const result = await sendEmail({ to: search.user.email, subject, html: emailLayout(subject, `<p>Bonjour ${search.user.name || ""},</p><p>Voici les nouvelles annonces correspondant à votre recherche :</p><ul>${links}</ul><p><a href="https://domify.ma/compte#alertes">Gérer mes alertes</a></p>`) });
       if (!result.skipped) sent += 1;
-    } else if (search.channel === "IN_APP") {
-      await prisma.notification.create({ data: { userId: search.user.id, type: "SAVED_SEARCH_MATCH", title: subject, body: properties.map((property) => property.title).join(" · "), href: "/compte#alertes", meta: { searchId: search.id, propertyIds: properties.map((property) => property.id) } } });
+    } else if (search.channel === "IN_APP" || search.channel === "WHATSAPP") {
+      await prisma.notification.create({ data: { userId: search.user.id, type: "SAVED_SEARCH_MATCH", title: search.channel === "WHATSAPP" ? `${subject} · à consulter dans votre compte` : subject, body: properties.map((property) => property.title).join(" · "), href: "/compte#alertes", meta: { searchId: search.id, propertyIds: properties.map((property) => property.id), requestedChannel: search.channel } } });
       sent += 1;
     }
     await prisma.crmSavedSearch.update({ where: { id: search.id }, data: { lastNotifiedAt: new Date() } });
