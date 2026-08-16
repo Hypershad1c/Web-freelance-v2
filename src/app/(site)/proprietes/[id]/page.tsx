@@ -78,12 +78,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl bg-[radial-gradient(circle_at_85%_0%,rgba(232,203,145,0.12),transparent_24rem)] px-4 py-9 sm:px-6 lg:px-8 lg:py-12">
       <JsonLd data={listingJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
 
       {/* Breadcrumb */}
-      <nav className="mb-6 flex items-center gap-2 text-xs text-domify-dark/50">
+      <nav className="mb-7 flex items-center gap-2 text-xs text-domify-dark/50">
         <Link href="/" className="hover:text-domify-primary">Accueil</Link> /
         <Link href="/proprietes" className="hover:text-domify-primary">Propriétés</Link> /
         <span className="text-domify-dark/80">{property.title}</span>
@@ -99,7 +99,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
               <span className="mb-2 inline-block rounded-full bg-domify-gold/10 px-3 py-1 text-xs font-semibold text-domify-gold">
                 {property.propertyType.name}
               </span>
-              <h1 className="max-w-2xl font-display text-3xl font-bold leading-tight text-domify-dark sm:text-4xl">{property.title}</h1>
+              <h1 className="max-w-2xl font-display text-3xl font-semibold leading-[1.04] tracking-[-0.025em] text-domify-dark sm:text-5xl">{property.title}</h1>
               <p className="mt-2 flex items-center gap-1.5 text-sm text-domify-dark/60">
                 <MapPin size={15} /> {property.neighborhood ? `${property.neighborhood.name}, ` : ""}{property.city.name}
               </p>
@@ -122,7 +122,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           </div>
 
           {/* Key facts */}
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+          <div className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             <Fact icon={Bed} label="Chambres" value={property.bedrooms} />
             <Fact icon={Bath} label="Salles de bain" value={property.bathrooms} />
             <Fact icon={Square} label="Surface" value={`${property.surfaceArea} m²`} />
@@ -183,7 +183,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
         {/* Sidebar */}
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <div className="mb-4 hidden rounded-2xl border border-domify-gold/15 bg-domify-warm-white/70 p-4 lg:block">
+          <div className="mb-4 hidden rounded-[1.35rem] border border-domify-gold/15 bg-domify-warm-white/70 p-5 lg:block">
             <p className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-domify-gold">L&apos;accompagnement Domify</p>
             <p className="mt-2 font-display text-lg font-semibold leading-6 text-domify-dark">Un conseiller dédié pour vous guider à chaque étape.</p>
             <p className="mt-2 text-xs leading-5 text-domify-dark/56">Réponse rapide, visite privée et suivi personnalisé.</p>
@@ -211,7 +211,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
 function Fact({ icon: Icon, label, value }: { icon: typeof Bed; label: string; value: string | number }) {
   return (
-    <div className="rounded-xl bg-domify-warm-white p-4 text-center">
+    <div className="rounded-2xl border border-domify-dark/6 bg-white/90 p-4 text-center shadow-[0_14px_30px_-26px_rgba(16,47,66,0.36)]">
       <Icon className="mx-auto text-domify-gold" size={20} />
       <p className="mt-2 font-display text-lg font-semibold text-domify-dark">{value}</p>
       <p className="text-xs text-domify-dark/50">{label}</p>
