@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { ArrowUpRight, Home } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Home, Map, SlidersHorizontal } from "lucide-react";
 import { getProperties, getCitiesWithCounts, getPropertyTypes, getNeighborhoods, getAmenities, type PropertyFilters } from "@/lib/data/properties";
 import { getSeoOverride } from "@/lib/data/seo";
 import { PropertyFiltersForm } from "@/components/properties/PropertyFiltersForm";
@@ -17,18 +18,13 @@ const DEFAULT_METADATA: Metadata = {
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoOverride("/proprietes");
   if (!seo) return DEFAULT_METADATA;
-  return {
-    title: seo.title,
-    description: seo.description,
-    openGraph: seo.ogImage ? { images: [seo.ogImage] } : undefined,
-  };
+  return { title: seo.title, description: seo.description, openGraph: seo.ogImage ? { images: [seo.ogImage] } : undefined };
 }
 
 type SearchParams = { city?: string; neighborhood?: string; listingType?: string; propertyType?: string; priceMin?: string; priceMax?: string; bedrooms?: string; surfaceMin?: string; amenity?: string; reference?: string; sort?: string };
 
 export default async function PropertiesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
-
   const filters: PropertyFilters = {
     city: params.city || undefined,
     listingType: params.listingType === "VENTE" || params.listingType === "LOCATION" ? params.listingType : undefined,
@@ -51,55 +47,39 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
     getAmenities(),
   ]);
 
+  const hasFilters = Object.values(params).some(Boolean);
+  const intentLabel = params.listingType === "LOCATION" ? "Locations sélectionnées" : params.listingType === "VENTE" ? "Acquisitions sélectionnées" : "La collection Domify";
+
   return (
     <>
-      <section className="relative overflow-hidden border-b border-domify-dark/8 bg-domify-warm-white/80">
-        <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full border border-domify-gold/25" />
-        <div className="pointer-events-none absolute right-[13%] top-12 h-36 w-36 rounded-full border border-domify-primary/10" />
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-          <div className="max-w-2xl">
-            <p className="luxury-eyebrow flex items-center gap-3 text-domify-gold"><span className="h-px w-8 bg-domify-gold" /> Collection Domify</p>
-            <h1 className="mt-4 font-display text-5xl font-semibold text-domify-dark sm:text-6xl">Nos propriétés</h1>
-            <p className="mt-5 max-w-xl text-base leading-7 text-domify-dark/62 sm:text-lg">Découvrez des adresses sélectionnées pour leur qualité, leur emplacement et leur potentiel.</p>
+      <section className="relative overflow-hidden bg-domify-primary-dark text-white">
+        <div className="pointer-events-none absolute -right-28 -top-24 h-80 w-80 rounded-full border border-white/10" />
+        <div className="pointer-events-none absolute bottom-[-10rem] left-[18%] h-80 w-80 rounded-full bg-domify-primary/45 blur-3xl" />
+        <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-4 py-16 sm:px-6 sm:py-20 lg:flex-row lg:items-end lg:justify-between lg:px-8 lg:py-24">
+          <div className="max-w-3xl">
+            <p className="luxury-eyebrow flex items-center gap-3 text-domify-soft-gold"><span className="h-px w-9 bg-domify-soft-gold" /> Collection Domify</p>
+            <h1 className="mt-5 font-display text-5xl font-semibold leading-[1.02] text-white sm:text-6xl">Des lieux qui méritent votre attention.</h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">Découvrez des adresses sélectionnées pour leur qualité, leur emplacement et leur potentiel.</p>
           </div>
+          <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-white/12 bg-white/[0.08] p-4 backdrop-blur-md"><div className="flex h-11 w-11 items-center justify-center rounded-full bg-domify-gold text-white"><Home size={19} /></div><div><p className="text-2xl font-semibold text-white">{properties.length}</p><p className="text-xs uppercase tracking-[0.12em] text-white/52">résultats</p></div></div>
         </div>
       </section>
 
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <div className="mb-8 flex flex-col gap-4 border-b border-domify-dark/8 pb-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-domify-dark/60"><span className="font-semibold text-domify-dark">{properties.length}</span> bien(s) correspondent à votre recherche</p>
-          <span className="inline-flex w-fit items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-domify-primary/75"><Home size={14} /> Maroc</span>
+      <main id="top" className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <div className="mb-8 flex flex-col gap-5 border-b border-domify-dark/8 pb-7 lg:flex-row lg:items-end lg:justify-between">
+          <div><p className="luxury-eyebrow text-domify-gold">Recherche immobilière</p><h2 className="mt-2 font-display text-3xl font-semibold text-domify-dark">{intentLabel}</h2><p className="mt-2 text-sm text-domify-dark/58"><span className="font-semibold text-domify-dark">{properties.length}</span> bien(s) correspondent à votre recherche{hasFilters ? "." : " dans notre sélection actuelle."}</p></div>
+          <a href="/carte" className="inline-flex w-fit items-center gap-2 rounded-full border border-domify-primary/15 bg-white px-4 py-2.5 text-sm font-semibold text-domify-primary shadow-[0_16px_30px_-25px_rgba(16,47,66,0.75)] transition-luxury hover:-translate-y-0.5 hover:border-domify-gold/50 hover:text-domify-gold"><Map size={15} /> Explorer sur la carte</a>
         </div>
 
         <div className="grid grid-cols-1 gap-9 lg:grid-cols-[292px_1fr]">
-          <aside>
-            <PropertyFiltersForm cities={cities} propertyTypes={propertyTypes} neighborhoods={neighborhoods} amenities={amenities} current={params} />
-          </aside>
+          <aside className="lg:sticky lg:top-28 lg:self-start"><div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-domify-primary/70 lg:hidden"><SlidersHorizontal size={14} /> Affiner la recherche</div><div className="rounded-[1.4rem] border border-domify-dark/8 bg-white p-4 shadow-luxury sm:p-5"><PropertyFiltersForm cities={cities} propertyTypes={propertyTypes} neighborhoods={neighborhoods} amenities={amenities} current={params} /></div></aside>
 
           <div>
-            {properties.length === 0 ? (
-              <div className="relative overflow-hidden rounded-[1.5rem] border border-domify-dark/8 bg-domify-warm-white p-10 text-center sm:p-14">
-                <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full border border-domify-gold/25" />
-                <p className="relative font-display text-2xl font-semibold text-domify-dark">Aucun bien ne correspond à vos critères.</p>
-                <p className="relative mx-auto mt-3 max-w-md text-sm leading-6 text-domify-dark/60">Essayez d&apos;élargir votre recherche ou de modifier vos filtres pour découvrir d&apos;autres opportunités.</p>
-              </div>
-            ) : (
-              <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3" stagger={0.06}>
-                {properties.map((property) => (
-                  <MotionDiv key={property.id} variants={staggerItem}>
-                    <PropertyCard property={property} />
-                  </MotionDiv>
-                ))}
-              </StaggerReveal>
-            )}
+            {properties.length === 0 ? <div className="relative overflow-hidden rounded-[1.5rem] border border-domify-dark/8 bg-domify-warm-white p-10 text-center sm:p-14"><div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full border border-domify-gold/25" /><p className="relative font-display text-2xl font-semibold text-domify-dark">Aucun bien ne correspond à vos critères.</p><p className="relative mx-auto mt-3 max-w-md text-sm leading-6 text-domify-dark/60">Essayez d&apos;élargir votre recherche ou de modifier vos filtres pour découvrir d&apos;autres opportunités.</p><Link href="/proprietes" className="relative mt-6 inline-flex rounded-full bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-domify-gold">Réinitialiser la recherche</Link></div> : <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3" stagger={0.06}>{properties.map((property) => <MotionDiv key={property.id} variants={staggerItem}><PropertyCard property={property} /></MotionDiv>)}</StaggerReveal>}
           </div>
         </div>
 
-        <div className="mt-12 flex justify-end">
-          <a href="#top" className="group inline-flex items-center gap-2 text-sm font-semibold text-domify-primary transition-luxury hover:text-domify-gold">
-            Retour en haut <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-          </a>
-        </div>
+        <div className="mt-12 flex justify-end"><a href="#top" className="group inline-flex items-center gap-2 text-sm font-semibold text-domify-primary transition-luxury hover:text-domify-gold">Retour en haut <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></a></div>
       </main>
     </>
   );
