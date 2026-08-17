@@ -12,6 +12,15 @@ function formatNumber(value: number) {
 
 type Check = { label: string; ok: boolean; detail: string; href?: string; icon: React.ReactNode };
 
+async function safeQuery<T>(label: string, query: Promise<T>, fallback: T) {
+  try {
+    return await query;
+  } catch (error) {
+    console.error(`[launch-control] ${label} failed`, error);
+    return fallback;
+  }
+}
+
 export default async function LaunchControlPage() {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") redirect("/admin");
@@ -19,18 +28,18 @@ export default async function LaunchControlPage() {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const [publishedProperties, pendingApprovals, activeSubscriptions, pastDueSubscriptions, newLeads, staleLeads, recentAnalytics, openConversations] = await Promise.all([
-    prisma.property.findMany({ where: { status: "PUBLISHED" }, select: { id: true, title: true, description: true, descriptionEn: true, descriptionAr: true, titleEn: true, titleAr: true, price: true, surfaceArea: true, cityId: true, media: { select: { id: true }, take: 1 } } }),
-    prisma.property.count({ where: { approvalStatus: "PENDING" } }),
-    prisma.agencySubscription.count({ where: { status: "ACTIVE" } }),
-    prisma.agencySubscription.count({ where: { status: { in: ["PAST_DUE", "EXPIRED"] } } }),
-    prisma.lead.count({ where: { status: "NEW" } }),
-    prisma.lead.count({ where: { status: "NEW", createdAt: { lt: oneHourAgo } } }),
-    prisma.analyticsEvent.count({ where: { type: "page_view", createdAt: { gte: oneDayAgo } } }),
-    prisma.portalConversation.count({ where: { status: "OPEN" } }),
+    safeQuery("published properties", prisma.property.findMany({ where: { status: "PUBLISHED" }, select: { description: true, descriptionEn: true, descriptionAr: true, titleEn: true, titleAr: true, price: true, surfaceArea: true, _count: { select: { media: true } } } }), []),
+    safeQuery("pending approvals", prisma.property.count({ where: { approvalStatus: "PENDING" } }), 0),
+    safeQuery("active subscriptions", prisma.agencySubscription.count({ where: { status: "ACTIVE" } }), 0),
+    safeQuery("past due subscriptions", prisma.agencySubscription.count({ where: { status: { in: ["PAST_DUE", "EXPIRED"] } } }), 0),
+    safeQuery("new leads", prisma.lead.count({ where: { status: "NEW" } }), 0),
+    safeQuery("stale leads", prisma.lead.count({ where: { status: "NEW", createdAt: { lt: oneHourAgo } } }), 0),
+    safeQuery("recent analytics", prisma.analyticsEvent.count({ where: { type: "page_view", createdAt: { gte: oneDayAgo } } }), 0),
+    safeQuery("open conversations", prisma.portalConversation.count({ where: { status: "OPEN" } }), 0),
   ]);
 
   const quality = publishedProperties.reduce((result, property) => {
-    if (!property.media.length) result.missingImages += 1;
+    if (!property._count.media) result.missingImages += 1;
     if (!property.price || property.price <= 0) result.missingPrice += 1;
     if (!property.surfaceArea || property.surfaceArea <= 0) result.missingSurface += 1;
     if (!property.description || property.description.trim().length < 120) result.shortDescriptions += 1;
