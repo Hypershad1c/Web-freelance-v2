@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Copy, Link2 } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 
 export function CampaignLinkBuilder() {
   const [destination, setDestination] = useState("/");
