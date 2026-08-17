@@ -69,6 +69,20 @@ export async function POST(request: Request) {
       });
     });
 
+    if (!["ADMIN", "EDITOR", "AGENT"].includes(session?.user?.role ?? "")) {
+      await prisma.analyticsEvent.create({
+        data: {
+          type: "appointment",
+          path: data.propertyId ? `/proprietes/${data.propertyId}` : "/rendez-vous",
+          source: data.source || null,
+          medium: data.utmMedium || null,
+          campaign: data.utmCampaign || null,
+          propertyId: data.propertyId || null,
+          meta: { channel: "appointment_form" },
+        },
+      }).catch((error) => console.error("[appointments] Analytics event failed:", error));
+    }
+
     syncInboundAppointment(appointment).catch((error) => console.error("[appointments] CRM sync failed:", error));
     notifyNewAppointment(appointment).catch((error) => console.error("[appointments] notification failed:", error));
     return NextResponse.json(appointment, { status: 201 });

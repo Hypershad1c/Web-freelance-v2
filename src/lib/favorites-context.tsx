@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { recordClientAnalyticsEvent } from "@/lib/client-analytics";
 
 export type FavoriteCollectionSummary = { id: string; name: string; color?: string | null; _count?: { favorites: number } };
 
@@ -50,6 +51,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     const isCurrentlyFavorite = favoriteIds.includes(propertyId);
     const next = isCurrentlyFavorite ? favoriteIds.filter((id) => id !== propertyId) : [...favoriteIds, propertyId];
     setFavoriteIds(next);
+    if (!isCurrentlyFavorite) recordClientAnalyticsEvent("favorite", { propertyId, meta: { action: "add" } });
 
     if (status === "authenticated") {
       try {

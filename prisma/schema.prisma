@@ -1037,6 +1037,9 @@ model AnalyticsEvent {
 
   @@index([type, source, createdAt])
   @@index([campaign, createdAt])
+  @@index([medium, createdAt])
+  @@index([deviceType, createdAt])
+  @@index([locale, createdAt])
   @@index([visitorId, createdAt])
   @@index([sessionId, createdAt])
   @@index([propertyId, type, createdAt])

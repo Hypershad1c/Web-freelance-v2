@@ -17,6 +17,10 @@
     {
       "path": "/api/admin/billing/alerts",
       "schedule": "30 8 * * *"
+    },
+    {
+      "path": "/api/admin/analytics/report",
+      "schedule": "0 10 * * *"
     }
   ]
 }

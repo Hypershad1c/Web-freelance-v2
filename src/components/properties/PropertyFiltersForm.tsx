@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SlidersHorizontal, Sparkles } from "lucide-react";
 import type { Locale } from "@/i18n/locales";
+import { recordClientAnalyticsEvent } from "@/lib/client-analytics";
 
 type CityOption = { slug: string; name: string; _count: { properties: number } };
 type TypeOption = { slug: string; name: string };
@@ -44,7 +45,7 @@ export function PropertyFiltersForm({
     advanced: "Filtres avancés", transaction: "Transaction", all: "Tous", buy: "Acheter", rent: "Louer", city: "Ville", allCities: "Toutes les villes", neighborhood: "Quartier", allNeighborhoods: "Tous les quartiers", type: "Type de bien", allTypes: "Tous les types", minPrice: "Prix min. (MAD)", maxPrice: "Prix max. (MAD)", noLimit: "Sans limite", bedrooms: "Chambres min.", indifferent: "Indifférent", surface: "Surface min. (m²)", amenity: "Équipement", allAmenities: "Tous les équipements", reference: "Référence", sort: "Trier par", recent: "Plus récents", priceAsc: "Prix croissant", priceDesc: "Prix décroissant", results: "Voir les résultats", reset: "Réinitialiser les critères"
   };
   return (
-    <form method="get" dir={locale === "ar" ? "rtl" : "ltr"} className="sticky top-24 space-y-5 rounded-[1.35rem] border border-domify-dark/8 bg-[#fcfbf8] p-5 text-start shadow-[0_18px_38px_-30px_rgba(16,47,66,0.35)] sm:p-6">
+    <form method="get" onSubmit={(event) => { const formData = new FormData(event.currentTarget); const filters = Object.fromEntries(Array.from(formData.entries()).filter(([, value]) => String(value).length > 0)); recordClientAnalyticsEvent("search", { path: "/proprietes", meta: { filters } }); }} dir={locale === "ar" ? "rtl" : "ltr"} className="sticky top-24 space-y-5 rounded-[1.35rem] border border-domify-dark/8 bg-[#fcfbf8] p-5 text-start shadow-[0_18px_38px_-30px_rgba(16,47,66,0.35)] sm:p-6">
       <div className="flex items-center justify-between border-b border-domify-dark/8 pb-4">
         <p className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-domify-primary"><SlidersHorizontal size={15} /> {labels.advanced}</p>
         <Sparkles size={15} className="text-domify-gold" />

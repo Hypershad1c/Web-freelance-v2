@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import type { Locale } from "@/i18n/locales";
+import { recordClientAnalyticsEvent } from "@/lib/client-analytics";
 
 type SearchValues = {
   city: string;
@@ -30,6 +31,7 @@ export function SearchBar({ cities, propertyTypes, locale = "fr" }: { cities: Se
     if (values.reference.trim()) query.set("reference", values.reference.trim());
 
     const suffix = query.toString();
+    recordClientAnalyticsEvent("search", { path: "/proprietes", meta: { filters: Object.fromEntries(query.entries()) } });
     router.push(suffix ? `/proprietes?${suffix}` : "/proprietes");
   }
 

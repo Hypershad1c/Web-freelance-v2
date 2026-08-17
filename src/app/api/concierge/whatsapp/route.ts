@@ -52,13 +52,17 @@ export async function POST(request: Request) {
   const source = `whatsapp_${parsed.data.placement}`;
   const session = await auth();
 
-  await prisma.analyticsEvent.create({
-    data: {
-      type: "whatsapp_concierge",
-      path: `/proprietes/${property.id}`,
-      meta: { propertyId: property.id, placement: parsed.data.placement, source },
-    },
-  }).catch((error) => console.error("[concierge] Failed to record WhatsApp click", error));
+  if (!["ADMIN", "EDITOR", "AGENT"].includes(session?.user?.role ?? "")) {
+    await prisma.analyticsEvent.create({
+      data: {
+        type: "whatsapp",
+        path: `/proprietes/${property.id}`,
+        source,
+        propertyId: property.id,
+        meta: { placement: parsed.data.placement },
+      },
+    }).catch((error) => console.error("[concierge] Failed to record WhatsApp click", error));
+  }
 
   const email = session?.user?.email?.toLowerCase();
   if (email) {

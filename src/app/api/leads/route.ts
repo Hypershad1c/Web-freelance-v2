@@ -14,7 +14,11 @@ const LeadSchema = z.object({
   phone: z.string().optional(),
   message: z.string().optional(),
   propertyId: z.string().optional(),
-  source: z.string().optional(),
+  source: z.string().max(160).optional(),
+  utmSource: z.string().max(160).optional(),
+  utmMedium: z.string().max(160).optional(),
+  utmCampaign: z.string().max(240).optional(),
+  referrer: z.string().max(500).optional(),
   website: z.string().optional(), // honeypot — real users never see/fill this field
   turnstileToken: z.string().optional(),
 });
@@ -56,6 +60,21 @@ export async function POST(request: Request) {
     },
     include: { property: { include: { agent: true } } },
   });
+
+  if (!["ADMIN", "EDITOR", "AGENT"].includes(session?.user?.role ?? "")) {
+    await prisma.analyticsEvent.create({
+      data: {
+        type: "lead",
+        path: data.propertyId ? `/proprietes/${data.propertyId}` : "/vendre-louer",
+        source: data.source || null,
+        medium: data.utmMedium || null,
+        campaign: data.utmCampaign || null,
+        referrer: data.referrer || null,
+        propertyId: data.propertyId || null,
+        meta: { channel: "lead_form" },
+      },
+    }).catch((error) => console.error("[leads] Analytics event failed:", error));
+  }
 
   // CRM sync and email notifications are best-effort: an auxiliary service failure
   // must never reject a genuine visitor enquiry.

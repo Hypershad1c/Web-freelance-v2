@@ -8,6 +8,7 @@ import { telLink } from "@/lib/utils";
 import { WhatsAppConciergeButton } from "@/components/properties/WhatsAppConciergeButton";
 import { HoneypotField } from "@/components/HoneypotField";
 import { Turnstile } from "@/components/Turnstile";
+import { getClientAnalyticsAttribution } from "@/lib/client-analytics";
 
 export function ContactAgentCard({ property }: { property: PropertyWithRelations }) {
   const [sent, setSent] = useState(false);
@@ -35,10 +36,11 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
     setSending(true);
     setError(null);
     try {
+      const attribution = getClientAnalyticsAttribution();
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, propertyId: property.id, source: "property_detail", website: honeypot, turnstileToken }),
+        body: JSON.stringify({ ...form, propertyId: property.id, source: "property_detail", utmSource: attribution.source, utmMedium: attribution.medium, utmCampaign: attribution.campaign, referrer: attribution.referrer, website: honeypot, turnstileToken }),
       });
       if (!response.ok) throw new Error();
       setSent(true);
@@ -182,7 +184,8 @@ function BookingModal({ property, agentName, onClose }: { property: PropertyWith
     if (!selectedSlot && !form.date) { setError("Choisissez un créneau ou une date de visite."); return; }
     setSending(true); setError(null);
     try {
-      const response = await fetch("/api/appointments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, date: selectedSlot?.startsAt || form.date, availabilitySlotId: selectedSlot?.id, propertyId: property.id, agentId: property.agentId ?? undefined, source: selectedSlot ? "availability_booking" : "property_detail", website: honeypot, turnstileToken }) });
+      const attribution = getClientAnalyticsAttribution();
+      const response = await fetch("/api/appointments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, date: selectedSlot?.startsAt || form.date, availabilitySlotId: selectedSlot?.id, propertyId: property.id, agentId: property.agentId ?? undefined, source: selectedSlot ? "availability_booking" : "property_detail", utmSource: attribution.source, utmMedium: attribution.medium, utmCampaign: attribution.campaign, website: honeypot, turnstileToken }) });
       const payload = await response.json().catch(() => null);
       if (!response.ok) throw new Error(payload?.error || "La demande n’a pas pu être envoyée.");
       setSent(true);
