@@ -14,6 +14,14 @@ export function isPayTabsConfigured() {
   return Boolean(process.env.PAYTABS_PROFILE_ID && process.env.PAYTABS_SERVER_KEY);
 }
 
+export function isPayTabsCheckoutEnabled() {
+  return isPayTabsConfigured() && process.env.PAYTABS_CHECKOUT_ENABLED === "true";
+}
+
+export function isPayTabsLiveEnabled() {
+  return process.env.PAYTABS_LIVE_ENABLED === "true";
+}
+
 function profileId() {
   const value = Number(process.env.PAYTABS_PROFILE_ID);
   if (!Number.isInteger(value) || value <= 0) throw new Error("PAYTABS_PROFILE_ID doit être un entier positif.");

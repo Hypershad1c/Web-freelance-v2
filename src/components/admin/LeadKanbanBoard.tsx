@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
-import { GripVertical, LoaderCircle, Mail, Phone } from "lucide-react";
+import { Clock3, GripVertical, LoaderCircle, Mail, Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { updateLeadStatus } from "@/lib/actions/inbox";
 
@@ -90,7 +90,7 @@ export function LeadKanbanBoard({ leads, canOpenProperty }: { leads: LeadCard[];
                     ) : <p className="mt-3 truncate text-xs font-semibold text-domify-primary">{lead.property.title}</p>
                   )}
                   {lead.message && <p className="mt-2 line-clamp-3 text-xs leading-5 text-domify-dark/60">{lead.message}</p>}
-                  <p className="mt-3 text-[0.66rem] font-medium uppercase tracking-wide text-domify-dark/38">{new Intl.DateTimeFormat("fr-MA", { dateStyle: "medium" }).format(new Date(lead.createdAt))}</p>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><p className="text-[0.66rem] font-medium uppercase tracking-wide text-domify-dark/38">{new Intl.DateTimeFormat("fr-MA", { dateStyle: "medium" }).format(new Date(lead.createdAt))}</p>{lead.status === "NEW" && (() => { const ageHours = Math.floor((Date.now() - new Date(lead.createdAt).getTime()) / 3600000); return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ${ageHours >= 24 ? "bg-red-100 text-red-700" : ageHours >= 1 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}><Clock3 size={11} /> {ageHours >= 24 ? "SLA > 24 h" : ageHours >= 1 ? "SLA dépassé" : "À traiter"}</span>; })()}</div>
                 </article>
               ))}
               {byStatus[column.status].length === 0 && <p className="rounded-xl border border-dashed border-black/10 px-3 py-5 text-center text-xs text-domify-dark/40">Déposez un lead ici</p>}

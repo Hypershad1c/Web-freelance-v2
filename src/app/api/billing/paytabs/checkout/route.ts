@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { AGENCY_PLAN_PRICES, createPayTabsHostedPayment, isPayTabsConfigured, newCartId } from "@/lib/paytabs";
+import { AGENCY_PLAN_PRICES, createPayTabsHostedPayment, isPayTabsCheckoutEnabled, newCartId } from "@/lib/paytabs";
 
 const CheckoutSchema = z.object({ plan: z.enum(["STARTER", "PRO", "PREMIUM"]) });
 
 export async function POST(request: Request) {
   const session = await auth();
   if (!session?.user?.id || !session.user.email) return NextResponse.json({ error: "Connexion requise" }, { status: 401 });
-  if (!isPayTabsConfigured()) return NextResponse.json({ error: "Le paiement en ligne sera bientôt disponible. L’équipe Domify peut déjà vous présenter les offres." }, { status: 503 });
+  if (!isPayTabsCheckoutEnabled()) return NextResponse.json({ error: "Le paiement en ligne sera activé après la configuration sécurisée de PayTabs. L’équipe Domify peut déjà vous présenter les offres." }, { status: 503 });
 
   let body: unknown;
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Données invalides" }, { status: 400 }); }

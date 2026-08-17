@@ -3,6 +3,10 @@
   "buildCommand": "npm run vercel-build",
   "crons": [
     {
+      "path": "/api/admin/leads/sla",
+      "schedule": "45 7 * * *"
+    },
+    {
       "path": "/api/admin/crm/automation/run",
       "schedule": "0 8 * * *"
     },
