@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "prebuild": "prisma generate",
     "build": "next build --turbopack",
-    "vercel-build": "prisma generate && (prisma migrate resolve --rolled-back 20260817090000_add_analytics_dimensions || true) && prisma migrate deploy && next build --turbopack",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build --turbopack",
     "bootstrap-admin": "tsx prisma/bootstrap-admin.ts",
     "start": "next start",
     "lint": "eslint",
