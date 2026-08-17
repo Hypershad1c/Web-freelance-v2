@@ -1020,18 +1020,26 @@ model SeoEntry {
 }
 
 model AnalyticsEvent {
-  id        String   @id @default(cuid())
-  type      String // page_view | lead | search | favorite | appointment | valuation | whatsapp
-  path      String?
-  source    String?
-  medium    String?
-  campaign  String?
-  referrer  String?
-  meta      Json?
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  type          String // page_view | lead | search | favorite | appointment | valuation | whatsapp
+  path          String?
+  source        String?
+  medium        String?
+  campaign      String?
+  referrer      String?
+  visitorId     String?
+  sessionId     String?
+  deviceType    String?
+  locale        String?
+  propertyId    String?
+  meta          Json?
+  createdAt     DateTime @default(now())
 
   @@index([type, source, createdAt])
   @@index([campaign, createdAt])
+  @@index([visitorId, createdAt])
+  @@index([sessionId, createdAt])
+  @@index([propertyId, type, createdAt])
 }
 
 // ---------- AGENCY BILLING ----------
