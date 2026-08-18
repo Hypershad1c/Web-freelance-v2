@@ -379,7 +379,7 @@ textarea:focus-visible {
   transform-origin: right;
 }
 
-[dir="rtl"] .group-hover\\:translate-x-0\\.5:hover {
+[dir="rtl"] .group-hover\:translate-x-0\.5:hover {
   transform: translateX(-0.125rem);
 }
 

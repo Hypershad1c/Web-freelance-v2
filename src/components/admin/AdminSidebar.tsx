@@ -28,12 +28,15 @@ import {
   ArrowLeft,
   Menu,
   X,
+  Sun,
+  Moon,
   Handshake,
   Megaphone,
   SlidersHorizontal,
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/ThemeProvider";
 
 type NavItem = { label: string; href: string; icon: typeof LayoutDashboard };
 type NavSection = { title: string; items: NavItem[] };
@@ -201,6 +204,55 @@ function ReturnToSite({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+function AdminThemeControl({ compact = false }: { compact?: boolean }) {
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={() => setTheme(isDark ? "light" : "dark")}
+        aria-label={isDark ? "Activer le mode clair" : "Activer le mode sombre"}
+        title={isDark ? "Mode clair" : "Mode sombre"}
+        className="pressable flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/[0.07] text-white hover:bg-white/[0.13] focus-visible:outline-white"
+      >
+        {isDark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
+      </button>
+    );
+  }
+
+  return (
+    <div className="mx-4 mb-4 rounded-2xl border border-white/10 bg-white/[0.06] p-2.5">
+      <p className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-white/42">Apparence</p>
+      <div className="grid grid-cols-2 gap-1.5" role="group" aria-label="Choisir le thème">
+        <button
+          type="button"
+          onClick={() => setTheme("light")}
+          aria-pressed={!isDark}
+          className={cn(
+            "pressable flex min-h-10 items-center justify-center gap-2 rounded-xl px-2 text-xs font-semibold focus-visible:outline-white",
+            !isDark ? "bg-domify-gold text-domify-primary-dark shadow-[0_8px_18px_-12px_rgba(232,203,145,0.95)]" : "text-white/62 hover:bg-white/[0.08] hover:text-white"
+          )}
+        >
+          <Sun size={15} aria-hidden="true" /> Clair
+        </button>
+        <button
+          type="button"
+          onClick={() => setTheme("dark")}
+          aria-pressed={isDark}
+          className={cn(
+            "pressable flex min-h-10 items-center justify-center gap-2 rounded-xl px-2 text-xs font-semibold focus-visible:outline-white",
+            isDark ? "bg-domify-gold text-domify-primary-dark shadow-[0_8px_18px_-12px_rgba(232,203,145,0.95)]" : "text-white/62 hover:bg-white/[0.08] hover:text-white"
+          )}
+        >
+          <Moon size={15} aria-hidden="true" /> Sombre
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function AdminSidebar({ role }: { role: Role }) {
   const pathname = usePathname();
   const sections = getSections(role);
@@ -216,6 +268,7 @@ export function AdminSidebar({ role }: { role: Role }) {
       <aside className="hidden w-72 shrink-0 bg-[linear-gradient(180deg,#12384c_0%,#102f42_54%,#0c2636_100%)] text-white lg:flex lg:flex-col">
         <SidebarBrand />
         <SidebarNav sections={sections} pathname={pathname} />
+        <AdminThemeControl />
         <ReturnToSite />
       </aside>
 
@@ -229,9 +282,12 @@ export function AdminSidebar({ role }: { role: Role }) {
             <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.15em] text-white/44">Back office</p>
           </div>
         </div>
-        <button onClick={() => setMobileOpen(true)} aria-label="Ouvrir le menu" aria-expanded={mobileOpen} className="pressable flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/[0.07]">
-          <Menu size={20} />
-        </button>
+        <div className="flex items-center gap-2">
+          <AdminThemeControl compact />
+          <button onClick={() => setMobileOpen(true)} aria-label="Ouvrir le menu" aria-expanded={mobileOpen} className="pressable flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/[0.07]">
+            <Menu size={20} />
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -269,6 +325,7 @@ export function AdminSidebar({ role }: { role: Role }) {
                 </button>
               </div>
               <SidebarNav sections={sections} pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+              <AdminThemeControl />
               <ReturnToSite onNavigate={() => setMobileOpen(false)} />
             </motion.aside>
           </div>
