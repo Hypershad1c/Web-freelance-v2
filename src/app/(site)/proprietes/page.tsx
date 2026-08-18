@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Compass, Home, Map, SearchX, SlidersHorizontal } from "lucide-react";
+import { ArrowUpRight, CircleAlert, Compass, Home, Map, SearchX, SlidersHorizontal } from "lucide-react";
 import { getProperties, getCitiesWithCounts, getPropertyTypes, getNeighborhoods, getAmenities, type PropertyFilters } from "@/lib/data/properties";
 import { getSeoOverride } from "@/lib/data/seo";
 import { PropertyFiltersForm } from "@/components/properties/PropertyFiltersForm";
@@ -8,6 +8,7 @@ import { PropertyCard } from "@/components/home/PropertyCard";
 import { StaggerReveal, staggerItem } from "@/components/motion/FadeIn";
 import { MotionDiv } from "@/components/motion/MotionPrimitives";
 import { getLocale } from "@/i18n/get-locale";
+import { isPrismaReady } from "@/lib/prisma";
 
 export const revalidate = 300;
 
@@ -41,13 +42,19 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
     sort: params.sort === "price-asc" || params.sort === "price-desc" ? params.sort : "recent",
   };
 
-  const [properties, cities, propertyTypes, neighborhoods, amenities] = await Promise.all([
-    readWithRetry(() => getProperties(filters), []),
-    readWithRetry(() => getCitiesWithCounts(), []),
-    readWithRetry(() => getPropertyTypes(), []),
-    readWithRetry(() => getNeighborhoods(), []),
-    readWithRetry(() => getAmenities(), []),
-  ]);
+  const databaseReady = await waitForDatabase();
+  const propertiesResult = databaseReady ? await readWithRetry(() => getProperties(filters), []) : { data: [], failed: true };
+  const citiesResult = databaseReady ? await readWithRetry(() => getCitiesWithCounts(), []) : { data: [], failed: true };
+  const propertyTypesResult = databaseReady ? await readWithRetry(() => getPropertyTypes(), []) : { data: [], failed: true };
+  const neighborhoodsResult = databaseReady ? await readWithRetry(() => getNeighborhoods(), []) : { data: [], failed: true };
+  const amenitiesResult = databaseReady ? await readWithRetry(() => getAmenities(), []) : { data: [], failed: true };
+
+  const { data: properties } = propertiesResult;
+  const { data: cities } = citiesResult;
+  const { data: propertyTypes } = propertyTypesResult;
+  const { data: neighborhoods } = neighborhoodsResult;
+  const { data: amenities } = amenitiesResult;
+  const catalogueUnavailable = propertiesResult.failed;
 
   const hasFilters = Object.values(params).some(Boolean);
   const intentLabel = params.listingType === "LOCATION" ? "Locations sélectionnées" : params.listingType === "VENTE" ? "Acquisitions sélectionnées" : "La collection Domify";
@@ -77,7 +84,7 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
           <aside className="lg:sticky lg:top-28 lg:self-start"><div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-domify-primary/70 lg:hidden"><SlidersHorizontal size={14} /> Affiner la recherche</div><div className="rounded-[1.4rem] border border-domify-dark/8 bg-white p-4 shadow-luxury sm:p-5"><PropertyFiltersForm cities={cities} propertyTypes={propertyTypes} neighborhoods={neighborhoods} amenities={amenities} current={params} locale={locale} /></div></aside>
 
           <div>
-            {properties.length === 0 ? <div className="relative overflow-hidden rounded-[1.5rem] border border-domify-dark/8 bg-domify-warm-white p-8 text-center sm:p-14"><div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full border border-domify-gold/25" /><div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-domify-gold shadow-[0_18px_32px_-24px_rgba(16,47,66,0.55)]"><SearchX size={24} strokeWidth={1.6} /></div><p className="relative mt-6 font-display text-2xl font-semibold text-domify-dark">Aucune adresse ne correspond encore à cette recherche.</p><p className="relative mx-auto mt-3 max-w-md text-sm leading-6 text-domify-dark/60">Modifiez un filtre ou revenez à la collection complète pour découvrir d&apos;autres opportunités vérifiées.</p><div className="relative mt-7 flex flex-wrap justify-center gap-3"><Link href="/proprietes" className="inline-flex items-center gap-2 rounded-full bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white transition-luxury hover:-translate-y-0.5 hover:bg-domify-gold">Réinitialiser la recherche <ArrowUpRight size={15} /></Link><Link href="/carte" className="inline-flex items-center gap-2 rounded-full border border-domify-primary/15 bg-white px-4 py-2.5 text-sm font-semibold text-domify-primary transition-luxury hover:-translate-y-0.5 hover:border-domify-gold hover:text-domify-gold"><Compass size={15} /> Explorer la carte</Link></div></div> : <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3" stagger={0.06}>{properties.map((property) => <MotionDiv key={property.id} variants={staggerItem}><PropertyCard property={property} locale={locale} /></MotionDiv>)}</StaggerReveal>}
+            {catalogueUnavailable ? <div className="relative overflow-hidden rounded-[1.5rem] border border-domify-gold/25 bg-domify-warm-white p-8 text-center sm:p-14"><div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full border border-domify-gold/25" /><div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-domify-gold shadow-[0_18px_32px_-24px_rgba(16,47,66,0.55)]"><CircleAlert size={24} strokeWidth={1.6} /></div><p className="relative mt-6 font-display text-2xl font-semibold text-domify-dark">Le catalogue se reconnecte.</p><p className="relative mx-auto mt-3 max-w-md text-sm leading-6 text-domify-dark/60">Notre inventaire est momentanément indisponible. Réessayez dans quelques instants : vos critères seront conservés.</p><Link href={`/proprietes${hasFilters ? `?${new URLSearchParams(Object.entries(params).filter(([, value]) => Boolean(value)) as Array<[string, string]>).toString()}` : ""}`} className="relative mt-7 inline-flex items-center gap-2 rounded-full bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white transition-luxury hover:-translate-y-0.5 hover:bg-domify-gold">Réessayer <ArrowUpRight size={15} /></Link></div> : properties.length === 0 ? <div className="relative overflow-hidden rounded-[1.5rem] border border-domify-dark/8 bg-domify-warm-white p-8 text-center sm:p-14"><div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full border border-domify-gold/25" /><div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-domify-gold shadow-[0_18px_32px_-24px_rgba(16,47,66,0.55)]"><SearchX size={24} strokeWidth={1.6} /></div><p className="relative mt-6 font-display text-2xl font-semibold text-domify-dark">Aucune adresse ne correspond encore à cette recherche.</p><p className="relative mx-auto mt-3 max-w-md text-sm leading-6 text-domify-dark/60">Modifiez un filtre ou revenez à la collection complète pour découvrir d&apos;autres opportunités vérifiées.</p><div className="relative mt-7 flex flex-wrap justify-center gap-3"><Link href="/proprietes" className="inline-flex items-center gap-2 rounded-full bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white transition-luxury hover:-translate-y-0.5 hover:bg-domify-gold">Réinitialiser la recherche <ArrowUpRight size={15} /></Link><Link href="/carte" className="inline-flex items-center gap-2 rounded-full border border-domify-primary/15 bg-white px-4 py-2.5 text-sm font-semibold text-domify-primary transition-luxury hover:-translate-y-0.5 hover:border-domify-gold hover:text-domify-gold"><Compass size={15} /> Explorer la carte</Link></div></div> : <StaggerReveal className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3" stagger={0.06}>{properties.map((property) => <MotionDiv key={property.id} variants={staggerItem}><PropertyCard property={property} locale={locale} /></MotionDiv>)}</StaggerReveal>}
           </div>
         </div>
 
@@ -87,13 +94,21 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
   );
 }
 
-async function readWithRetry<T>(read: () => Promise<T>, fallback: T): Promise<T> {
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+async function waitForDatabase() {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (await isPrismaReady()) return true;
+    if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 200 * 2 ** attempt));
+  }
+  return false;
+}
+
+async function readWithRetry<T>(read: () => Promise<T>, fallback: T): Promise<{ data: T; failed: boolean }> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      return await read();
+      return { data: await read(), failed: false };
     } catch {
-      if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 50));
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 200 * 2 ** attempt));
     }
   }
-  return fallback;
+  return { data: fallback, failed: true };
 }
