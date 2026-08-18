@@ -9,3 +9,4 @@
 - [x] Rebuild property detail UI with immersive gallery, trust signals, finance preview, and sticky conversion actions
 - [x] Add neighborhood, editorial, and polished empty-state UI modules using live Domify data
 - [x] Validate the public UI upgrade across mobile, RTL, light/dark themes, tests, and production deployment
+- [x] Diagnose and fix the public catalogue route not rendering at /properties or /proprietes

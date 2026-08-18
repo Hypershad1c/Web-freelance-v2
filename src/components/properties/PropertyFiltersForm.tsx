@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { SlidersHorizontal, Sparkles } from "lucide-react";
 import type { Locale } from "@/i18n/locales";
