@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Bed, Bath, Square, MapPin, Calendar, Hash, Check, Eye } from "lucide-react";
+import { Bed, Bath, Square, MapPin, Calendar, Hash, Check, Eye, BadgeCheck, Landmark, ArrowUpRight } from "lucide-react";
 import { getPropertyById, getSimilarProperties, incrementPropertyViews } from "@/lib/data/properties";
 import { PropertyGallery } from "@/components/properties/PropertyGallery";
 import { ContactAgentCard } from "@/components/properties/ContactAgentCard";
-import { WhatsAppConciergeButton } from "@/components/properties/WhatsAppConciergeButton";
 import { PropertyActionButtons } from "@/components/properties/PropertyActionButtons";
+import { MobilePropertyActionBar } from "@/components/properties/MobilePropertyActionBar";
 import { PropertyCard } from "@/components/home/PropertyCard";
 import { PropertyMapClient } from "@/components/map/PropertyMapClient";
 import { JsonLd } from "@/components/JsonLd";
@@ -84,7 +84,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
   };
 
   return (
-    <div className="mx-auto max-w-7xl bg-[radial-gradient(circle_at_85%_0%,rgba(232,203,145,0.12),transparent_24rem)] px-4 py-9 sm:px-6 lg:px-8 lg:py-12">
+    <div className="mx-auto max-w-7xl bg-[radial-gradient(circle_at_85%_0%,rgba(232,203,145,0.12),transparent_24rem)] px-4 pb-28 pt-9 sm:px-6 lg:px-8 lg:py-12">
       <JsonLd data={listingJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
 
@@ -102,9 +102,11 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           {/* Header */}
           <div className="mt-8 flex flex-col justify-between gap-5 border-b border-black/5 pb-8 sm:flex-row sm:items-start">
             <div>
-              <span className="mb-2 inline-block rounded-full bg-domify-gold/10 px-3 py-1 text-xs font-semibold text-domify-gold">
-                {property.propertyType.name}
-              </span>
+              <div className="mb-3 flex flex-wrap gap-2">
+                <span className="inline-block rounded-full bg-domify-gold/10 px-3 py-1 text-xs font-semibold text-domify-gold">{property.propertyType.name}</span>
+                <span className="rounded-full bg-domify-primary/8 px-3 py-1 text-xs font-semibold text-domify-primary">{property.listingType === "LOCATION" ? "À louer" : "À vendre"}</span>
+                {property.agency?.verified && <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700"><BadgeCheck size={13} /> Agence vérifiée</span>}
+              </div>
               <h1 className="max-w-2xl font-display text-3xl font-semibold leading-[1.04] tracking-[-0.025em] text-domify-dark sm:text-5xl">{content.title}</h1>
               <p className="mt-2 flex items-center gap-1.5 text-sm text-domify-dark/60">
                 <MapPin size={15} /> {property.neighborhood ? `${property.neighborhood.name}, ` : ""}{property.city.name}
@@ -123,10 +125,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
               </span>
             </div>
           </div>
-          <div className="mt-5 lg:hidden">
-            <WhatsAppConciergeButton propertyId={property.id} placement="detail" variant="prominent" className="w-full" />
-          </div>
-
           {/* Key facts */}
           <div className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             <Fact icon={Bed} label="Chambres" value={property.bedrooms} />
@@ -143,6 +141,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
               <Hash size={12} /> Référence {property.reference}
             </p>
           </div>
+
+          <Link href="/calculateur-credit" className="group mt-10 flex items-center gap-4 rounded-[1.35rem] border border-domify-gold/30 bg-[linear-gradient(135deg,rgba(232,203,145,0.24),rgba(255,255,255,0.95))] p-5 shadow-[0_18px_38px_-30px_rgba(16,47,66,0.45)] transition-luxury hover:-translate-y-0.5 hover:border-domify-gold/65">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-domify-primary text-domify-soft-gold shadow-[0_14px_24px_-16px_rgba(16,47,66,0.7)]"><Landmark size={21} /></span>
+            <span className="min-w-0 flex-1"><span className="block text-[0.66rem] font-bold uppercase tracking-[0.16em] text-domify-gold">Financement Domify</span><span className="mt-1 block font-display text-lg font-semibold text-domify-dark">Projetez votre mensualité.</span><span className="mt-1 block text-sm text-domify-dark/58">Comparez les taux indicatifs des banques marocaines pour ce projet.</span></span>
+            <ArrowUpRight size={19} className="shrink-0 text-domify-primary transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </Link>
 
           {/* Amenities */}
           {property.amenities.length > 0 && (
@@ -194,7 +198,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             <p className="mt-2 font-display text-lg font-semibold leading-6 text-domify-dark">Un conseiller dédié pour vous guider à chaque étape.</p>
             <p className="mt-2 text-xs leading-5 text-domify-dark/56">Réponse rapide, visite privée et suivi personnalisé.</p>
           </div>
-          <ContactAgentCard property={property} />
+          <div id="contact-property"><ContactAgentCard property={property} /></div>
         </div>
       </div>
 
@@ -211,6 +215,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           </StaggerReveal>
         </FadeIn>
       )}
+      <MobilePropertyActionBar propertyId={property.id} phone={property.agent?.phone ?? property.agency?.phone} />
     </div>
   );
 }

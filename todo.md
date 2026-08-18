@@ -5,3 +5,7 @@
 - [x] Ensure all admin surfaces, charts, tables, forms, and mobile layouts remain legible in both themes
 - [x] Validate theme persistence, system preference fallback, accessibility, tests, and production deployment
 - [x] Repair the root-layout and global 404 composition that currently blocks production builds
+- [x] Upgrade property cards, catalogue search, filters, and map/list discovery UI
+- [x] Rebuild property detail UI with immersive gallery, trust signals, finance preview, and sticky conversion actions
+- [x] Add neighborhood, editorial, and polished empty-state UI modules using live Domify data
+- [x] Validate the public UI upgrade across mobile, RTL, light/dark themes, tests, and production deployment

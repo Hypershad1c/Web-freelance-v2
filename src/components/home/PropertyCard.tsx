@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { Heart, Bed, Bath, Square, Phone, Scale, Eye, BadgeCheck, Video } from "lucide-react";
+import { Heart, Bed, Bath, Square, Phone, Scale, Eye, BadgeCheck, CalendarClock, Landmark, Video } from "lucide-react";
 import { formatMAD, cn, telLink } from "@/lib/utils";
 import { useFavorites } from "@/lib/favorites-context";
 import { useCompare } from "@/lib/compare-context";
@@ -25,6 +25,10 @@ export function PropertyCard({ property, locale = "fr" }: { property: PropertyWi
   const contactPhone = property.agent?.phone ?? property.agency?.phone;
   const hasVideo = property.media.some((media) => media.type === "video");
   const reduceMotion = useReducedMotion();
+  const financingMonths = 20 * 12;
+  const monthlyRate = 0.045 / 12;
+  const estimatedMonthlyPayment = Math.round((property.price * 0.8 * (monthlyRate * (1 + monthlyRate) ** financingMonths)) / ((1 + monthlyRate) ** financingMonths - 1));
+  const updatedLabel = new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : locale === "en" ? "en-GB" : "fr-MA", { day: "numeric", month: "short" }).format(new Date(property.updatedAt));
 
   return (
     <motion.div
@@ -97,11 +101,14 @@ export function PropertyCard({ property, locale = "fr" }: { property: PropertyWi
               <Eye size={13} /> {property.viewsCount}
             </span>
           </div>
+          {property.listingType === "VENTE" && <div className="mt-3 flex items-center gap-2 rounded-xl border border-domify-gold/20 bg-domify-soft-gold/14 px-3 py-2.5 text-xs text-domify-dark/65"><Landmark size={14} className="shrink-0 text-domify-gold" /><span className="min-w-0"><strong className="font-semibold text-domify-dark">{formatMAD(estimatedMonthlyPayment)} / mois</strong><span className="ml-1 text-domify-dark/48">indicatif*</span></span></div>}
           <div className="mt-5 flex items-center gap-3 border-t border-domify-dark/8 pt-4 text-sm text-domify-dark/62">
             <span className="flex items-center gap-1.5"><Bed size={15} className="text-domify-primary/72" /> {property.bedrooms}</span>
             <span className="flex items-center gap-1.5"><Bath size={15} className="text-domify-primary/72" /> {property.bathrooms}</span>
             <span className="flex items-center gap-1.5"><Square size={15} className="text-domify-primary/72" /> {property.surfaceArea} m²</span>
           </div>
+
+          <div className="mt-3 flex items-center justify-between text-[0.68rem] text-domify-dark/42"><span className="inline-flex items-center gap-1"><CalendarClock size={12} /> Actualisé le {updatedLabel}</span>{property.agency?.verified && <span className="inline-flex items-center gap-1 font-semibold text-emerald-700"><BadgeCheck size={12} /> Vérifié</span>}</div>
 
           <div className="mt-5 flex gap-2 border-t border-domify-dark/8 pt-4">
             <WhatsAppConciergeButton

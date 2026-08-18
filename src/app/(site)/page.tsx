@@ -56,6 +56,15 @@ export default async function HomePage() {
     { title: dict.home.why4Title, desc: dict.home.why4Desc },
   ];
   const featuredCities = cities.filter((city) => city._count.properties > 0).slice(0, 4);
+  const newestProperties = [...featuredProperties].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 3);
+  const mostViewedProperties = [...featuredProperties].sort((a, b) => b.viewsCount - a.viewsCount).slice(0, 3);
+  const investmentProperties = [...featuredProperties].filter((property) => property.listingType === "VENTE").sort((a, b) => b.viewsCount - a.viewsCount).slice(0, 3);
+  const editorialCollections = [
+    { eyebrow: "À découvrir", title: "Nouveautés cette semaine", description: "Les dernières adresses entrées dans la sélection Domify.", properties: newestProperties, href: "/proprietes?sort=recent" },
+    { eyebrow: "Le regard Domify", title: "Les plus consultés", description: "Les biens qui retiennent l’attention de notre communauté.", properties: mostViewedProperties, href: "/proprietes?sort=popular" },
+    { eyebrow: "Vision patrimoine", title: "Opportunités d’investissement", description: "Des adresses à étudier pour leur qualité de vie et leur potentiel.", properties: investmentProperties, href: "/proprietes?listingType=VENTE" },
+  ].filter((collection) => collection.properties.length > 0);
+  const cityLifestyles = ["Bord de mer", "Vie de famille", "Business & mobilité", "Centre-ville"];
   const baseUrl = process.env.NEXTAUTH_URL || "https://domify.ma";
   const organizationJsonLd = {
     "@context": "https://schema.org",
@@ -142,6 +151,29 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {editorialCollections.length > 0 && (
+        <section className="border-y border-domify-dark/8 bg-white py-20 sm:py-28">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <FadeIn className="max-w-2xl"><p className="luxury-eyebrow text-domify-gold">Sélections éditoriales</p><h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.04em] text-domify-dark sm:text-5xl">Explorez selon votre rythme de vie.</h2></FadeIn>
+            <div className="mt-10 grid gap-5 lg:grid-cols-3">
+              {editorialCollections.map((collection, index) => {
+                const cover = collection.properties[0];
+                const coverImage = cover.media[0]?.url || "/hero-domify-cinematic.jpg";
+                return <Link key={collection.title} href={collection.href} className="group relative min-h-[22rem] overflow-hidden rounded-[1.75rem] bg-domify-primary-dark p-6 text-white shadow-[0_24px_50px_-35px_rgba(16,47,66,0.7)] sm:p-7">
+                  <Image src={coverImage} alt="" fill sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover opacity-45 transition-transform duration-700 group-hover:scale-105" />
+                  <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,31,43,0.16)_0%,rgba(9,31,43,0.88)_100%)]" />
+                  <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xs font-bold text-domify-soft-gold backdrop-blur-sm">0{index + 1}</span>
+                  <span className="relative mt-10 block text-[0.66rem] font-bold uppercase tracking-[0.16em] text-domify-soft-gold">{collection.eyebrow}</span>
+                  <h3 className="relative mt-2 font-display text-3xl font-semibold leading-[1.03]">{collection.title}</h3>
+                  <p className="relative mt-3 max-w-sm text-sm leading-6 text-white/70">{collection.description}</p>
+                  <span className="relative mt-7 inline-flex items-center gap-2 text-sm font-semibold text-white">Voir la sélection <ArrowUpRight size={16} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></span>
+                </Link>;
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {featuredCities.length > 0 && (
         <section className="border-y border-domify-dark/8 bg-domify-primary-dark py-24 text-white sm:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -156,9 +188,10 @@ export default async function HomePage() {
               {featuredCities.map((city, index) => (
                 <Link key={city.slug} href={`/proprietes?city=${city.slug}`} className="group relative min-h-56 overflow-hidden rounded-[1.55rem] border border-white/12 bg-white/[0.06] p-6 text-white backdrop-blur-sm transition-luxury hover:-translate-y-1 hover:border-domify-soft-gold/50 hover:bg-white/[0.1]">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(205,156,32,0.26),transparent_36%)] transition-transform duration-500 group-hover:scale-110" />
-                  <span className="relative text-sm font-semibold text-domify-soft-gold">0{index + 1}</span>
+                  <span className="relative text-sm font-semibold text-domify-soft-gold">{cityLifestyles[index] ?? "Art de vivre"}</span>
                   <p className="relative mt-14 font-display text-2xl font-semibold">{city.name}</p>
-                  <span className="relative mt-2 inline-flex items-center gap-1 text-xs text-white/55">{dict.home.seeAll}<ArrowUpRight size={13} className="transition-transform group-hover:translate-x-0.5" /></span>
+                  <span className="relative mt-2 block text-xs text-white/55">{city._count.properties} bien{city._count.properties > 1 ? "s" : ""} disponible{city._count.properties > 1 ? "s" : ""}</span>
+                  <span className="relative mt-4 inline-flex items-center gap-1 text-xs font-semibold text-domify-soft-gold">Découvrir <ArrowUpRight size={13} className="transition-transform group-hover:translate-x-0.5" /></span>
                 </Link>
               ))}
             </div>
