@@ -155,7 +155,7 @@ function SidebarNav({ sections, pathname, onNavigate }: { sections: NavSection[]
   const reduceMotion = useReducedMotion();
 
   return (
-    <nav className="flex-1 space-y-7 overflow-y-auto px-4 py-6">
+    <nav className="flex-1 space-y-5 overflow-y-auto px-4 py-5">
       {sections.map((section) => (
         <div key={section.title}>
           <p className="mb-2.5 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/38">{section.title}</p>
@@ -265,7 +265,7 @@ export function AdminSidebar({ role }: { role: Role }) {
 
   return (
     <>
-      <aside className="hidden w-72 shrink-0 bg-[linear-gradient(180deg,#12384c_0%,#102f42_54%,#0c2636_100%)] text-white lg:flex lg:flex-col">
+      <aside className="sticky top-0 hidden h-screen w-72 shrink-0 bg-[linear-gradient(180deg,#12384c_0%,#102f42_54%,#0c2636_100%)] text-white lg:flex lg:flex-col">
         <SidebarBrand />
         <SidebarNav sections={sections} pathname={pathname} />
         <AdminThemeControl />

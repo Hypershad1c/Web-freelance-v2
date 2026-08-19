@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Bell, CheckCheck, LoaderCircle } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { Bell, CheckCheck, ChevronRight, Inbox, LoaderCircle, MessageCircle, ShieldCheck, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { markAllNotificationsRead, markNotificationRead } from "@/lib/actions/notifications";
 
 type NotificationItem = {
   id: string;
+  type: string;
   title: string;
   body: string | null;
   href: string | null;
@@ -21,6 +22,8 @@ export function NotificationBell({ notifications }: { notifications: Notificatio
   const router = useRouter();
   const reduceMotion = useReducedMotion();
   const unreadCount = notifications.filter((notification) => !notification.readAt).length;
+  const unreadNotifications = useMemo(() => notifications.filter((notification) => !notification.readAt), [notifications]);
+  const earlierNotifications = useMemo(() => notifications.filter((notification) => notification.readAt), [notifications]);
 
   function openNotification(notification: NotificationItem) {
     startTransition(async () => {
@@ -55,56 +58,14 @@ export function NotificationBell({ notifications }: { notifications: Notificatio
         )}
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: -8, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduceMotion ? undefined : { opacity: 0, y: -6, scale: 0.98 }}
-            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-            className="absolute right-0 z-50 mt-3 w-[min(92vw,24rem)] origin-top-right overflow-hidden rounded-2xl border border-domify-dark/8 bg-white/98 shadow-[0_22px_46px_-24px_rgba(16,47,66,0.42)] backdrop-blur-xl"
-          >
-            <div className="flex items-center justify-between border-b border-domify-dark/7 px-4 py-3.5">
-              <div>
-                <p className="font-display text-base font-semibold text-domify-dark">Notifications</p>
-                <p className="mt-0.5 text-xs text-domify-dark/50">{unreadCount ? `${unreadCount} non lue(s)` : "Tout est à jour"}</p>
-              </div>
-              <button
-                type="button"
-                onClick={markAllRead}
-                disabled={unreadCount === 0 || isPending}
-                className="pressable flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-domify-primary hover:bg-domify-warm-white disabled:opacity-40"
-              >
-                {isPending ? <LoaderCircle size={13} className="animate-spin" /> : <CheckCheck size={14} />} Tout lire
-              </button>
-            </div>
-            <div className="max-h-[24rem] overflow-y-auto p-1.5">
-              {notifications.length === 0 ? (
-                <p className="m-1 rounded-xl bg-domify-warm-white/70 px-4 py-8 text-center text-sm text-domify-dark/50">Aucune notification pour le moment.</p>
-              ) : (
-                notifications.map((notification) => (
-                  <button
-                    key={notification.id}
-                    type="button"
-                    onClick={() => openNotification(notification)}
-                    disabled={isPending}
-                    className={`pressable block w-full rounded-xl px-3 py-3 text-left ${notification.readAt ? "bg-white hover:bg-domify-warm-white/60" : "bg-domify-warm-white/70 hover:bg-domify-warm-white"}`}
-                  >
-                    <span className="flex items-start gap-2.5">
-                      {!notification.readAt && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-domify-gold" />}
-                      <span className={notification.readAt ? "pl-4" : ""}>
-                        <span className="block text-sm font-semibold text-domify-dark">{notification.title}</span>
-                        {notification.body && <span className="mt-1 block text-xs leading-5 text-domify-dark/60">{notification.body}</span>}
-                        <span className="mt-1.5 block text-[0.68rem] text-domify-dark/40">{new Intl.DateTimeFormat("fr-MA", { dateStyle: "medium", timeStyle: "short" }).format(new Date(notification.createdAt))}</span>
-                      </span>
-                    </span>
-                  </button>
-                ))
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{open && <><motion.button type="button" aria-label="Fermer les notifications" initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={reduceMotion ? undefined : { opacity: 0 }} onClick={() => setOpen(false)} className="fixed inset-0 z-40 cursor-default bg-domify-primary-dark/20 backdrop-blur-[1px]" /><motion.aside initial={reduceMotion ? false : { opacity: 0, x: 34 }} animate={{ opacity: 1, x: 0 }} exit={reduceMotion ? undefined : { opacity: 0, x: 34 }} transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }} className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[26rem] flex-col border-l border-domify-dark/8 bg-[#fcfbf8]/98 shadow-[-24px_0_60px_-34px_rgba(16,47,66,0.5)] backdrop-blur-xl">
+        <div className="admin-safe-top border-b border-domify-dark/7 px-5 pb-4 pt-5 sm:px-6"><div className="flex items-start justify-between gap-3"><div><p className="admin-eyebrow">Centre de notifications</p><h2 className="mt-1 font-display text-2xl font-semibold text-domify-dark">À suivre</h2><p className="mt-2 text-sm text-domify-dark/55">{unreadCount ? `${unreadCount} alerte${unreadCount > 1 ? "s" : ""} demande${unreadCount > 1 ? "nt" : ""} votre attention.` : "Votre espace est à jour."}</p></div><button type="button" onClick={() => setOpen(false)} className="pressable flex h-10 w-10 items-center justify-center rounded-xl border border-domify-dark/8 bg-white text-domify-dark/60 hover:text-domify-primary" aria-label="Fermer"><X size={17} /></button></div><button type="button" onClick={markAllRead} disabled={unreadCount === 0 || isPending} className="pressable mt-4 inline-flex items-center gap-2 rounded-xl bg-domify-primary px-3 py-2 text-xs font-semibold text-white hover:bg-domify-primary-dark disabled:opacity-40">{isPending ? <LoaderCircle size={13} className="animate-spin" /> : <CheckCheck size={14} />} Tout marquer comme lu</button></div>
+        <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-4">{notifications.length === 0 ? <div className="admin-empty-state m-2"><Inbox size={20} /><p><strong>Aucune notification.</strong><span>Les alertes opérationnelles apparaîtront ici.</span></p></div> : <>{unreadNotifications.length > 0 && <NotificationGroup label="À traiter" notifications={unreadNotifications} onOpen={openNotification} pending={isPending} />}{earlierNotifications.length > 0 && <NotificationGroup label="Historique récent" notifications={earlierNotifications} onOpen={openNotification} pending={isPending} muted />}</>}</div>
+      </motion.aside></>}</AnimatePresence>
     </div>
   );
+}
+
+function NotificationGroup({ label, notifications, onOpen, pending, muted = false }: { label: string; notifications: NotificationItem[]; onOpen: (notification: NotificationItem) => void; pending: boolean; muted?: boolean }) {
+  return <section className="mb-6"><p className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-domify-dark/42">{label}</p><div className="space-y-2">{notifications.map((notification) => { const Icon = notification.type === "MESSAGE" ? MessageCircle : notification.type === "APPROVAL_REQUEST" ? ShieldCheck : Inbox; return <button key={notification.id} type="button" onClick={() => onOpen(notification)} disabled={pending} className={`pressable flex w-full items-start gap-3 rounded-2xl border p-3.5 text-left ${muted ? "border-domify-dark/6 bg-white/65" : "border-domify-gold/20 bg-domify-warm-white/80 shadow-[0_16px_28px_-26px_rgba(16,47,66,0.45)]"}`}><span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${muted ? "bg-domify-warm-white text-domify-dark/45" : "bg-domify-primary text-domify-soft-gold"}`}><Icon size={16} /></span><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-domify-dark">{notification.title}</span>{notification.body && <span className="mt-1 block text-xs leading-5 text-domify-dark/58">{notification.body}</span>}<span className="mt-2 block text-[0.68rem] font-medium text-domify-dark/40">{new Intl.DateTimeFormat("fr-MA", { dateStyle: "medium", timeStyle: "short" }).format(new Date(notification.createdAt))}</span></span><ChevronRight size={15} className="mt-1 shrink-0 text-domify-dark/35" /></button>; })}</div></section>;
 }
