@@ -14,3 +14,4 @@
 - [x] Audit and modernize the shared admin dashboard navigation, command-centre layout, and operational visual hierarchy
 - [x] Improve admin tables, status feedback, notifications, loading states, and mobile dashboard usability
 - [x] Validate the refreshed admin interface across themes, permissions, tests, and production deployment
+- [x] Diagnose and fix notification centre layout, stacking, and responsive display in the admin dashboard
