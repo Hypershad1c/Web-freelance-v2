@@ -18,3 +18,4 @@
 - [x] Standardize shared headers, actions, panels, filters, tables, and empty states across every admin route
 - [x] Refresh catalogue, network, content, CRM, communication, analytics, system, and settings route UI with responsive consistency
 - [x] Validate every refreshed admin route in light/dark themes and production deployment
+- [x] Verify and harden /admin/settings so ADMIN configuration and link changes save safely without crashes
