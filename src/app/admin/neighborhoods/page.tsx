@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { AdminEmptyState, AdminPageLead } from "@/components/admin/AdminPageLead";
 import { InlineCreateForm } from "@/components/admin/InlineCreateForm";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { createNeighborhood, deleteNeighborhood } from "@/lib/actions/locations";
+import { MapPin } from "lucide-react";
 
 export default async function AdminNeighborhoodsPage() {
   const [neighborhoods, cities] = await Promise.all([
@@ -17,19 +19,22 @@ export default async function AdminNeighborhoodsPage() {
     <>
       <AdminTopbar title="Quartiers" />
       <div className="space-y-6 p-6 lg:p-10">
+        <AdminPageLead eyebrow="Découverte locale" title="Donnez du relief à chaque quartier" description="Les quartiers connectent les propriétés aux pages de destination et aux recherches précises des acquéreurs." icon={MapPin} metric={{ value: neighborhoods.length, label: "quartier(s)" }} />
+        <section className="admin-form-section"><div><p className="admin-eyebrow">Nouvelle zone</p><h3>Ajouter un quartier</h3><p>Associez chaque quartier à une ville existante afin de préserver la cohérence du catalogue.</p></div>
         <InlineCreateForm action={createNeighborhood} submitLabel="Ajouter le quartier">
-          <input name="name" placeholder="Nom (ex. Anfa)" required className="input" />
-          <input name="slug" placeholder="slug (ex. anfa)" required className="input" />
-          <select name="cityId" required className="input" defaultValue="">
+          <input name="name" placeholder="Nom (ex. Anfa)" required className="w-full" />
+          <input name="slug" placeholder="slug (ex. anfa)" required className="w-full" />
+          <select name="cityId" required className="w-full" defaultValue="">
             <option value="">Ville...</option>
             {cities.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
-          <input name="description" placeholder="Description (optionnel)" className="input" />
+          <input name="description" placeholder="Description (optionnel)" className="w-full" />
         </InlineCreateForm>
+        </section>
 
-        <div className="overflow-hidden rounded-2xl bg-white shadow-luxury">
+        {neighborhoods.length === 0 ? <AdminEmptyState icon={MapPin} title="Aucun quartier n’est encore défini" description="Ajoutez un quartier pour enrichir les pages locales et les recherches de précision." /> : <div className="admin-data-panel overflow-hidden">
           <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-black/5 bg-domify-warm-white/50 text-xs uppercase tracking-wide text-domify-dark/50">
@@ -57,19 +62,8 @@ export default async function AdminNeighborhoodsPage() {
             </tbody>
           </table>
           </div>
-        </div>
+        </div>}
       </div>
-
-      <style>{`
-        .input {
-          width: 100%;
-          border-radius: 0.75rem;
-          border: 1px solid rgba(31,41,55,0.12);
-          padding: 0.65rem 0.9rem;
-          font-size: 0.875rem;
-          background: white;
-        }
-      `}</style>
     </>
   );
 }

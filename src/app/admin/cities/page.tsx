@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { AdminEmptyState, AdminPageLead } from "@/components/admin/AdminPageLead";
 import { InlineCreateForm } from "@/components/admin/InlineCreateForm";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { createCity, deleteCity } from "@/lib/actions/locations";
+import { MapPinned } from "lucide-react";
 
 export default async function AdminCitiesPage() {
   const cities = await prisma.city.findMany({
@@ -14,14 +16,17 @@ export default async function AdminCitiesPage() {
     <>
       <AdminTopbar title="Villes" />
       <div className="space-y-6 p-6 lg:p-10">
+        <AdminPageLead eyebrow="Couverture géographique" title="Structurez les destinations de recherche" description="Chaque ville alimente les recherches, les pages éditoriales et le classement de vos biens publiés." icon={MapPinned} metric={{ value: cities.length, label: "ville(s)" }} />
+        <section className="admin-form-section"><div><p className="admin-eyebrow">Nouvelle destination</p><h3>Ajouter une ville</h3><p>Utilisez une image ou une description pour enrichir les futures pages locales.</p></div>
         <InlineCreateForm action={createCity} submitLabel="Ajouter la ville">
-          <input name="name" placeholder="Nom (ex. Essaouira)" required className="input" />
-          <input name="slug" placeholder="slug (ex. essaouira)" required className="input" />
-          <input name="image" placeholder="URL image (optionnel)" className="input" />
-          <input name="description" placeholder="Description (optionnel)" className="input" />
+          <input name="name" placeholder="Nom (ex. Essaouira)" required className="w-full" />
+          <input name="slug" placeholder="slug (ex. essaouira)" required className="w-full" />
+          <input name="image" placeholder="URL image (optionnel)" className="w-full" />
+          <input name="description" placeholder="Description (optionnel)" className="w-full" />
         </InlineCreateForm>
+        </section>
 
-        <div className="overflow-hidden rounded-2xl bg-white shadow-luxury">
+        {cities.length === 0 ? <AdminEmptyState icon={MapPinned} title="Votre carte de villes commence ici" description="Ajoutez votre première destination pour construire les recherches et pages locales." /> : <div className="admin-data-panel overflow-hidden">
           <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-black/5 bg-domify-warm-white/50 text-xs uppercase tracking-wide text-domify-dark/50">
@@ -51,19 +56,8 @@ export default async function AdminCitiesPage() {
             </tbody>
           </table>
           </div>
-        </div>
+        </div>}
       </div>
-
-      <style>{`
-        .input {
-          width: 100%;
-          border-radius: 0.75rem;
-          border: 1px solid rgba(31,41,55,0.12);
-          padding: 0.65rem 0.9rem;
-          font-size: 0.875rem;
-          background: white;
-        }
-      `}</style>
     </>
   );
 }

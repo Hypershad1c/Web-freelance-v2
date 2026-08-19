@@ -19,3 +19,5 @@
 - [x] Refresh catalogue, network, content, CRM, communication, analytics, system, and settings route UI with responsive consistency
 - [x] Validate every refreshed admin route in light/dark themes and production deployment
 - [x] Verify and harden /admin/settings so ADMIN configuration and link changes save safely without crashes
+- [x] Review and improve remaining admin routes with page-specific hierarchy, actions, tables, filters, and responsive recovery states
+- [ ] Validate the final remaining admin-route UI pass across themes, permissions, tests, and production deployment

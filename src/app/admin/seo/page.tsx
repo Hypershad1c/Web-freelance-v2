@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Plus, Pencil, Search } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { AdminEmptyState, AdminPageLead } from "@/components/admin/AdminPageLead";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { deleteSeoEntry } from "@/lib/actions/seo";
 
@@ -11,20 +12,14 @@ export default async function AdminSeoPage() {
   return (
     <>
       <AdminTopbar title="SEO" />
-      <div className="p-6 lg:p-10">
-        <div className="mb-6 rounded-xl bg-domify-warm-white p-4 text-sm text-domify-dark/70">
-          Définissez un titre et une description personnalisés pour n&apos;importe quelle page du site (identifiée
-          par son chemin, ex. <code>/</code>, <code>/proprietes</code>, <code>/blog</code>). Une page sans entrée ici
-          utilise ses valeurs par défaut.
-        </div>
+      <div className="space-y-6 p-6 lg:p-10">
+        <AdminPageLead eyebrow="Visibilité organique" title="Gardez la promesse Domify cohérente dans les résultats" description="Créez des titres et descriptions sur mesure uniquement là où les valeurs par défaut ne suffisent pas." icon={Search} metric={{ value: entries.length, label: "entrée(s)" }}>
+          <Link href="/admin/seo/new" className="pressable inline-flex items-center gap-2 rounded-xl bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-21px_rgba(16,47,66,0.75)] hover:bg-domify-primary-dark"><Plus size={16} /> Nouvelle entrée</Link>
+        </AdminPageLead>
 
-        <div className="mb-6 flex justify-end">
-          <Link href="/admin/seo/new" className="flex items-center gap-2 rounded-xl bg-domify-gold px-4 py-2.5 text-sm font-semibold text-white shadow-luxury">
-            <Plus size={16} /> Nouvelle entrée SEO
-          </Link>
-        </div>
+        <div className="admin-guidance-note">Définissez une entrée par chemin, par exemple <code>/</code>, <code>/proprietes</code> ou <code>/blog</code>. Une page sans entrée personnalisée conserve ses métadonnées par défaut.</div>
 
-        <div className="overflow-hidden rounded-2xl bg-white shadow-luxury">
+        {entries.length === 0 ? <AdminEmptyState icon={Search} title="Aucune optimisation personnalisée pour le moment" description="Créez une première entrée pour cibler une page stratégique, comme l’accueil ou le catalogue de propriétés." /> : <div className="admin-data-panel overflow-hidden">
           <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-black/5 bg-domify-warm-white/50 text-xs uppercase tracking-wide text-domify-dark/50">
@@ -36,14 +31,7 @@ export default async function AdminSeoPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
-              {entries.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-5 py-10 text-center text-domify-dark/50">
-                    <Search className="mx-auto mb-2 text-domify-dark/20" size={24} />
-                    Aucune entrée SEO personnalisée pour le moment.
-                  </td>
-                </tr>
-              ) : entries.map((e) => (
+              {entries.map((e) => (
                 <tr key={e.id} className="hover:bg-domify-warm-white/30">
                   <td className="px-5 py-3 font-mono text-xs text-domify-dark">{e.path}</td>
                   <td className="max-w-xs truncate px-5 py-3 text-domify-dark/80">{e.title}</td>
@@ -61,7 +49,7 @@ export default async function AdminSeoPage() {
             </tbody>
           </table>
           </div>
-        </div>
+        </div>}
       </div>
     </>
   );

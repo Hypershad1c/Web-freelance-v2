@@ -4,6 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { AdminEmptyState, AdminPageLead } from "@/components/admin/AdminPageLead";
 import { InlineCreateForm } from "@/components/admin/InlineCreateForm";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { createPermission, deletePermission } from "@/lib/actions/permissions";
@@ -33,11 +34,12 @@ export default async function AdminRolesPage() {
     <>
       <AdminTopbar title="Rôles & permissions" />
       <div className="space-y-8 p-6 lg:p-10">
+        <AdminPageLead eyebrow="Gouvernance des accès" title="Donnez à chacun le bon niveau de contrôle" description="Les rôles définissent les espaces accessibles, tandis que les permissions individuelles couvrent les exceptions précises." icon={ShieldCheck} metric={{ value: permissions.length, label: "permission(s)" }} />
         <div>
-          <h2 className="mb-4 font-display text-lg font-semibold text-domify-dark">Rôles</h2>
+          <div className="mb-4"><p className="admin-eyebrow">Accès standardisés</p><h2 className="mt-1 font-display text-xl font-semibold text-domify-dark">Rôles de la plateforme</h2></div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Object.entries(ROLE_DESCRIPTIONS).map(([role, desc]) => (
-              <div key={role} className="rounded-2xl bg-white p-5 shadow-luxury">
+              <div key={role} className="admin-role-card">
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={16} className="text-domify-gold" />
                   <p className="font-display text-base font-semibold text-domify-dark">{role}</p>
@@ -52,18 +54,14 @@ export default async function AdminRolesPage() {
           </div>
         </div>
 
-        <div>
-          <h2 className="mb-4 font-display text-lg font-semibold text-domify-dark">Permissions individuelles</h2>
-          <p className="mb-4 text-xs text-domify-dark/50">
-            Un catalogue libre de permissions granulaires (ex. <code>blog.publish</code>, <code>properties.delete</code>)
-            que vous pouvez accorder à des utilisateurs spécifiques depuis leur fiche, en plus de leur rôle.
-          </p>
+        <section className="admin-form-section"><div><p className="admin-eyebrow">Exceptions contrôlées</p><h3>Permissions individuelles</h3><p>Utilisez-les pour les droits ciblés, par exemple <code>blog.publish</code> ou <code>properties.delete</code>, en complément du rôle principal.</p></div>
           <InlineCreateForm action={createPermission} submitLabel="Ajouter la permission">
-            <input name="key" placeholder="Clé (ex. blog.publish)" required className="input" />
-            <input name="label" placeholder="Libellé (ex. Publier des articles)" required className="input" />
+            <input name="key" placeholder="Clé (ex. blog.publish)" required className="w-full" />
+            <input name="label" placeholder="Libellé (ex. Publier des articles)" required className="w-full" />
           </InlineCreateForm>
+        </section>
 
-          <div className="mt-4 overflow-hidden rounded-2xl bg-white shadow-luxury">
+        {permissions.length === 0 ? <AdminEmptyState icon={ShieldCheck} title="Aucune permission individuelle n’est définie" description="Créez une permission seulement lorsqu’un rôle standard ne couvre pas le besoin métier." /> : <div className="admin-data-panel overflow-hidden">
             <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
               <thead className="border-b border-black/5 bg-domify-warm-white/50 text-xs uppercase tracking-wide text-domify-dark/50">
@@ -75,9 +73,7 @@ export default async function AdminRolesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/5">
-                {permissions.length === 0 ? (
-                  <tr><td colSpan={4} className="px-5 py-8 text-center text-domify-dark/50">Aucune permission définie.</td></tr>
-                ) : permissions.map((p) => (
+                {permissions.map((p) => (
                   <tr key={p.id} className="hover:bg-domify-warm-white/30">
                     <td className="px-5 py-3 font-mono text-xs text-domify-dark">{p.key}</td>
                     <td className="px-5 py-3 text-domify-dark/70">{p.label}</td>
@@ -90,13 +86,8 @@ export default async function AdminRolesPage() {
               </tbody>
             </table>
             </div>
-          </div>
-        </div>
+          </div>}
       </div>
-
-      <style>{`
-        .input { width: 100%; border-radius: 0.75rem; border: 1px solid rgba(31,41,55,0.12); padding: 0.65rem 0.9rem; font-size: 0.875rem; background: white; }
-      `}</style>
     </>
   );
 }

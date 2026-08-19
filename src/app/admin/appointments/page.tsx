@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, CalendarDays } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { AdminEmptyState, AdminPageLead } from "@/components/admin/AdminPageLead";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { StatusSelect } from "@/components/admin/StatusSelect";
 import { updateAppointmentStatus, deleteAppointment } from "@/lib/actions/inbox";
@@ -37,18 +38,19 @@ export default async function AdminAppointmentsPage({
   return (
     <>
       <AdminTopbar title={isAgent ? "Mes rendez-vous" : "Rendez-vous"} />
-      <div className="p-6 lg:p-10">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><form className="flex items-center gap-3">
-          <select name="status" defaultValue={status ?? ""} className="rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm">
+      <div className="space-y-6 p-6 lg:p-10">
+        <AdminPageLead eyebrow={isAgent ? "Agenda personnel" : "Orchestration des visites"} title={isAgent ? "Votre agenda de visites" : "Pilotez les rendez-vous et confirmations"} description={isAgent ? "Filtrez vos visites pour confirmer les créneaux et accompagner vos clients." : "Suivez les demandes, assignez les agents et gardez une vision claire des créneaux à venir."} icon={CalendarDays} metric={{ value: appointments.length, label: "rendez-vous" }} />
+        <div className="admin-control-row"><form className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+          <select name="status" defaultValue={status ?? ""} className="min-w-0 px-3 py-2.5 text-sm">
             <option value="">Tous les statuts</option>
             {STATUS_OPTIONS.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
-          <button className="rounded-xl bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white">Filtrer</button>
+          <button className="pressable rounded-xl bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white">Filtrer</button>
         </form><Link href="/admin/appointments/disponibilites" className="pressable inline-flex items-center justify-center gap-2 rounded-xl border border-domify-primary/18 bg-white px-4 py-2.5 text-sm font-semibold text-domify-primary hover:bg-domify-warm-white"><CalendarClock size={16}/> Gérer les disponibilités</Link></div>
 
-        <div className="overflow-hidden rounded-2xl bg-white shadow-luxury">
+        {appointments.length === 0 ? <AdminEmptyState icon={CalendarDays} title="Aucun rendez-vous pour ce filtre" description="Changez le statut sélectionné ou attendez une nouvelle demande de visite." /> : <div className="admin-data-panel overflow-hidden">
           <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-black/5 bg-domify-warm-white/50 text-xs uppercase tracking-wide text-domify-dark/50">
@@ -62,9 +64,7 @@ export default async function AdminAppointmentsPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
-              {appointments.length === 0 ? (
-                <tr><td colSpan={isAgent ? 4 : 6} className="px-5 py-10 text-center text-domify-dark/50">Aucun rendez-vous.</td></tr>
-              ) : appointments.map((appt) => (
+              {appointments.map((appt) => (
                 <tr key={appt.id} className="align-top hover:bg-domify-warm-white/30">
                   <td className="px-5 py-3">
                     <p className="font-medium text-domify-dark">{appt.name}</p>
@@ -101,7 +101,7 @@ export default async function AdminAppointmentsPage({
             </tbody>
           </table>
           </div>
-        </div>
+        </div>}
       </div>
     </>
   );

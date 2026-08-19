@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { AdminEmptyState, AdminPageLead } from "@/components/admin/AdminPageLead";
 import { InlineCreateForm } from "@/components/admin/InlineCreateForm";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { createPropertyType, deletePropertyType } from "@/lib/actions/taxonomy";
+import { Building2 } from "lucide-react";
 
 export default async function AdminPropertyTypesPage() {
   const propertyTypes = await prisma.propertyType.findMany({
@@ -14,13 +16,16 @@ export default async function AdminPropertyTypesPage() {
     <>
       <AdminTopbar title="Types de biens" />
       <div className="space-y-6 p-6 lg:p-10">
+        <AdminPageLead eyebrow="Taxonomie du catalogue" title="Clarifiez chaque type de propriété" description="Les types de biens structurent les recherches, les cartes de catalogue et les parcours de comparaison." icon={Building2} metric={{ value: propertyTypes.length, label: "type(s)" }} />
+        <section className="admin-form-section"><div><p className="admin-eyebrow">Nouvelle catégorie</p><h3>Ajouter un type de bien</h3><p>Préférez une dénomination claire, courte et facile à comprendre pour les visiteurs.</p></div>
         <InlineCreateForm action={createPropertyType} submitLabel="Ajouter le type">
-          <input name="name" placeholder="Nom (ex. Chalet)" required className="input" />
-          <input name="slug" placeholder="slug (optionnel, auto-généré)" className="input" />
-          <input name="icon" placeholder="Icône (optionnel, ex. lucide name)" className="input" />
+          <input name="name" placeholder="Nom (ex. Chalet)" required className="w-full" />
+          <input name="slug" placeholder="slug (optionnel, auto-généré)" className="w-full" />
+          <input name="icon" placeholder="Icône (optionnel, ex. lucide name)" className="w-full" />
         </InlineCreateForm>
+        </section>
 
-        <div className="overflow-hidden rounded-2xl bg-white shadow-luxury">
+        {propertyTypes.length === 0 ? <AdminEmptyState icon={Building2} title="Le catalogue a besoin de ses premiers types" description="Ajoutez des types de biens pour rendre la navigation et les filtres plus précis." /> : <div className="admin-data-panel overflow-hidden">
           <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-black/5 bg-domify-warm-white/50 text-xs uppercase tracking-wide text-domify-dark/50">
@@ -32,9 +37,7 @@ export default async function AdminPropertyTypesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
-              {propertyTypes.length === 0 ? (
-                <tr><td colSpan={4} className="px-5 py-10 text-center text-domify-dark/50">Aucun type de bien.</td></tr>
-              ) : propertyTypes.map((t) => (
+              {propertyTypes.map((t) => (
                 <tr key={t.id} className="hover:bg-domify-warm-white/30">
                   <td className="px-5 py-3 font-medium text-domify-dark">{t.name}</td>
                   <td className="px-5 py-3 text-domify-dark/60">{t.slug}</td>
@@ -54,12 +57,8 @@ export default async function AdminPropertyTypesPage() {
             </tbody>
           </table>
           </div>
-        </div>
+        </div>}
       </div>
-
-      <style>{`
-        .input { width: 100%; border-radius: 0.75rem; border: 1px solid rgba(31,41,55,0.12); padding: 0.65rem 0.9rem; font-size: 0.875rem; background: white; }
-      `}</style>
     </>
   );
 }
