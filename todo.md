@@ -15,3 +15,6 @@
 - [x] Improve admin tables, status feedback, notifications, loading states, and mobile dashboard usability
 - [x] Validate the refreshed admin interface across themes, permissions, tests, and production deployment
 - [x] Diagnose and fix notification centre layout, stacking, and responsive display in the admin dashboard
+- [x] Standardize shared headers, actions, panels, filters, tables, and empty states across every admin route
+- [x] Refresh catalogue, network, content, CRM, communication, analytics, system, and settings route UI with responsive consistency
+- [ ] Validate every refreshed admin route in light/dark themes and production deployment
