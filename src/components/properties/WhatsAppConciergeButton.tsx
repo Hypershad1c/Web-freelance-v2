@@ -61,7 +61,7 @@ export function WhatsAppConciergeButton({
       type="button"
       onClick={openConcierge}
       disabled={opening}
-      aria-label="Parler au concierge Domify sur WhatsApp"
+      aria-label={prominent ? "Contact In WhatsApp" : "Open WhatsApp for this property"}
       className={cn(
         "pressable inline-flex items-center justify-center gap-2 font-semibold transition-all disabled:cursor-wait disabled:opacity-70",
         prominent
@@ -71,7 +71,7 @@ export function WhatsAppConciergeButton({
       )}
     >
       {opening ? <LoaderCircle size={prominent ? 17 : 14} className="animate-spin" /> : <WhatsAppIcon size={prominent ? 17 : 14} />}
-      <span>{opening ? "Ouverture..." : prominent ? "Parler au concierge" : "WhatsApp"}</span>
+      <span>{opening ? "Opening..." : prominent ? "Contact In WhatsApp" : "WhatsApp"}</span>
       {prominent && <MessageCircle size={15} />}
     </button>
   );
