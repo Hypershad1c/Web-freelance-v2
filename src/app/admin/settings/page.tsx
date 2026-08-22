@@ -4,7 +4,7 @@ import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { SettingsForm } from "@/components/admin/SettingsForm";
 import { LeadNotificationTestControl } from "@/components/admin/LeadNotificationTestControl";
 import { getSiteSettings } from "@/lib/data/settings";
-import { sendTestLeadNotification, updateSettings } from "@/lib/actions/settings";
+import { updateSettings } from "@/lib/actions/settings";
 
 export default async function AdminSettingsPage() {
   const session = await auth();
@@ -17,7 +17,7 @@ export default async function AdminSettingsPage() {
       <AdminTopbar title="Paramètres" />
       <div className="space-y-5 p-6 lg:p-10">
         <SettingsForm action={updateSettings} defaultValues={settings} />
-        <LeadNotificationTestControl action={sendTestLeadNotification} />
+        <LeadNotificationTestControl />
       </div>
     </>
   );

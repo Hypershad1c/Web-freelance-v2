@@ -41,3 +41,4 @@
 - [ ] Submit a clearly marked production test lead and verify the administrator email notification workflow
 - [x] Add an ADMIN-only test action for lead-notification email delivery without a public submission or CAPTCHA bypass
 - [ ] Diagnose the Gmail delivery result from the ADMIN-only notification test, including provider acceptance status
+- [x] Verify and enforce administrator-only recipient coverage for every new lead without relying on the optional contact mailbox
