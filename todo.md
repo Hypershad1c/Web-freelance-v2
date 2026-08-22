@@ -19,5 +19,14 @@
 - [x] Refresh catalogue, network, content, CRM, communication, analytics, system, and settings route UI with responsive consistency
 - [x] Validate every refreshed admin route in light/dark themes and production deployment
 - [x] Verify and harden /admin/settings so ADMIN configuration and link changes save safely without crashes
+- [x] Diagnose Google indexability, sitemap inclusion, canonical metadata, and on-page SEO for property cmscgdrlh000yucvi8r9ebhug
+- [ ] Audit and fix the reported public UI defects across the seller CTA, header, calculator, valuation, and affected responsive views
+- [ ] Replace the public header agent link with the credit-calculator link
+- [ ] Extend seller submissions with phone number, price, property details, media, and protected review-to-listing workflow
+- [ ] Rebuild the credit and valuation journey with bank selection, verified bank branding, and transparent payment assumptions
+- [ ] Review CRM records and obtain explicit confirmation before deleting any leads, appointments, messages, or related records
+- [ ] Permanently delete all Lead records only, preserving properties, CRM contacts, seller cases, appointments, messages, and users
+- [ ] Add and deploy a temporary ADMIN-only lead cleanup control, execute it once, verify counts, then remove the control
+- [ ] Validate the combined public UI and seller/finance flows in tests and production
 - [x] Review and improve remaining admin routes with page-specific hierarchy, actions, tables, filters, and responsive recovery states
 - [x] Validate the final remaining admin-route UI pass across themes, permissions, tests, and production deployment
