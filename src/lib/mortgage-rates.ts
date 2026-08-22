@@ -6,6 +6,9 @@ export type MortgageRateProfile = {
   sourceReferenceRatePercent: number | null;
   monthlyPaymentMad: number | null;
   confidence: "medium" | "low";
+  brandColor: string;
+  brandColorLight: string;
+  logoPath: string;
 };
 
 export const MORTGAGE_RATES_LAST_VERIFIED = "20 avril 2026";
@@ -22,6 +25,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: null,
     monthlyPaymentMad: null,
     confidence: "medium",
+    brandColor: "#163B57",
+    brandColorLight: "#EDF5F8",
+    logoPath: "/banks/market-average.svg",
   },
   {
     slug: "bank-of-africa",
@@ -31,6 +37,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 4.35,
     monthlyPaymentMad: 3163,
     confidence: "medium",
+    brandColor: "#ED7A23",
+    brandColorLight: "#FFF1E7",
+    logoPath: "/banks/bank-of-africa.svg",
   },
   {
     slug: "bmci",
@@ -40,6 +49,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 4.4,
     monthlyPaymentMad: 3190,
     confidence: "medium",
+    brandColor: "#00884A",
+    brandColorLight: "#E8F6EF",
+    logoPath: "/banks/bmci.svg",
   },
   {
     slug: "attijariwafa-bank",
@@ -49,6 +61,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 4.15,
     monthlyPaymentMad: 3231,
     confidence: "medium",
+    brandColor: "#F06445",
+    brandColorLight: "#FFF0EB",
+    logoPath: "/banks/attijariwafa-bank.svg",
   },
   {
     slug: "cih-bank",
@@ -58,6 +73,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 4.1,
     monthlyPaymentMad: 3231,
     confidence: "medium",
+    brandColor: "#0F5DAA",
+    brandColorLight: "#EAF4FE",
+    logoPath: "/banks/cih-bank.svg",
   },
   {
     slug: "credit-du-maroc",
@@ -67,6 +85,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 4.3,
     monthlyPaymentMad: 3231,
     confidence: "medium",
+    brandColor: "#007A5E",
+    brandColorLight: "#E7F6F0",
+    logoPath: "/banks/credit-du-maroc.svg",
   },
   {
     slug: "banque-populaire",
@@ -76,6 +97,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 4.15,
     monthlyPaymentMad: 3272,
     confidence: "medium",
+    brandColor: "#1677BC",
+    brandColorLight: "#EAF5FC",
+    logoPath: "/banks/banque-populaire.svg",
   },
   {
     slug: "saham-bank",
@@ -85,6 +109,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 4.3,
     monthlyPaymentMad: 3272,
     confidence: "medium",
+    brandColor: "#D4462E",
+    brandColorLight: "#FFF0EC",
+    logoPath: "/banks/saham-bank.svg",
   },
   {
     slug: "cfg-bank",
@@ -94,6 +121,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: null,
     monthlyPaymentMad: 3272,
     confidence: "low",
+    brandColor: "#D45443",
+    brandColorLight: "#FFF0ED",
+    logoPath: "/banks/cfg-bank.svg",
   },
   {
     slug: "umnia-bank",
@@ -103,6 +133,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 4.6,
     monthlyPaymentMad: 3327,
     confidence: "medium",
+    brandColor: "#8F1248",
+    brandColorLight: "#FCECF3",
+    logoPath: "/banks/umnia-bank.svg",
   },
   {
     slug: "bank-assafa",
@@ -112,6 +145,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 4.8,
     monthlyPaymentMad: 3355,
     confidence: "medium",
+    brandColor: "#00916E",
+    brandColorLight: "#EAF8F3",
+    logoPath: "/banks/bank-assafa.svg",
   },
   {
     slug: "al-akhdar-bank",
@@ -121,6 +157,9 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 4.9,
     monthlyPaymentMad: 3383,
     confidence: "medium",
+    brandColor: "#4E8D3A",
+    brandColorLight: "#EFF7EA",
+    logoPath: "/banks/al-akhdar-bank.svg",
   },
   {
     slug: "bank-al-karam",
@@ -130,5 +169,8 @@ export const MORTGAGE_BANK_RATES: MortgageRateProfile[] = [
     sourceReferenceRatePercent: 5,
     monthlyPaymentMad: 3411,
     confidence: "medium",
+    brandColor: "#8A1E37",
+    brandColorLight: "#FAEDF1",
+    logoPath: "/banks/bank-al-karam.svg",
   },
 ];

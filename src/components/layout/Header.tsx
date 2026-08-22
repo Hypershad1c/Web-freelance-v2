@@ -28,7 +28,7 @@ export function Header({ locale, dict }: { locale: Locale; dict: Dictionary }) {
     { label: dict.nav.map, href: "/carte" },
     { label: dict.nav.neighborhoods, href: "/quartiers" },
     { label: dict.nav.agencies, href: "/agences" },
-    { label: dict.nav.agents, href: "/agents" },
+    { label: dict.nav.calculator, href: "/calculateur-credit" },
     { label: dict.nav.blog, href: "/blog" },
   ];
 

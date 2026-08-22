@@ -2,7 +2,6 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { LeadKanbanBoard } from "@/components/admin/LeadKanbanBoard";
-import { AdminLeadCleanupControl } from "@/components/admin/AdminLeadCleanupControl";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Toutes les étapes" },
@@ -21,20 +20,16 @@ export default async function AdminLeadsPage({
   const { status } = await searchParams;
   const session = await auth();
   const isAgent = session?.user?.role === "AGENT";
-  const isAdmin = session?.user?.role === "ADMIN";
 
   const agent = isAgent ? await prisma.agent.findUnique({ where: { userId: session!.user.id } }) : null;
-  const [leads, totalLeadCount] = await Promise.all([
-    prisma.lead.findMany({
+  const leads = await prisma.lead.findMany({
     where: {
       ...(status ? { status: status as never } : {}),
       ...(isAgent ? { property: { agentId: agent?.id ?? "__none__" } } : {}),
     },
     include: { property: { select: { title: true, id: true } } },
     orderBy: [{ status: "asc" }, { position: "asc" }, { createdAt: "desc" }],
-    }),
-    isAdmin ? prisma.lead.count() : Promise.resolve(0),
-  ]);
+  });
 
   return (
     <>
@@ -53,7 +48,6 @@ export default async function AdminLeadsPage({
           </form>
         </div>
         <LeadKanbanBoard leads={leads} canOpenProperty={!isAgent} />
-        {isAdmin && <AdminLeadCleanupControl count={totalLeadCount} />}
       </div>
     </>
   );

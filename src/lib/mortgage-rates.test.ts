@@ -27,6 +27,9 @@ describe("mortgage rate catalog", () => {
     for (const bank of MORTGAGE_BANK_RATES) {
       expect(bank.nominalRatePercent).toBeGreaterThan(0);
       expect(bank.tegPercent).toBeGreaterThanOrEqual(bank.nominalRatePercent);
+      expect(bank.brandColor).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(bank.brandColorLight).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(bank.logoPath).toMatch(/^\/banks\/.+\.svg$/);
     }
   });
 });
