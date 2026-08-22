@@ -27,7 +27,7 @@
 - [x] Review CRM records and obtain explicit confirmation before deleting any leads, appointments, messages, or related records
 - [x] Permanently delete all Lead records only, preserving properties, CRM contacts, seller cases, appointments, messages, and users — production transaction verified: 6 deleted, 0 remaining (22 August 2026)
 - [x] Add and deploy a temporary ADMIN-only lead cleanup control, execute it once, verify counts, then remove the control
-- [ ] Validate the combined public UI and seller/finance flows in tests and production
+- [x] Validate the combined public UI and seller/finance flows in tests and production
 - [x] Verify the calculator’s responsive lower-card visibility with the cookie consent banner and the floating seller CTA present
 - [x] Prevent overlap between the PWA install prompt and the fixed seller CTA on public calculator screens
 - [ ] Complete page-level Arabic localization and RTL copy harmonization on property-detail content beyond the shared header and footer
