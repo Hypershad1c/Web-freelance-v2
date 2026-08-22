@@ -20,6 +20,7 @@ export default async function AdminLeadsPage({
   const { status } = await searchParams;
   const session = await auth();
   const isAgent = session?.user?.role === "AGENT";
+  const isAdmin = session?.user?.role === "ADMIN";
 
   const agent = isAgent ? await prisma.agent.findUnique({ where: { userId: session!.user.id } }) : null;
   const leads = await prisma.lead.findMany({
@@ -47,7 +48,7 @@ export default async function AdminLeadsPage({
             <button className="rounded-xl bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white">Filtrer</button>
           </form>
         </div>
-        <LeadKanbanBoard leads={leads} canOpenProperty={!isAgent} />
+        <LeadKanbanBoard leads={leads} canOpenProperty={!isAgent} canDelete={isAdmin} />
       </div>
     </>
   );

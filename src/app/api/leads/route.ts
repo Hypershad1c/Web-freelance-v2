@@ -76,10 +76,15 @@ export async function POST(request: Request) {
     }).catch((error) => console.error("[leads] Analytics event failed:", error));
   }
 
-  // CRM sync and email notifications are best-effort: an auxiliary service failure
-  // must never reject a genuine visitor enquiry.
-  syncInboundLead(lead).catch((e) => console.error("[leads] CRM sync failed:", e));
-  notifyNewLead(lead).catch((e) => console.error("[leads] notification failed:", e));
+  // Complete auxiliary work before returning from this serverless request so a
+  // successful lead response cannot terminate the notification promise early.
+  // Delivery and CRM failures remain non-blocking for the visitor’s submission.
+  const [crmResult, notificationResult] = await Promise.allSettled([
+    syncInboundLead(lead),
+    notifyNewLead(lead),
+  ]);
+  if (crmResult.status === "rejected") console.error("[leads] CRM sync failed:", crmResult.reason);
+  if (notificationResult.status === "rejected") console.error("[leads] notification failed:", notificationResult.reason);
 
   return NextResponse.json(lead, { status: 201 });
 }

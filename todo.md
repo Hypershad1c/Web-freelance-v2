@@ -42,3 +42,5 @@
 - [x] Add an ADMIN-only test action for lead-notification email delivery without a public submission or CAPTCHA bypass
 - [x] Diagnose the Gmail delivery result from the ADMIN-only notification test, including provider acceptance status — provider accepted the test for 3 ADMIN recipients (message ID 997966e2-83ff-40e2-9f80-a9b3c44d04bc)
 - [x] Verify and enforce administrator-only recipient coverage for every new lead without relying on the optional contact mailbox
+- [x] Make genuine lead-submission emails complete reliably for every ADMIN recipient
+- [x] Add an ADMIN-only individual lead delete action with confirmation and audit history
