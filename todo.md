@@ -38,3 +38,6 @@
 - [x] Merge /estimation into the purchase-only credit journey and capture qualified buyer financing enquiries as leads — /estimation now redirects to the shared calculator; production verifies the selected-bank simulation and purchase-only enquiry form
 - [x] Improve /admin/leads so each lead can be viewed and opened independently alongside the pipeline board — production verifies the list view, direct detail panel, contact links, and stage control
 - [x] Ensure every new lead email notifies the configured Domify administrator as well as any assigned agent
+- [ ] Submit a clearly marked production test lead and verify the administrator email notification workflow
+- [x] Add an ADMIN-only test action for lead-notification email delivery without a public submission or CAPTCHA bypass
+- [ ] Diagnose the Gmail delivery result from the ADMIN-only notification test, including provider acceptance status

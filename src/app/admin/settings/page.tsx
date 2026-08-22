@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { SettingsForm } from "@/components/admin/SettingsForm";
+import { LeadNotificationTestControl } from "@/components/admin/LeadNotificationTestControl";
 import { getSiteSettings } from "@/lib/data/settings";
-import { updateSettings } from "@/lib/actions/settings";
+import { sendTestLeadNotification, updateSettings } from "@/lib/actions/settings";
 
 export default async function AdminSettingsPage() {
   const session = await auth();
@@ -14,8 +15,9 @@ export default async function AdminSettingsPage() {
   return (
     <>
       <AdminTopbar title="Paramètres" />
-      <div className="p-6 lg:p-10">
+      <div className="space-y-5 p-6 lg:p-10">
         <SettingsForm action={updateSettings} defaultValues={settings} />
+        <LeadNotificationTestControl action={sendTestLeadNotification} />
       </div>
     </>
   );
