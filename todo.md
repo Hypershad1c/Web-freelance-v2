@@ -36,3 +36,4 @@
 - [x] Diagnose and fix rental listings missing from /proprietes?listingType=LOCATION — production currently returns the two published rental properties; a LOCATION filter regression test now protects the query
 - [x] Change the property-page WhatsApp action label to “Contact In WhatsApp”
 - [x] Merge /estimation into the purchase-only credit journey and capture qualified buyer financing enquiries as leads — /estimation now redirects to the shared calculator; production verifies the selected-bank simulation and purchase-only enquiry form
+- [x] Improve /admin/leads so each lead can be viewed and opened independently alongside the pipeline board
