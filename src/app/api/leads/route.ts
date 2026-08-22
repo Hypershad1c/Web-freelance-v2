@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { getSiteSettings } from "@/lib/data/settings";
+import { resolveLeadNotificationRecipients } from "@/lib/lead-notification-recipients";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { syncInboundLead } from "@/lib/crm";
@@ -93,23 +94,37 @@ type LeadWithProperty = {
 };
 
 async function notifyNewLead(lead: LeadWithProperty) {
-  const settings = await getSiteSettings();
-  const recipientEmail = lead.property?.agent?.email || settings.contact_email;
-
-  await sendEmail({
-    to: recipientEmail,
-    subject: `Nouveau lead — ${lead.property?.title ?? "demande générale"}`,
-    html: emailLayout(
-      "Nouveau lead reçu",
-      `
-      <p><strong>${lead.name}</strong> (${lead.email}${lead.phone ? `, ${lead.phone}` : ""}) vient de soumettre une demande${
-        lead.property ? ` pour <strong>${lead.property.title}</strong> (${lead.property.reference})` : ""
-      }.</p>
-      ${lead.message ? `<p style="background:#F2ECDD; padding:12px 16px; border-radius:8px;">${lead.message}</p>` : ""}
-      <p>Connectez-vous à l'admin pour y répondre.</p>
-      `
-    ),
+  const [settings, administrators] = await Promise.all([
+    getSiteSettings(),
+    prisma.user.findMany({
+      where: { role: "ADMIN" },
+      select: { email: true },
+    }),
+  ]);
+  const recipients = resolveLeadNotificationRecipients({
+    administratorEmails: administrators.map((administrator) => administrator.email),
+    configuredAdminEmail: settings.contact_email,
+    agentEmail: lead.property?.agent?.email,
   });
+
+  if (recipients.length > 0) {
+    await sendEmail({
+      to: recipients,
+      subject: `Nouveau lead — ${lead.property?.title ?? "demande générale"}`,
+      html: emailLayout(
+        "Nouveau lead reçu",
+        `
+        <p><strong>${lead.name}</strong> (${lead.email}${lead.phone ? `, ${lead.phone}` : ""}) vient de soumettre une demande${
+          lead.property ? ` pour <strong>${lead.property.title}</strong> (${lead.property.reference})` : ""
+        }.</p>
+        ${lead.message ? `<p style="background:#F2ECDD; padding:12px 16px; border-radius:8px;">${lead.message}</p>` : ""}
+        <p>Connectez-vous à l'admin pour y répondre.</p>
+        `
+      ),
+    });
+  } else {
+    console.error("[leads] No valid administrator or agent email is configured for new-lead notification");
+  }
 
   await sendEmail({
     to: lead.email,

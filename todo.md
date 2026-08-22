@@ -37,3 +37,4 @@
 - [x] Change the property-page WhatsApp action label to “Contact In WhatsApp”
 - [x] Merge /estimation into the purchase-only credit journey and capture qualified buyer financing enquiries as leads — /estimation now redirects to the shared calculator; production verifies the selected-bank simulation and purchase-only enquiry form
 - [x] Improve /admin/leads so each lead can be viewed and opened independently alongside the pipeline board — production verifies the list view, direct detail panel, contact links, and stage control
+- [x] Ensure every new lead email notifies the configured Domify administrator as well as any assigned agent
