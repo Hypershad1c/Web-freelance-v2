@@ -33,3 +33,4 @@
 - [ ] Complete page-level Arabic localization and RTL copy harmonization on property-detail content beyond the shared header and footer
 - [x] Review and improve remaining admin routes with page-specific hierarchy, actions, tables, filters, and responsive recovery states
 - [x] Validate the final remaining admin-route UI pass across themes, permissions, tests, and production deployment
+- [x] Diagnose and fix rental listings missing from /proprietes?listingType=LOCATION — production currently returns the two published rental properties; a LOCATION filter regression test now protects the query

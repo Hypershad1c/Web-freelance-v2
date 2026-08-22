@@ -10,7 +10,7 @@ vi.mock("@/lib/prisma", () => ({
   isPrismaReady: mockIsPrismaReady,
 }));
 
-import { getHomepageProperties } from "@/lib/data/properties";
+import { getHomepageProperties, getProperties } from "@/lib/data/properties";
 
 afterEach(() => {
   mockFindMany.mockReset();
@@ -36,5 +36,17 @@ describe("getHomepageProperties", () => {
 
     await expect(getHomepageProperties()).resolves.toEqual([]);
     expect(mockFindMany).not.toHaveBeenCalled();
+  });
+});
+
+describe("getProperties", () => {
+  it("returns published rental inventory when the LOCATION filter is selected", async () => {
+    const rentals = [{ id: "rental-1", listingType: "LOCATION" }] as never[];
+    mockFindMany.mockResolvedValueOnce(rentals);
+
+    await expect(getProperties({ listingType: "LOCATION" })).resolves.toEqual(rentals);
+    expect(mockFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ status: "PUBLISHED", listingType: "LOCATION" }),
+    }));
   });
 });
