@@ -9,8 +9,17 @@ import { WhatsAppConciergeButton } from "@/components/properties/WhatsAppConcier
 import { HoneypotField } from "@/components/HoneypotField";
 import { Turnstile } from "@/components/Turnstile";
 import { getClientAnalyticsAttribution } from "@/lib/client-analytics";
+import type { Locale } from "@/i18n/locales";
 
-export function ContactAgentCard({ property }: { property: PropertyWithRelations }) {
+const CONTACT_COPY = {
+  fr: { team: "Équipe Domify", greeting: "Bonjour, je suis intéressé(e) par", retry: "La demande n’a pas pu être envoyée. Merci de réessayer.", call: "Appeler", schedule: "Planifier une visite", thank: "Merci ! Votre demande a bien été envoyée,", followUp: "vous recontactera rapidement.", name: "Nom complet", email: "Email", phone: "Téléphone", submit: "Contacter l’agent", sending: "Envoi..." },
+  en: { team: "Domify team", greeting: "Hello, I am interested in", retry: "Your request could not be sent. Please try again.", call: "Call", schedule: "Schedule a viewing", thank: "Thank you! Your request has been sent. ", followUp: "will contact you shortly.", name: "Full name", email: "Email", phone: "Phone", submit: "Contact the agent", sending: "Sending..." },
+  ar: { team: "فريق دوميفاي", greeting: "مرحباً، أنا مهتم بـ", retry: "تعذر إرسال طلبك. يرجى المحاولة مرة أخرى.", call: "اتصل", schedule: "حدد موعداً للزيارة", thank: "شكراً! تم إرسال طلبك بنجاح،", followUp: "سيتواصل معك قريباً.", name: "الاسم الكامل", email: "البريد الإلكتروني", phone: "رقم الهاتف", submit: "تواصل مع المستشار", sending: "جارٍ الإرسال..." },
+} as const;
+
+export function ContactAgentCard({ property, locale }: { property: PropertyWithRelations; locale: Locale }) {
+  const copy = CONTACT_COPY[locale];
+  const isRtl = locale === "ar";
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
@@ -21,14 +30,14 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
     name: "",
     email: "",
     phone: "",
-    message: `Bonjour, je suis intéressé(e) par ${property.title} (${property.reference}).`,
+    message: `${copy.greeting} ${property.title} (${property.reference}).`,
   });
 
   const contactName = property.agent?.name ?? property.agency?.name ?? "Domify";
   const contactPhone = property.agent?.phone ?? property.agency?.phone;
   const contactEmail = property.agent?.email ?? property.agency?.email;
   const contactPhoto = property.agent?.photo;
-  const contactSubtitle = property.agent ? property.agency?.name ?? "Domify" : "Équipe Domify";
+  const contactSubtitle = property.agent ? property.agency?.name ?? "Domify" : copy.team;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,14 +54,14 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
       if (!response.ok) throw new Error();
       setSent(true);
     } catch {
-      setError("La demande n’a pas pu être envoyée. Merci de réessayer.");
+      setError(copy.retry);
     } finally {
       setSending(false);
     }
   }
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-luxury">
+    <div dir={isRtl ? "rtl" : "ltr"} className={`rounded-2xl bg-white p-6 shadow-luxury ${isRtl ? "text-right" : ""}`}>
       <div className="flex items-center gap-3">
         <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-domify-warm-white">
           {contactPhoto ? (
@@ -69,8 +78,8 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
 
       {(contactPhone || contactEmail) && (
         <div className="mt-4 space-y-2 text-sm text-domify-dark/70">
-          {contactPhone && <p className="flex items-center gap-2"><Phone size={14} /> {contactPhone}</p>}
-          {contactEmail && <p className="flex items-center gap-2"><Mail size={14} /> {contactEmail}</p>}
+          {contactPhone && <p className="flex items-center gap-2"><Phone size={14} /> <bdi>{contactPhone}</bdi></p>}
+          {contactEmail && <p className="flex items-center gap-2"><Mail size={14} /> <bdi>{contactEmail}</bdi></p>}
         </div>
       )}
 
@@ -86,7 +95,7 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
             href={telLink(contactPhone)}
             className="pressable flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-domify-primary/10 py-2.5 text-sm font-semibold text-domify-primary hover:bg-domify-primary hover:text-white"
           >
-            <Phone size={14} /> Appeler
+            <Phone size={14} /> {copy.call}
           </a>
         )}
       </div>
@@ -95,21 +104,21 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
         onClick={() => setShowBooking(true)}
         className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-domify-primary py-2.5 text-sm font-semibold text-domify-primary transition-luxury hover:bg-domify-primary hover:text-white"
       >
-        <CalendarClock size={16} /> Planifier une visite
+        <CalendarClock size={16} /> {copy.schedule}
       </button>
 
       <div className="my-5 h-px bg-black/5" />
 
       {sent ? (
         <p className="rounded-xl bg-domify-warm-white p-4 text-sm text-domify-dark">
-          Merci ! Votre demande a bien été envoyée, {contactName.split(" ")[0]} vous recontactera rapidement.
+          {copy.thank} {contactName.split(" ")[0]} {copy.followUp}
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
           <HoneypotField value={honeypot} onChange={setHoneypot} />
           <input
             required
-            placeholder="Nom complet"
+            placeholder={copy.name}
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm"
@@ -117,13 +126,13 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
           <input
             required
             type="email"
-            placeholder="Email"
+            placeholder={copy.email}
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm"
           />
           <input
-            placeholder="Téléphone"
+            placeholder={copy.phone}
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             className="w-full rounded-lg border border-black/10 px-3 py-2.5 text-sm"
@@ -142,7 +151,7 @@ export function ContactAgentCard({ property }: { property: PropertyWithRelations
             disabled={sending || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !turnstileToken)}
             className="w-full rounded-xl bg-domify-gold py-2.5 text-sm font-semibold text-white shadow-luxury transition-luxury hover:bg-domify-soft-gold hover:text-domify-dark disabled:opacity-60"
           >
-            {sending ? "Envoi..." : "Contacter l'agent"}
+            {sending ? copy.sending : copy.submit}
           </button>
         </form>
       )}
