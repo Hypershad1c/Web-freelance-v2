@@ -31,6 +31,14 @@ export default async function AdminLeadsPage({
     include: { property: { select: { title: true, id: true } } },
     orderBy: [{ status: "asc" }, { position: "asc" }, { createdAt: "desc" }],
   });
+  const deliveryEntries = isAdmin && leads.length > 0 ? await prisma.auditLog.findMany({
+    where: { entityType: "Lead", entityId: { in: leads.map((lead) => lead.id) }, action: { in: ["LEAD_EMAIL_ACCEPTED", "LEAD_EMAIL_FAILED"] } },
+    select: { entityId: true, action: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
+  }) : [];
+  const latestDelivery = new Map<string, { action: string; createdAt: Date }>();
+  for (const entry of deliveryEntries) if (!latestDelivery.has(entry.entityId)) latestDelivery.set(entry.entityId, { action: entry.action, createdAt: entry.createdAt });
+  const leadsWithDelivery = leads.map((lead) => ({ ...lead, delivery: latestDelivery.get(lead.id) ? { accepted: latestDelivery.get(lead.id)!.action === "LEAD_EMAIL_ACCEPTED", createdAt: latestDelivery.get(lead.id)!.createdAt } : null }));
 
   return (
     <>
@@ -48,7 +56,7 @@ export default async function AdminLeadsPage({
             <button className="rounded-xl bg-domify-primary px-4 py-2.5 text-sm font-semibold text-white">Filtrer</button>
           </form>
         </div>
-        <LeadKanbanBoard leads={leads} canOpenProperty={!isAgent} canDelete={isAdmin} />
+        <LeadKanbanBoard leads={leadsWithDelivery} canOpenProperty={!isAgent} canDelete={isAdmin} canResend={isAdmin} />
       </div>
     </>
   );

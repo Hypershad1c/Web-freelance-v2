@@ -44,3 +44,12 @@
 - [x] Verify and enforce administrator-only recipient coverage for every new lead without relying on the optional contact mailbox
 - [x] Make genuine lead-submission emails complete reliably for every ADMIN recipient
 - [x] Add an ADMIN-only individual lead delete action with confirmation and audit history — production detail panel verified; no record was deleted during verification
+- [x] Add lead email delivery history, recipient visibility, provider status, and an ADMIN-only resend action
+- [ ] Complete Arabic buyer-page translations and RTL mirroring on property and financing journeys
+- [ ] Add saved searches and buyer email or WhatsApp alert preferences for matching published properties
+- [ ] Enhance the owner portal with listing review status, required actions, views, and enquiry visibility
+- [ ] Add a listing quality score for photos, price, location, description, and required details
+- [ ] Add similar-property recommendations and useful neighborhood context to property discovery
+- [ ] Automate lead assignment and escalation using property, city, agent workload, and response SLA rules
+- [ ] Add document-verification controls for ownership evidence, mandates, review status, and notes
+- [ ] Add operational monitoring for email delivery, errors, uptime, backups, and deployment checks

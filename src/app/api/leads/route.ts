@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { sendEmail, emailLayout } from "@/lib/email";
-import { resolveLeadNotificationRecipients } from "@/lib/lead-notification-recipients";
+import { sendLeadAdministratorNotification, sendLeadReceipt } from "@/lib/lead-email";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { syncInboundLead } from "@/lib/crm";
@@ -81,57 +80,10 @@ export async function POST(request: Request) {
   // Delivery and CRM failures remain non-blocking for the visitor’s submission.
   const [crmResult, notificationResult] = await Promise.allSettled([
     syncInboundLead(lead),
-    notifyNewLead(lead),
+    Promise.all([sendLeadAdministratorNotification(lead), sendLeadReceipt(lead)]),
   ]);
   if (crmResult.status === "rejected") console.error("[leads] CRM sync failed:", crmResult.reason);
   if (notificationResult.status === "rejected") console.error("[leads] notification failed:", notificationResult.reason);
 
   return NextResponse.json(lead, { status: 201 });
-}
-
-type LeadWithProperty = {
-  name: string;
-  email: string;
-  phone: string | null;
-  message: string | null;
-  property?: { title: string; reference: string; agent?: { email: string | null } | null } | null;
-};
-
-async function notifyNewLead(lead: LeadWithProperty) {
-  const administrators = await prisma.user.findMany({
-    where: { role: "ADMIN" },
-    select: { email: true },
-  });
-  const recipients = resolveLeadNotificationRecipients({
-    administratorEmails: administrators.map((administrator) => administrator.email),
-    agentEmail: lead.property?.agent?.email,
-  });
-
-  if (recipients.length > 0) {
-    await sendEmail({
-      to: recipients,
-      subject: `Nouveau lead — ${lead.property?.title ?? "demande générale"}`,
-      html: emailLayout(
-        "Nouveau lead reçu",
-        `
-        <p><strong>${lead.name}</strong> (${lead.email}${lead.phone ? `, ${lead.phone}` : ""}) vient de soumettre une demande${
-          lead.property ? ` pour <strong>${lead.property.title}</strong> (${lead.property.reference})` : ""
-        }.</p>
-        ${lead.message ? `<p style="background:#F2ECDD; padding:12px 16px; border-radius:8px;">${lead.message}</p>` : ""}
-        <p>Connectez-vous à l'admin pour y répondre.</p>
-        `
-      ),
-    });
-  } else {
-    console.error("[leads] No valid administrator or assigned-agent email is configured for new-lead notification");
-  }
-
-  await sendEmail({
-    to: lead.email,
-    subject: "Nous avons bien reçu votre demande — Domify",
-    html: emailLayout(
-      "Merci pour votre demande !",
-      `<p>Bonjour ${lead.name},</p><p>Votre demande a bien été transmise à notre équipe. Un conseiller vous recontactera très prochainement.</p>`
-    ),
-  });
 }
