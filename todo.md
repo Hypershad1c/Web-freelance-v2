@@ -35,3 +35,4 @@
 - [x] Validate the final remaining admin-route UI pass across themes, permissions, tests, and production deployment
 - [x] Diagnose and fix rental listings missing from /proprietes?listingType=LOCATION — production currently returns the two published rental properties; a LOCATION filter regression test now protects the query
 - [x] Change the property-page WhatsApp action label to “Contact In WhatsApp”
+- [x] Merge /estimation into the purchase-only credit journey and capture qualified buyer financing enquiries as leads

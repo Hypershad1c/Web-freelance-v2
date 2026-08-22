@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Calculator, CheckCircle2, ExternalLink, Info, Landmark, ShieldCheck, TrendingUp } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calculator, CheckCircle2, ExternalLink, Info, Landmark, Send, ShieldCheck } from "lucide-react";
+import { FinancingLeadForm } from "@/components/financing/FinancingLeadForm";
 import { formatMAD } from "@/lib/utils";
 import {
   MORTGAGE_BANK_RATES,
@@ -84,11 +84,12 @@ export default function MortgageCalculatorPage() {
           <div className="p-5 sm:p-7">
             <div className="grid grid-cols-2 gap-3 sm:gap-4"><StatCard label="Montant emprunté" value={formatMAD(Math.round(result.principal))} color={selectedBank.brandColor} /><StatCard label="Apport" value={formatMAD(Math.round(result.downPayment))} color={selectedBank.brandColor} /><StatCard label="Intérêts estimés" value={formatMAD(Math.round(result.totalInterest))} color={selectedBank.brandColor} /><StatCard label="Coût total du crédit" value={formatMAD(Math.round(result.totalPaid))} color={selectedBank.brandColor} /></div>
             <div className="mt-5 rounded-2xl border border-domify-dark/7 p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.14em]" style={{ color: selectedBank.brandColor }}>Lecture du taux</p><p className="mt-1 text-sm font-semibold text-domify-dark">{usesBankRate ? "Taux indicatif de la référence sélectionnée" : "Taux personnalisé pour votre simulation"}</p></div><span className="rounded-full px-3 py-1.5 text-xs font-bold" style={{ backgroundColor: selectedBank.brandColorLight, color: selectedBank.brandColor }}>{rate.toFixed(2).replace(".", ",")} % nominal</span></div><div className="mt-4 space-y-1.5 text-xs leading-5 text-domify-dark/60">{usesBankRate ? <p>TEG indicatif associé : <strong className="font-semibold text-domify-dark/80">{selectedBank.tegPercent.toFixed(2).replace(".", ",")} %</strong>.</p> : <p>Le TEG indicatif de {selectedBank.name} est présenté à titre de repère ; le taux a été ajusté pour cette simulation.</p>}{selectedBank.sourceReferenceRatePercent ? <p>Taux de référence signalé : {selectedBank.sourceReferenceRatePercent.toFixed(2).replace(".", ",")} %.</p> : null}</div></div>
-            <Link href="/estimation" className="pressable mt-5 flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-white shadow-[0_16px_30px_-20px_rgba(16,47,66,0.7)] transition-luxury hover:-translate-y-0.5" style={{ backgroundColor: selectedBank.brandColor }}><TrendingUp size={17} /> Obtenir l’estimation de mon bien <ArrowRight size={16} /></Link>
+            <button type="button" onClick={() => document.getElementById("financing-enquiry")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="pressable mt-5 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-white shadow-[0_16px_30px_-20px_rgba(16,47,66,0.7)] transition-luxury hover:-translate-y-0.5" style={{ backgroundColor: selectedBank.brandColor }}><Send size={17} /> Envoyer mon projet d’achat <ArrowRight size={16} /></button>
             <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold"><a href={MORTGAGE_RATES_SOURCE_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-domify-primary hover:text-domify-gold">{MORTGAGE_RATES_SOURCE_LABEL} <ExternalLink size={13} /></a><a href={MORTGAGE_RATES_MARKET_SOURCE_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-domify-primary hover:text-domify-gold">Référence marché <ExternalLink size={13} /></a></div>
           </div>
         </section>
       </div>
+      <FinancingLeadForm bankName={selectedBank.name} brandColor={selectedBank.brandColor} price={price} downPayment={result.downPayment} principal={result.principal} nominalRate={rate} years={years} monthlyPayment={Math.round(result.monthlyPayment)} />
       <p className="mx-auto mt-7 max-w-3xl text-center text-xs leading-5 text-domify-dark/45">Taux indicatifs, vérifiés le {MORTGAGE_RATES_LAST_VERIFIED}. Ils sont fournis à titre d’information et peuvent varier selon le profil de l’emprunteur, le montant financé et les conditions de la banque.</p>
     </div>
   );

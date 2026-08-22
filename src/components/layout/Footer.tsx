@@ -19,7 +19,7 @@ export async function Footer({ dict }: { locale: Locale; dict: Dictionary }) {
 
   const usefulLinks = [
     { label: dict.footer.sellOrRent, href: "/vendre-louer" },
-    { label: dict.footer.estimate, href: "/estimation" },
+    { label: dict.footer.estimate, href: "/calculateur-credit" },
     { label: dict.footer.mapSearch, href: "/carte" },
     { label: dict.footer.neighborhoods, href: "/quartiers" },
     { label: dict.footer.compare, href: "/comparer" },
