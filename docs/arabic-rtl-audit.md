@@ -51,3 +51,5 @@ The current `BlogPost` schema stores a single title, excerpt, and body without A
 Local verification after the expanded implementation confirms Arabic catalogue headings, recovery states, filters, and RTL ordering render correctly. The investment calculator also renders Arabic slider labels, result metrics, an Arabic informational disclaimer, and direction-safe MAD figures. The local preview intentionally has no development database, so catalogue cards and map records require final production verification against live data.
 
 The expanded local Arabic pass also verified the contact journey’s translated headings, form prompts, CTA, and RTL form alignment. The FAQ now has Arabic page framing, six Arabic questions and answers, and an Arabic support CTA.
+
+Production verification of release `ef4bfac` passed on `domify.ma`. The Arabic catalogue now renders translated collection headings, search summary, shared listing badges, rental and financing labels, metadata, comparison/favorite labels, and call actions against live data. The Arabic investment calculator also renders its translated controls, metrics, exploration CTA, and informational disclaimer in production.
