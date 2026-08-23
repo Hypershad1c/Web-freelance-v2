@@ -57,3 +57,12 @@
 - [ ] Complete Arabic translation and RTL mirroring across the remaining public catalogue, discovery, account, seller, editorial, and utility pages
 - [x] Execute a complete non-destructive coverage audit across public pages, protected user and admin routes, and API endpoints
 - [x] Translate the remaining homepage editorial-selection copy and mirror its Arabic RTL presentation
+- [x] Add an Arabic localization coverage dashboard for remaining public content and RTL status
+- [x] Add and surface listing quality scoring with owner improvement guidance
+- [x] Add lead response SLA tracking, automatic assignment visibility, and escalation controls
+- [ ] Enhance saved-search alerts with preference controls and matching/price-change notifications
+- [ ] Enhance property comparison with finance, amenity, and neighborhood context
+- [x] Add a controlled document-verification centre with reviewer notes and expiry visibility
+- [x] Add actionable neighborhood intelligence and buyer discovery context
+- [x] Add owner conversion reporting for listing views, saves, enquiries, and improvement actions
+- [x] Add an operational monitoring centre for email delivery, errors, uptime, deployments, and database health

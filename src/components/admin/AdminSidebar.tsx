@@ -96,6 +96,7 @@ const STAFF_SECTIONS: NavSection[] = [
     items: [
       { label: "SEO", href: "/admin/seo", icon: Search },
       { label: "Analytique", href: "/admin/analytics", icon: BarChart3 },
+      { label: "Centre des opérations", href: "/admin/operations", icon: SlidersHorizontal },
       { label: "Contrôle de lancement", href: "/admin/lancement", icon: ShieldCheck },
       { label: "Campagnes UTM", href: "/admin/campagnes", icon: Megaphone },
       { label: "Journal d’audit", href: "/admin/audit-log", icon: ScrollText },
