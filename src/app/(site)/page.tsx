@@ -59,10 +59,44 @@ export default async function HomePage() {
   const newestProperties = [...featuredProperties].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 3);
   const mostViewedProperties = [...featuredProperties].sort((a, b) => b.viewsCount - a.viewsCount).slice(0, 3);
   const investmentProperties = [...featuredProperties].filter((property) => property.listingType === "VENTE").sort((a, b) => b.viewsCount - a.viewsCount).slice(0, 3);
+  const isArabic = locale === "ar";
+  const editorialCopy = {
+    fr: {
+      sectionEyebrow: "Sélections éditoriales",
+      sectionTitle: "Explorez selon votre rythme de vie.",
+      viewCollection: "Voir la sélection",
+      collections: [
+        { eyebrow: "À découvrir", title: "Nouveautés cette semaine", description: "Les dernières adresses entrées dans la sélection Domify." },
+        { eyebrow: "Le regard Domify", title: "Les plus consultés", description: "Les biens qui retiennent l’attention de notre communauté." },
+        { eyebrow: "Vision patrimoine", title: "Opportunités d’investissement", description: "Des adresses à étudier pour leur qualité de vie et leur potentiel." },
+      ],
+    },
+    en: {
+      sectionEyebrow: "Editorial selections",
+      sectionTitle: "Explore according to your lifestyle.",
+      viewCollection: "View the collection",
+      collections: [
+        { eyebrow: "To discover", title: "New this week", description: "The latest addresses to join the Domify selection." },
+        { eyebrow: "The Domify view", title: "Most viewed", description: "The homes attracting the attention of our community." },
+        { eyebrow: "Investment perspective", title: "Investment opportunities", description: "Homes worth considering for their lifestyle quality and potential." },
+      ],
+    },
+    ar: {
+      sectionEyebrow: "اختيارات دوميفاي",
+      sectionTitle: "اكتشف ما يناسب أسلوب حياتك.",
+      viewCollection: "عرض المجموعة",
+      collections: [
+        { eyebrow: "للاكتشاف", title: "إضافات هذا الأسبوع", description: "أحدث العناوين التي انضمّت إلى مجموعة دوميفاي." },
+        { eyebrow: "رؤية دوميفاي", title: "الأكثر مشاهدة", description: "العقارات التي تستقطب اهتمام مجتمعنا." },
+        { eyebrow: "رؤية استثمارية", title: "فرص استثمارية", description: "عناوين تستحق الدراسة لما توفره من جودة حياة وإمكانات واعدة." },
+      ],
+    },
+  } as const;
+  const activeEditorialCopy = editorialCopy[locale];
   const editorialCollections = [
-    { eyebrow: "À découvrir", title: "Nouveautés cette semaine", description: "Les dernières adresses entrées dans la sélection Domify.", properties: newestProperties, href: "/proprietes?sort=recent" },
-    { eyebrow: "Le regard Domify", title: "Les plus consultés", description: "Les biens qui retiennent l’attention de notre communauté.", properties: mostViewedProperties, href: "/proprietes?sort=popular" },
-    { eyebrow: "Vision patrimoine", title: "Opportunités d’investissement", description: "Des adresses à étudier pour leur qualité de vie et leur potentiel.", properties: investmentProperties, href: "/proprietes?listingType=VENTE" },
+    { ...activeEditorialCopy.collections[0], properties: newestProperties, href: "/proprietes?sort=recent" },
+    { ...activeEditorialCopy.collections[1], properties: mostViewedProperties, href: "/proprietes?sort=popular" },
+    { ...activeEditorialCopy.collections[2], properties: investmentProperties, href: "/proprietes?listingType=VENTE" },
   ].filter((collection) => collection.properties.length > 0);
   const cityLifestyles = ["Bord de mer", "Vie de famille", "Business & mobilité", "Centre-ville"];
   const baseUrl = process.env.NEXTAUTH_URL || "https://domify.ma";
@@ -152,9 +186,9 @@ export default async function HomePage() {
       </section>
 
       {editorialCollections.length > 0 && (
-        <section className="border-y border-domify-dark/8 bg-white py-20 sm:py-28">
+        <section dir={isArabic ? "rtl" : "ltr"} className={`border-y border-domify-dark/8 bg-white py-20 sm:py-28 ${isArabic ? "text-right" : "text-left"}`}>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <FadeIn className="max-w-2xl"><p className="luxury-eyebrow text-domify-gold">Sélections éditoriales</p><h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.04em] text-domify-dark sm:text-5xl">Explorez selon votre rythme de vie.</h2></FadeIn>
+            <FadeIn className="max-w-2xl"><p className="luxury-eyebrow text-domify-gold">{activeEditorialCopy.sectionEyebrow}</p><h2 className="mt-3 font-display text-4xl font-semibold tracking-[-0.04em] text-domify-dark sm:text-5xl">{activeEditorialCopy.sectionTitle}</h2></FadeIn>
             <div className="mt-10 grid gap-5 lg:grid-cols-3">
               {editorialCollections.map((collection, index) => {
                 const cover = collection.properties[0];
@@ -166,7 +200,7 @@ export default async function HomePage() {
                   <span className="relative mt-10 block text-[0.66rem] font-bold uppercase tracking-[0.16em] text-domify-soft-gold">{collection.eyebrow}</span>
                   <h3 className="relative mt-2 font-display text-3xl font-semibold leading-[1.03]">{collection.title}</h3>
                   <p className="relative mt-3 max-w-sm text-sm leading-6 text-white/70">{collection.description}</p>
-                  <span className="relative mt-7 inline-flex items-center gap-2 text-sm font-semibold text-white">Voir la sélection <ArrowUpRight size={16} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></span>
+                  <span className={`relative mt-7 inline-flex items-center gap-2 text-sm font-semibold text-white ${isArabic ? "flex-row-reverse" : ""}`}>{activeEditorialCopy.viewCollection} <ArrowUpRight size={16} className={`transition-transform group-hover:-translate-y-0.5 ${isArabic ? "-scale-x-100 group-hover:-translate-x-0.5" : "group-hover:translate-x-0.5"}`} /></span>
                 </Link>;
               })}
             </div>
