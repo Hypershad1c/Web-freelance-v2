@@ -55,3 +55,4 @@
 - [ ] Add document-verification controls for ownership evidence, mandates, review status, and notes
 - [ ] Add operational monitoring for email delivery, errors, uptime, backups, and deployment checks
 - [ ] Complete Arabic translation and RTL mirroring across the remaining public catalogue, discovery, account, seller, editorial, and utility pages
+- [x] Execute a complete non-destructive coverage audit across public pages, protected user and admin routes, and API endpoints

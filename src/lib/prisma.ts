@@ -7,7 +7,16 @@ const globalForPrisma = globalThis as unknown as {
   prismaReadyCheck: Promise<boolean> | undefined;
 };
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+// Vercel can run several route handlers concurrently. The default `pg` pool size
+// is too high for the production database when every serverless instance creates
+// its own pool, which can cause otherwise read-only endpoints to fail under a
+// short burst. Keep one reusable connection per warm instance instead.
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+  max: 1,
+  idleTimeoutMillis: 5_000,
+  connectionTimeoutMillis: 5_000,
+});
 
 export const prisma =
   globalForPrisma.prisma ??
