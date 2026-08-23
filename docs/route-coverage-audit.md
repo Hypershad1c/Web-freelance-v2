@@ -27,3 +27,5 @@ The first authenticated API probe used a parallel browser batch. A direct follow
 The serial authenticated retest returned `200` for all eight safe read APIs: favorite collections, favorites, matching recommendations, notifications, portal conversations, analytics CSV export, analytics report, and property CSV export. The live NextAuth session also returned a valid ADMIN user identifier and role. To reduce the connection burst that caused the initial parallel-probe failures, the Prisma PostgreSQL adapter now uses a single connection per warm serverless instance with short connection and idle timeouts.
 
 All 35 ADMIN list, overview, settings, creation, and operational pages returned `200` under the active ADMIN session. Real discovered detail routes for an agency, agent, blog post, CRM contact, property, and user also returned `200`.
+
+After deployment of commit `f3ba0f8`, a controlled parallel batch of the same eight safe authenticated and ADMIN read APIs returned `200` for every request. The pool-limit correction removed the previously observed short-burst `500` responses without invoking any mutation or business automation route.
