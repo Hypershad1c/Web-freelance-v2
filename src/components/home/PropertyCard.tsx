@@ -15,7 +15,15 @@ import type { Locale } from "@/i18n/locales";
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop";
 
+const CARD_COPY = {
+  fr: { rent: "À louer", featured: "Sélection Domify", verifiedAgency: "Agence vérifiée", video: "Visite vidéo", removeCompare: "Retirer de la comparaison", addCompare: "Ajouter à la comparaison", compareLimit: "Maximum 4 biens à comparer", addFavorite: "Ajouter aux favoris", month: "/mois", indicative: "indicatif*", updated: "Actualisé le", verified: "Vérifié", call: "Appeler" },
+  en: { rent: "For rent", featured: "Domify selection", verifiedAgency: "Verified agency", video: "Video tour", removeCompare: "Remove from comparison", addCompare: "Add to comparison", compareLimit: "Maximum 4 properties to compare", addFavorite: "Add to favorites", month: "/month", indicative: "indicative*", updated: "Updated", verified: "Verified", call: "Call" },
+  ar: { rent: "للإيجار", featured: "اختيارات دوميفاي", verifiedAgency: "وكالة موثقة", video: "جولة بالفيديو", removeCompare: "إزالة من المقارنة", addCompare: "أضف إلى المقارنة", compareLimit: "يمكن مقارنة أربعة عقارات كحد أقصى", addFavorite: "أضف إلى المفضلة", month: "/شهرياً", indicative: "استرشادي*", updated: "تم التحديث في", verified: "موثق", call: "اتصل" },
+} as const;
+
 export function PropertyCard({ property, locale = "fr" }: { property: PropertyWithRelations; locale?: Locale }) {
+  const copy = CARD_COPY[locale];
+  const isRtl = locale === "ar";
   const { isFavorite, toggleFavorite } = useFavorites();
   const localized = getLocalizedPropertyContent(property, locale);
   const { isComparing, toggleCompare, maxReached } = useCompare();
@@ -39,7 +47,8 @@ export function PropertyCard({ property, locale = "fr" }: { property: PropertyWi
     >
       <Link
         href={`/proprietes/${property.id}`}
-        className="group flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-domify-dark/8 bg-white shadow-[0_18px_38px_-28px_rgba(16,47,66,0.45)] transition-luxury hover:border-domify-gold/35 hover:shadow-[0_28px_48px_-28px_rgba(16,47,66,0.45)] focus-visible:ring-2 focus-visible:ring-domify-gold"
+        dir={isRtl ? "rtl" : "ltr"}
+        className={`group flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-domify-dark/8 bg-white shadow-[0_18px_38px_-28px_rgba(16,47,66,0.45)] transition-luxury hover:border-domify-gold/35 hover:shadow-[0_28px_48px_-28px_rgba(16,47,66,0.45)] focus-visible:ring-2 focus-visible:ring-domify-gold ${isRtl ? "text-right" : ""}`}
       >
         <div className="relative h-60 w-full overflow-hidden bg-domify-primary-dark">
           <Image
@@ -49,18 +58,18 @@ export function PropertyCard({ property, locale = "fr" }: { property: PropertyWi
             className="object-cover transition-transform duration-700 [transition-timing-function:var(--ease-snappy)] group-hover:scale-[1.045]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-domify-primary-dark/45 via-transparent to-transparent opacity-85" />
-          <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
+          <div className={`absolute top-4 flex flex-col items-start gap-2 ${isRtl ? "right-4" : "left-4"}`}>
             <span className="rounded-full bg-domify-gold px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.09em] text-white shadow-sm">
-              {property.listingType === "LOCATION" ? "À louer" : property.propertyType.name}
+              {property.listingType === "LOCATION" ? copy.rent : property.propertyType.name}
             </span>
-            {property.featured && <span className="rounded-full border border-white/25 bg-domify-primary-dark/80 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-domify-soft-gold shadow-sm backdrop-blur-sm">Sélection Domify</span>}
-            {property.agency?.verified && <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/40 bg-emerald-950/60 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-emerald-100 backdrop-blur-sm"><BadgeCheck size={12} /> Agence vérifiée</span>}
+            {property.featured && <span className="rounded-full border border-white/25 bg-domify-primary-dark/80 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-domify-soft-gold shadow-sm backdrop-blur-sm">{copy.featured}</span>}
+            {property.agency?.verified && <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/40 bg-emerald-950/60 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-emerald-100 backdrop-blur-sm"><BadgeCheck size={12} /> {copy.verifiedAgency}</span>}
           </div>
-          <div className="absolute bottom-4 left-4 flex items-center gap-2">{hasVideo && <span className="inline-flex items-center gap-1 rounded-full bg-black/35 px-2.5 py-1.5 text-[0.62rem] font-semibold text-white backdrop-blur-sm"><Video size={12} /> Visite vidéo</span>}</div>
-          <div className="absolute right-4 top-4 flex gap-2">
+          <div className={`absolute bottom-4 flex items-center gap-2 ${isRtl ? "right-4" : "left-4"}`}>{hasVideo && <span className="inline-flex items-center gap-1 rounded-full bg-black/35 px-2.5 py-1.5 text-[0.62rem] font-semibold text-white backdrop-blur-sm"><Video size={12} /> {copy.video}</span>}</div>
+          <div className={`absolute top-4 flex gap-2 ${isRtl ? "left-4 flex-row-reverse" : "right-4"}`}>
             <button
-              aria-label={comparing ? "Retirer de la comparaison" : "Ajouter à la comparaison"}
-              title={!comparing && maxReached ? "Maximum 4 biens à comparer" : undefined}
+              aria-label={comparing ? copy.removeCompare : copy.addCompare}
+              title={!comparing && maxReached ? copy.compareLimit : undefined}
               disabled={!comparing && maxReached}
               onClick={(event) => {
                 event.preventDefault();
@@ -74,7 +83,7 @@ export function PropertyCard({ property, locale = "fr" }: { property: PropertyWi
               <Scale size={14} />
             </button>
             <button
-              aria-label="Ajouter aux favoris"
+              aria-label={copy.addFavorite}
               onClick={(event) => {
                 event.preventDefault();
                 toggleFavorite(property.id);
@@ -95,20 +104,20 @@ export function PropertyCard({ property, locale = "fr" }: { property: PropertyWi
           <div className="mt-4 flex items-end justify-between gap-3">
             <p className="font-display text-[1.35rem] font-bold leading-none text-domify-gold">
               {formatMAD(property.price)}
-              {property.listingType === "LOCATION" && <span className="ml-1 font-sans text-xs font-medium text-domify-dark/45">/mois</span>}
+              {property.listingType === "LOCATION" && <span className="ms-1 font-sans text-xs font-medium text-domify-dark/45">{copy.month}</span>}
             </p>
             <span className="flex items-center gap-1 text-xs text-domify-dark/42">
               <Eye size={13} /> {property.viewsCount}
             </span>
           </div>
-          {property.listingType === "VENTE" && <div className="mt-3 flex items-center gap-2 rounded-xl border border-domify-gold/20 bg-domify-soft-gold/14 px-3 py-2.5 text-xs text-domify-dark/65"><Landmark size={14} className="shrink-0 text-domify-gold" /><span className="min-w-0"><strong className="font-semibold text-domify-dark">{formatMAD(estimatedMonthlyPayment)} / mois</strong><span className="ml-1 text-domify-dark/48">indicatif*</span></span></div>}
+          {property.listingType === "VENTE" && <div className="mt-3 flex items-center gap-2 rounded-xl border border-domify-gold/20 bg-domify-soft-gold/14 px-3 py-2.5 text-xs text-domify-dark/65"><Landmark size={14} className="shrink-0 text-domify-gold" /><span className="min-w-0"><strong className="font-semibold text-domify-dark"><bdi>{formatMAD(estimatedMonthlyPayment)}</bdi> {copy.month}</strong><span className="ms-1 text-domify-dark/48">{copy.indicative}</span></span></div>}
           <div className="mt-5 flex items-center gap-3 border-t border-domify-dark/8 pt-4 text-sm text-domify-dark/62">
             <span className="flex items-center gap-1.5"><Bed size={15} className="text-domify-primary/72" /> {property.bedrooms}</span>
             <span className="flex items-center gap-1.5"><Bath size={15} className="text-domify-primary/72" /> {property.bathrooms}</span>
             <span className="flex items-center gap-1.5"><Square size={15} className="text-domify-primary/72" /> {property.surfaceArea} m²</span>
           </div>
 
-          <div className="mt-3 flex items-center justify-between text-[0.68rem] text-domify-dark/42"><span className="inline-flex items-center gap-1"><CalendarClock size={12} /> Actualisé le {updatedLabel}</span>{property.agency?.verified && <span className="inline-flex items-center gap-1 font-semibold text-emerald-700"><BadgeCheck size={12} /> Vérifié</span>}</div>
+          <div className="mt-3 flex items-center justify-between text-[0.68rem] text-domify-dark/42"><span className="inline-flex items-center gap-1"><CalendarClock size={12} /> {copy.updated} <bdi>{updatedLabel}</bdi></span>{property.agency?.verified && <span className="inline-flex items-center gap-1 font-semibold text-emerald-700"><BadgeCheck size={12} /> {copy.verified}</span>}</div>
 
           <div className="mt-5 flex gap-2 border-t border-domify-dark/8 pt-4">
             <WhatsAppConciergeButton
@@ -126,7 +135,7 @@ export function PropertyCard({ property, locale = "fr" }: { property: PropertyWi
                 }}
                 className="pressable flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-domify-primary/9 py-2.5 text-xs font-semibold text-domify-primary hover:bg-domify-primary hover:text-white"
               >
-                <Phone size={13} /> Appeler
+                <Phone size={13} /> {copy.call}
               </button>
             )}
           </div>

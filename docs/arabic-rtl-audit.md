@@ -17,3 +17,37 @@ The production retry passed. The property-detail page now shows Arabic breadcrum
 The live calculator check also passed. The Arabic bank-selection heading, descriptions, card labels, accessible choice labels, action arrows, and rate disclaimer are deployed on `domify.ma/calculateur-credit`; each branded bank card remains selectable for the existing purchase-only simulation and enquiry flow.
 
 The browser automation session did not persist the optional live bank-card state transition despite invoking the card control. This did not indicate an application error: the same Arabic simulation and enquiry state was verified locally, and the deployed production bank-selection DOM exposes the expected interactive controls and translated labels. No production lead was submitted during validation.
+
+## Follow-up public-page audit — 23 August 2026
+
+The public catalogue is only partially Arabic. Filter categories and some controls are translated, but the hero, result count, collection introduction, map CTA, multiple property-card badges and metadata, reusable attribute values, and WhatsApp/call actions remain French. The current layout also retains left-to-right card and filter-panel alignment in several desktop areas.
+
+The map-discovery page is similarly French-first in its hero, result count, map heading, filter CTA, listing cards, and detail actions. The map canvas itself should remain map-native, but surrounding discovery content, control order, and result-card presentation require Arabic copy and RTL-aware layout.
+
+The neighbourhood index has an Arabic hero and primary CTA but leaves its city captions, neighbourhood descriptions, and property counts in French. Its cards should use Arabic status copy and natural RTL alignment while preserving proper nouns such as city and neighbourhood names.
+
+The agency directory is almost entirely French in its heading, trust count, agency statistics, and description. It needs locale-aware directory copy and right-aligned agency cards; agency names can remain source-language identifiers where an Arabic brand label is unavailable.
+
+The owner submission journey is currently French-first from the headline through its verification explanation, benefit cards, wizard steps, sell/rent choice, input prompts, and navigation. This is a priority because it captures seller conversion; the entire multi-step form needs an Arabic locale record and RTL-aware step sequence.
+
+The editorial hub is French-only in its title, description, category filters, article labels, headlines, summaries, and dates. Blog content should use Arabic editorial fields where available, then a clearly defined fallback rather than presenting a page that appears Arabic only in navigation.
+
+The contact journey mixes Arabic helper copy with French hero text, form placeholders, and submission action. Its input order and button alignment must be mirrored and locale-aware to avoid a broken Arabic inquiry experience.
+
+The property-comparison empty state is entirely French, including its headline, explanation, and both discovery CTAs. It needs full Arabic copy and directional button ordering before comparison becomes a coherent Arabic buyer journey.
+
+The investment calculator remains predominantly French in its headline, explanatory copy, slider labels, result metrics, discovery CTA, and investment disclaimer. Its financial labels need Arabic copy and RTL treatment while retaining isolated MAD figures and the existing informational, non-advisory disclaimer.
+
+The FAQ contains Arabic answers for most entries but still has French page framing, one French WhatsApp question, and a French support CTA. The shared FAQ heading, all question labels, CTA copy, and accordion icon direction need completion.
+
+## Implementation priority
+
+The first correction batch should address the shared `PropertyCard`, the catalogue shell and empty states, and the map-discovery route and view. These components fix the repeated French badges, monthly-payment labels, metadata, CTA labels, map results, and discovery hierarchy seen by buyers before they open a property.
+
+The second batch should complete the seller submission wizard and its `/vendre-louer` shell. The third batch should cover focused utility routes—contact, comparison, investment calculator, FAQ, neighbourhoods, agencies, and the blog—followed by account, seller-portal, legal, authentication, and secondary editorial routes. Dynamic content will use Arabic fields when present and retain clearly scoped source-language fallbacks when it is not translated in the database.
+
+The current `BlogPost` schema stores a single title, excerpt, and body without Arabic variants. Blog navigation and generic interface copy can be translated safely, but a genuinely Arabic article experience requires Arabic content fields and editorial translations rather than automatic replacement of published source content.
+
+Local verification after the expanded implementation confirms Arabic catalogue headings, recovery states, filters, and RTL ordering render correctly. The investment calculator also renders Arabic slider labels, result metrics, an Arabic informational disclaimer, and direction-safe MAD figures. The local preview intentionally has no development database, so catalogue cards and map records require final production verification against live data.
+
+The expanded local Arabic pass also verified the contact journey’s translated headings, form prompts, CTA, and RTL form alignment. The FAQ now has Arabic page framing, six Arabic questions and answers, and an Arabic support CTA.

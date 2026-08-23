@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { getSiteSettings } from "@/lib/data/settings";
+import { getLocale } from "@/i18n/get-locale";
 
 export const revalidate = 300;
 
@@ -10,10 +11,12 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
+  const locale = await getLocale();
   const settings = await getSiteSettings();
 
   return (
     <ContactForm
+      locale={locale}
       settings={{
         phone: settings.contact_phone,
         email: settings.contact_email,
