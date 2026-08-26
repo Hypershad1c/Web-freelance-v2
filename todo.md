@@ -66,3 +66,6 @@
 - [x] Add actionable neighborhood intelligence and buyer discovery context
 - [x] Add owner conversion reporting for listing views, saves, enquiries, and improvement actions
 - [x] Add an operational monitoring centre for email delivery, errors, uptime, deployments, and database health
+- [x] Improve visual polish through refined feedback, empty states, image treatment, and motion consistency
+- [x] Strengthen production reliability with health probes, protected error visibility, and operational recovery guidance
+- [x] Expand automated quality assurance with deterministic coverage for core public, seller, and administrative workflows

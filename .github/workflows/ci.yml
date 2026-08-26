@@ -62,3 +62,25 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Install browser for smoke checks
+        run: npx playwright install --with-deps chromium
+
+      - name: Start production server
+        run: nohup npm run start > /tmp/domify-next.log 2>&1 &
+
+      - name: Wait for health probe
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3000/api/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/domify-next.log
+          exit 1
+
+      - name: Browser regression checks
+        env:
+          E2E_BASE_URL: http://127.0.0.1:3000
+        run: npx playwright test --project=desktop-chromium --project=iphone-chromium

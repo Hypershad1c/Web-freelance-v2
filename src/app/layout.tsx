@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { NetworkStatusNotice } from "@/components/NetworkStatusNotice";
 import { getLocale } from "@/i18n/get-locale";
 import { isRtl } from "@/i18n/locales";
 
@@ -12,6 +13,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className="antialiased">
         <ThemeProvider>
           <Providers>{children}</Providers>
+          <NetworkStatusNotice />
         </ThemeProvider>
       </body>
     </html>

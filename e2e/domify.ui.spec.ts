@@ -3,6 +3,19 @@ import { expect, test } from "@playwright/test";
 const seedEmail = process.env.E2E_BUYER_EMAIL || "client@domify.ma";
 const seedPassword = process.env.E2E_BUYER_PASSWORD || "Domify2026!";
 
+test.describe("public reliability", () => {
+  test("exposes a minimal privacy-safe health contract", async ({ request }) => {
+    const response = await request.get("/api/health");
+    expect([200, 503]).toContain(response.status());
+
+    const health = await response.json();
+    expect(health).toMatchObject({ service: "domify", checks: { database: expect.any(String) } });
+    expect(["healthy", "degraded"]).toContain(health.status);
+    expect(new Date(health.timestamp).toString()).not.toBe("Invalid Date");
+    expect(JSON.stringify(health)).not.toMatch(/postgres|database_url|password/i);
+  });
+});
+
 test.describe("map discovery", () => {
   test("renders the interactive map and synchronized result rail", async ({ page }) => {
     await page.goto("/carte", { waitUntil: "networkidle" });
