@@ -432,6 +432,10 @@ export async function importPropertiesFromCsv(_previous: CsvImportState, formDat
         seoDescription: value.seoDescription,
         seoDescriptionEn: value.seoDescriptionEn || null,
         seoDescriptionAr: value.seoDescriptionAr || null,
+        submittedById: session.user.id,
+        approvalStatus: session.user.role === "ADMIN" && value.status === "PUBLISHED" ? "APPROVED" as const : "DRAFT" as const,
+        approvedById: session.user.role === "ADMIN" && value.status === "PUBLISHED" ? session.user.id : null,
+        approvedAt: session.user.role === "ADMIN" && value.status === "PUBLISHED" ? new Date() : null,
       };
 
       if (existing) {
