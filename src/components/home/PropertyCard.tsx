@@ -16,9 +16,9 @@ const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop";
 
 const CARD_COPY = {
-  fr: { rent: "À louer", featured: "Sélection Domify", verifiedAgency: "Agence vérifiée", video: "Visite vidéo", removeCompare: "Retirer de la comparaison", addCompare: "Ajouter à la comparaison", compareLimit: "Maximum 4 biens à comparer", addFavorite: "Ajouter aux favoris", month: "/mois", indicative: "indicatif*", updated: "Actualisé le", verified: "Vérifié", call: "Appeler" },
-  en: { rent: "For rent", featured: "Domify selection", verifiedAgency: "Verified agency", video: "Video tour", removeCompare: "Remove from comparison", addCompare: "Add to comparison", compareLimit: "Maximum 4 properties to compare", addFavorite: "Add to favorites", month: "/month", indicative: "indicative*", updated: "Updated", verified: "Verified", call: "Call" },
-  ar: { rent: "للإيجار", featured: "اختيارات دوميفاي", verifiedAgency: "وكالة موثقة", video: "جولة بالفيديو", removeCompare: "إزالة من المقارنة", addCompare: "أضف إلى المقارنة", compareLimit: "يمكن مقارنة أربعة عقارات كحد أقصى", addFavorite: "أضف إلى المفضلة", month: "/شهرياً", indicative: "استرشادي*", updated: "تم التحديث في", verified: "موثق", call: "اتصل" },
+  fr: { rent: "À louer", featured: "Sélection Domify", sample: "Annonce exemple", verifiedAgency: "Agence vérifiée", video: "Visite vidéo", removeCompare: "Retirer de la comparaison", addCompare: "Ajouter à la comparaison", compareLimit: "Maximum 4 biens à comparer", addFavorite: "Ajouter aux favoris", month: "/mois", indicative: "indicatif*", updated: "Actualisé le", verified: "Vérifié", call: "Appeler" },
+  en: { rent: "For rent", featured: "Domify selection", sample: "Sample listing", verifiedAgency: "Verified agency", video: "Video tour", removeCompare: "Remove from comparison", addCompare: "Add to comparison", compareLimit: "Maximum 4 properties to compare", addFavorite: "Add to favorites", month: "/month", indicative: "indicative*", updated: "Updated", verified: "Verified", call: "Call" },
+  ar: { rent: "للإيجار", featured: "اختيارات دوميفاي", sample: "عقار نموذجي", verifiedAgency: "وكالة موثقة", video: "جولة بالفيديو", removeCompare: "إزالة من المقارنة", addCompare: "أضف إلى المقارنة", compareLimit: "يمكن مقارنة أربعة عقارات كحد أقصى", addFavorite: "أضف إلى المفضلة", month: "/شهرياً", indicative: "استرشادي*", updated: "تم التحديث في", verified: "موثق", call: "اتصل" },
 } as const;
 
 export function PropertyCard({ property, locale = "fr" }: { property: PropertyWithRelations; locale?: Locale }) {
@@ -32,6 +32,7 @@ export function PropertyCard({ property, locale = "fr" }: { property: PropertyWi
   const image = property.media[0]?.url ?? FALLBACK_IMAGE;
   const contactPhone = property.agent?.phone ?? property.agency?.phone;
   const hasVideo = property.media.some((media) => media.type === "video");
+  const isSampleListing = property.reference.startsWith("DEMO-");
   const reduceMotion = useReducedMotion();
   const financingMonths = 20 * 12;
   const monthlyRate = 0.045 / 12;
@@ -62,6 +63,7 @@ export function PropertyCard({ property, locale = "fr" }: { property: PropertyWi
             <span className="rounded-full bg-domify-gold px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.09em] text-white shadow-sm">
               {property.listingType === "LOCATION" ? copy.rent : property.propertyType.name}
             </span>
+            {isSampleListing && <span className="rounded-full border border-amber-100/60 bg-amber-500/90 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-white shadow-sm backdrop-blur-sm">{copy.sample}</span>}
             {property.featured && <span className="rounded-full border border-white/25 bg-domify-primary-dark/80 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-domify-soft-gold shadow-sm backdrop-blur-sm">{copy.featured}</span>}
             {property.agency?.verified && <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/40 bg-emerald-950/60 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-emerald-100 backdrop-blur-sm"><BadgeCheck size={12} /> {copy.verifiedAgency}</span>}
           </div>

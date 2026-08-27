@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Bed, Bath, Square, MapPin, Calendar, Hash, Check, Eye, BadgeCheck, Landmark, ArrowUpRight } from "lucide-react";
+import { Bed, Bath, Square, MapPin, Calendar, Hash, Check, Eye, BadgeCheck, Landmark, ArrowUpRight, CircleAlert } from "lucide-react";
 import { getPropertyById, getSimilarProperties, incrementPropertyViews } from "@/lib/data/properties";
 import { PropertyGallery } from "@/components/properties/PropertyGallery";
 import { ContactAgentCard } from "@/components/properties/ContactAgentCard";
@@ -20,9 +20,9 @@ const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1600&auto=format&fit=crop";
 
 const DETAIL_COPY = {
-  fr: { home: "Accueil", properties: "Propriétés", rent: "À louer", sale: "À vendre", verified: "Agence vérifiée", month: "/mois", views: "vue", bedrooms: "Chambres", bathrooms: "Salles de bain", surface: "Surface", year: "Année", description: "Description", reference: "Référence", finance: "Financement Domify", financeTitle: "Projetez votre mensualité.", financeBody: "Comparez les taux indicatifs des banques marocaines pour ce projet.", amenities: "Équipements", location: "Localisation", approximate: "Localisation approximative", support: "L’accompagnement Domify", supportTitle: "Un conseiller dédié pour vous guider à chaque étape.", supportBody: "Réponse rapide, visite privée et suivi personnalisé.", similar: "Biens similaires" },
-  en: { home: "Home", properties: "Properties", rent: "For rent", sale: "For sale", verified: "Verified agency", month: "/month", views: "view", bedrooms: "Bedrooms", bathrooms: "Bathrooms", surface: "Area", year: "Year", description: "Description", reference: "Reference", finance: "Domify financing", financeTitle: "Estimate your monthly payment.", financeBody: "Compare indicative Moroccan bank rates for this project.", amenities: "Amenities", location: "Location", approximate: "Approximate location", support: "The Domify experience", supportTitle: "A dedicated advisor to guide you at every step.", supportBody: "Fast response, private visits, and tailored follow-up.", similar: "Similar properties" },
-  ar: { home: "الرئيسية", properties: "العقارات", rent: "للإيجار", sale: "للبيع", verified: "وكالة موثقة", month: "/شهرياً", views: "مشاهدة", bedrooms: "غرف النوم", bathrooms: "الحمامات", surface: "المساحة", year: "سنة البناء", description: "الوصف", reference: "المرجع", finance: "تمويل دوميفاي", financeTitle: "احسب قسطك الشهري.", financeBody: "قارن الأسعار الاسترشادية للبنوك المغربية لمشروعك.", amenities: "المزايا", location: "الموقع", approximate: "الموقع التقريبي", support: "مرافقة دوميفاي", supportTitle: "مستشار مخصص لمرافقتك في كل خطوة.", supportBody: "استجابة سريعة، زيارات خاصة، ومتابعة شخصية.", similar: "عقارات مشابهة" },
+  fr: { home: "Accueil", properties: "Propriétés", rent: "À louer", sale: "À vendre", verified: "Agence vérifiée", sample: "Annonce exemple", sampleTitle: "Informations illustratives", sampleBody: "Cette fiche est une démonstration Domify. Le bien, le prix, les visuels et la localisation sont fournis à titre d’exemple et ne sont pas disponibles pour une transaction réelle.", month: "/mois", views: "vue", bedrooms: "Chambres", bathrooms: "Salles de bain", surface: "Surface", year: "Année", description: "Description", reference: "Référence", finance: "Financement Domify", financeTitle: "Projetez votre mensualité.", financeBody: "Comparez les taux indicatifs des banques marocaines pour ce projet.", amenities: "Équipements", location: "Localisation", approximate: "Localisation approximative", support: "L’accompagnement Domify", supportTitle: "Un conseiller dédié pour vous guider à chaque étape.", supportBody: "Réponse rapide, visite privée et suivi personnalisé.", similar: "Biens similaires" },
+  en: { home: "Home", properties: "Properties", rent: "For rent", sale: "For sale", verified: "Verified agency", sample: "Sample listing", sampleTitle: "Illustrative information", sampleBody: "This is a Domify demonstration listing. The property, price, imagery, and location are illustrative only and are not available for a real transaction.", month: "/month", views: "view", bedrooms: "Bedrooms", bathrooms: "Bathrooms", surface: "Area", year: "Year", description: "Description", reference: "Reference", finance: "Domify financing", financeTitle: "Estimate your monthly payment.", financeBody: "Compare indicative Moroccan bank rates for this project.", amenities: "Amenities", location: "Location", approximate: "Approximate location", support: "The Domify experience", supportTitle: "A dedicated advisor to guide you at every step.", supportBody: "Fast response, private visits, and tailored follow-up.", similar: "Similar properties" },
+  ar: { home: "الرئيسية", properties: "العقارات", rent: "للإيجار", sale: "للبيع", verified: "وكالة موثقة", sample: "عقار نموذجي", sampleTitle: "معلومات توضيحية", sampleBody: "هذه الصفحة نموذج توضيحي من دوميفاي. العقار والسعر والصور والموقع معلومات إرشادية فقط وليست متاحة لإتمام معاملة حقيقية.", month: "/شهرياً", views: "مشاهدة", bedrooms: "غرف النوم", bathrooms: "الحمامات", surface: "المساحة", year: "سنة البناء", description: "الوصف", reference: "المرجع", finance: "تمويل دوميفاي", financeTitle: "احسب قسطك الشهري.", financeBody: "قارن الأسعار الاسترشادية للبنوك المغربية لمشروعك.", amenities: "المزايا", location: "الموقع", approximate: "الموقع التقريبي", support: "مرافقة دوميفاي", supportTitle: "مستشار مخصص لمرافقتك في كل خطوة.", supportBody: "استجابة سريعة، زيارات خاصة، ومتابعة شخصية.", similar: "عقارات مشابهة" },
 } as const;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -31,9 +31,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!property) return {};
   const locale = await getLocale();
   const content = getLocalizedPropertyContent(property, locale);
+  const isSampleListing = property.reference.startsWith("DEMO-");
   return {
     title: `${content.seoTitle} — ${property.city.name} | Domify`,
     description: content.seoDescription.slice(0, 155),
+    ...(isSampleListing ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
@@ -45,6 +47,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
   const content = getLocalizedPropertyContent(property, locale);
   const copy = DETAIL_COPY[locale];
   const isRtl = locale === "ar";
+  const isSampleListing = property.reference.startsWith("DEMO-");
 
   incrementPropertyViews(id).catch(() => {});
 
@@ -93,7 +96,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
   return (
     <div dir={isRtl ? "rtl" : "ltr"} className={`mx-auto max-w-7xl bg-[radial-gradient(circle_at_85%_0%,rgba(232,203,145,0.12),transparent_24rem)] px-4 pb-28 pt-9 sm:px-6 lg:px-8 lg:py-12 ${isRtl ? "text-right" : ""}`}>
-      <JsonLd data={listingJsonLd} />
+      {!isSampleListing && <JsonLd data={listingJsonLd} />}
       <JsonLd data={breadcrumbJsonLd} />
 
       {/* Breadcrumb */}
@@ -113,6 +116,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
               <div className="mb-3 flex flex-wrap gap-2">
                 <span className="inline-block rounded-full bg-domify-gold/10 px-3 py-1 text-xs font-semibold text-domify-gold">{property.propertyType.name}</span>
                 <span className="rounded-full bg-domify-primary/8 px-3 py-1 text-xs font-semibold text-domify-primary">{property.listingType === "LOCATION" ? copy.rent : copy.sale}</span>
+                {isSampleListing && <span className="rounded-full border border-amber-300/70 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">{copy.sample}</span>}
                 {property.agency?.verified && <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700"><BadgeCheck size={13} /> {copy.verified}</span>}
               </div>
               <h1 className="max-w-2xl font-display text-3xl font-semibold leading-[1.04] tracking-[-0.025em] text-domify-dark sm:text-5xl">{content.title}</h1>
@@ -133,6 +137,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
               </span>
             </div>
           </div>
+          {isSampleListing && (
+            <aside role="note" className="mt-6 flex gap-3 rounded-2xl border border-amber-300/80 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-950">
+              <CircleAlert size={20} className="mt-0.5 shrink-0 text-amber-700" aria-hidden="true" />
+              <div><p className="font-semibold">{copy.sampleTitle}</p><p className="mt-0.5 text-amber-900/90">{copy.sampleBody}</p></div>
+            </aside>
+          )}
           {/* Key facts */}
           <div className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             <Fact icon={Bed} label={copy.bedrooms} value={property.bedrooms} />
