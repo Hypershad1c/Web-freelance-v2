@@ -69,4 +69,4 @@
 - [x] Improve visual polish through refined feedback, empty states, image treatment, and motion consistency
 - [x] Strengthen production reliability with health probes, protected error visibility, and operational recovery guidance
 - [x] Expand automated quality assurance with deterministic coverage for core public, seller, and administrative workflows
-- [ ] Add 12 clearly identified sample listings with licensed imagery, illustrative MAD prices, locations, and French/English/Arabic content
+- [x] Add 12 clearly identified sample listings with licensed imagery, illustrative MAD prices, locations, and French/English/Arabic content

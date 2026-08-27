@@ -23,6 +23,16 @@ Les images ont été sélectionnées depuis des résultats **Unsplash** de reche
 
 Les fichiers sont stockés sous `public/sample-listings/` uniquement pour les annonces d’exemple approuvées. Les URL individuelles des pages de photographes n’ont pas été conservées au moment de la sélection ; elles doivent être enregistrées avant tout usage au-delà de cette démonstration de catalogue. Avant de présenter tout bien comme une annonce réelle, Domify doit disposer des droits d’image applicables et de la validation du propriétaire ou de l’agence.
 
+## Traçabilité de publication
+
+Le catalogue a été créé depuis le back-office protégé le 27 août 2026. L’import a créé onze fiches et a mis à jour la première fiche créée par le formulaire ; les douze références `DEMO-…` sont publiées avec un statut d’approbation administratif. Aucune fiche existante ne portant une référence autre que `DEMO-…` n’a été incluse dans l’import.
+
+## Validation réalisée
+
+La recherche publique par référence `DEMO-` retourne exactement **12 résultats**. Le filtre public de location retourne les quatre annonces d’exemple concernées. Les douze fiches sont visibles dans la recherche cartographique avec leurs coordonnées illustratives, et les douze fichiers image locaux répondent avec le statut HTTP `200`.
+
+Une fiche représentative a été contrôlée sur sa page de détail en français et en arabe : le badge localisé et l’avertissement explicite indiquant le caractère illustratif, non transactionnel du bien sont visibles dans les deux langues. La réponse serveur de cette même fiche comporte également la directive `noindex, follow`, afin de ne pas traiter ce contenu d’exemple comme un inventaire réel par les moteurs de recherche.
+
 ## Références
 
 [1] [Unsplash, « License »](https://unsplash.com/license)
